@@ -1,0 +1,52 @@
+<%# One page of the user's history ; the next one loads in a lazy frame once its top is reached.
+    The first one starts with the language and kind filters (when several ; dimmed at 0 under the other one),
+    their links reload the frame %>
+<%= turbo_frame_tag "user_history_#{@page}" do %>
+  <% if @page == 1 && (@language_counts.size > 1 || @kind_counts.size > 1) %>
+    <% pill = "flex items-center gap-1 rounded px-1.5 py-0.5" %>
+    <% active = "bg-stone-900 text-white" %>
+    <% idle = "bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900" %>
+    <% count = ->(n) { tag.span(n, class: "tabular-nums opacity-60") } %>
+    <div class="space-y-1.5 border-b border-stone-100 px-4 py-2 text-xs">
+      <% if @language_counts.size > 1 %>
+        <nav class="flex flex-wrap gap-1">
+          <%= link_to history_user_path(@user, kind: @kind), class: "#{pill} #{@language ? idle : active}" do %>
+            <%= t(".all_languages") %> <%= count.(@language_counts.sum(&:last)) %>
+          <% end %>
+          <% @language_counts.each do |code, n| %>
+            <%= link_to history_user_path(@user, language: code, kind: @kind), class: "#{pill} #{code == @language ? active : idle} #{"opacity-50" if n.zero?}",
+                        title: (t(".source") if code == Language::SOURCE_CODE) do %>
+              <span class="font-mono"><%= code.upcase %></span> <%= count.(n) %>
+            <% end %>
+          <% end %>
+        </nav>
+      <% end %>
+      <% if @kind_counts.size > 1 %>
+        <nav class="flex flex-wrap gap-1">
+          <%= link_to history_user_path(@user, language: @language), class: "#{pill} #{@kind ? idle : active}" do %>
+            <%= t(".all_kinds") %> <%= count.(@kind_counts.sum(&:last)) %>
+          <% end %>
+          <% @kind_counts.each do |kind, n| %>
+            <%= link_to history_user_path(@user, language: @language, kind: kind), class: "#{pill} #{kind == @kind ? active : idle} #{"opacity-50" if n.zero?}" do %>
+              <%= t("revision_kinds.#{kind}").upcase_first %> <%= count.(n) %>
+            <% end %>
+          <% end %>
+        </nav>
+      <% end %>
+    </div>
+  <% end %>
+  <% if @page == 1 && @entries.empty? %>
+    <p class="p-4 text-sm text-stone-400"><%= t(".empty") %></p>
+  <% else %>
+    <div class="flex flex-col gap-1.5 text-sm <%= 'p-4' if @page == 1 %>">
+      <% @entries.each do |e| %>
+        <%= render "translations/history_entry", entry: e, unit: e.revision.unit, fill: nil, key_link: true %>
+      <% end %>
+      <% if @more %>
+        <%= turbo_frame_tag "user_history_#{@page + 1}", src: history_user_path(@user, page: @page + 1, language: @language, kind: @kind), loading: :lazy do %>
+          <p class="py-2 text-center text-stone-400"><%= t("loading") %></p>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,10 +1,10 @@
 <% content_for :title, "#{t("layouts.application.users")} · OpenCutList Localize" %>
-<%# Toolbar (search, filters, sort, invite) stays on screen above the list (.toolbar in application.css) %>
+<%# Toolbar (search, filters, sort, new) stays on screen above the list (.toolbar in application.css) %>
 <div class="toolbar">
   <div class="mb-2 flex flex-wrap items-start gap-3">
     <%= render "search_bar", list: @list, languages: @languages %>
     <%# The border matches the search bar's : same height as its first row %>
-    <%= link_to t(".invite"), new_user_path, class: "rounded border border-stone-800 bg-stone-800 px-3 py-1.5 text-sm text-white" %>
+    <%= link_to t(".new"), new_user_path, class: "rounded border border-stone-800 bg-stone-800 px-3 py-1.5 text-sm text-white" %>
   </div>
 </div>
 <% if @list.users.empty? %>
@@ -20,7 +20,8 @@
   <div class="rounded border border-stone-200 bg-white text-sm">
     <% @list.users.each do |user| %>
       <% stat = @list.stats[user.id] %>
-      <div class="flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+      <%# The whole row opens the user's page %>
+      <%= link_to edit_user_path(user), class: "flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0 hover:bg-stone-50" do %>
         <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %></span>
         <span class="w-64 truncate text-stone-500"><%= user.email %></span>
         <span class="flex flex-1 flex-wrap gap-1">
@@ -36,8 +37,7 @@
             <%= t(".no_contribution") %>
           <% end %>
         </span>
-        <%= link_to t(".edit"), edit_user_path(user), class: "text-stone-600 underline" %>
-      </div>
+      <% end %>
     <% end %>
   </div>
   <p class="mt-2 text-xs text-stone-500"><%= t(".legend") %></p>

@@ -1,2 +1,6 @@
-<h1 class="mb-4 text-lg font-semibold"><%= t("users.index.invite") %></h1>
+<% content_for :title, "#{t("users.index.new")} · OpenCutList Localize" %>
+<%# Same band as the lists' toolbar (.toolbar in application.css) : one row, h-8 as their search bar %>
+<div class="toolbar">
+  <h1 class="mb-2 flex h-8 items-center text-lg font-semibold"><%= t("users.index.new") %></h1>
+</div>
 <%= render "form" %>

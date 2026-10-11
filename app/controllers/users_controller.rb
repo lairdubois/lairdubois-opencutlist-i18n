@@ -1,7 +1,9 @@
 # Admins invite people and give them languages (translator or reviewer)
 class UsersController < ApplicationController
   before_action :require_admin
-  before_action :set_user, only: [:edit, :update, :destroy, :invite]
+  before_action :set_user, only: [:edit, :update, :destroy, :invite, :history]
+
+  HISTORY_PER_PAGE = 50
 
   def index
     @list = UserList.new(params)
@@ -35,6 +37,30 @@ class UsersController < ApplicationController
     end
   end
 
+  # The user's revisions (Transifex imports included), newest first : a page per lazy frame, the next one
+  # chained at its bottom. Filters : language = a code, the source's for the revisions without one (fr, keys),
+  # kind = Revision::KINDS. The first page lists each filter's entries, counted under the other filter
+  def history
+    @page = [params[:page].to_i, 1].max
+    @language = params[:language].presence
+    @kind = params[:kind].presence
+    all = Revision.by_user(@user).unscope(:order)
+    by_language = history_language(all, @language)
+    by_kind = @kind ? all.where(kind: @kind) : all
+    if @page == 1
+      @language_counts = history_language_counts(all, by_kind)
+      kinds = all.distinct.pluck(:kind)
+      counts = by_language.group(:kind).count
+      @kind_counts = Revision::KINDS.select { |k| kinds.include?(k) }.map { |k| [k, counts[k] || 0] }
+    end
+    filtered = @kind ? by_language.where(kind: @kind) : by_language
+    revisions = filtered.order(created_at: :desc, id: :desc).includes(:unit, :language)
+                        .offset((@page - 1) * HISTORY_PER_PAGE).limit(HISTORY_PER_PAGE + 1).to_a
+    @more = revisions.size > HISTORY_PER_PAGE
+    @entries = revisions.first(HISTORY_PER_PAGE).map { |r| TranslationHistory.entry(r) }
+    render partial: "history"
+  end
+
   # Re-sends the invitation, e.g. when the first one got lost
   def invite
     return redirect_to(edit_user_path(@user), alert: t(".disabled")) unless ActionMailer::Base.perform_deliveries
@@ -56,12 +82,30 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 
+  def history_language(scope, code)
+    if code == Language::SOURCE_CODE then scope.where(language_id: nil)
+    elsif code then scope.where(language_id: Language.where(code: code).select(:id))
+    else scope
+    end
+  end
+
+  # [[code, count]] : the source first (revisions without a language), then by language position
+  def history_language_counts(all, filtered)
+    ids = all.distinct.pluck(:language_id)
+    counts = filtered.group(:language_id).count
+    languages = Language.where(id: ids.compact).index_by(&:id)
+    ids.sort_by { |id| id ? [1, languages[id].position, languages[id].code] : [0] }
+       .map { |id| [id ? languages[id].code : Language::SOURCE_CODE, counts[id] || 0] }
+  end
+
   def user_params
     params.require(:user).permit(:name, :email, :admin, :locale)
   end
 
-  # roles[<language_id>] = "" | "translator" | "reviewer"
+  # roles[<language_id>] = "" | "translator" | "reviewer". An admin has every language : none kept (the form hides them)
   def save_memberships
+    return @user.memberships.destroy_all if @user.admin?
+
     roles = params.fetch(:roles, {}).to_unsafe_h
     Language.targets.each do |language|
       role = roles[language.id.to_s].presence

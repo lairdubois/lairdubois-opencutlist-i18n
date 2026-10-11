@@ -20,8 +20,7 @@
   }
 }
 
-/* OCL strings in CodeMirror (lib/i18n_text.js). Colours only in the editor : a bolder weight could
-   change the monospace advance width. */
+/* OCL strings in CodeMirror (lib/i18n_text.js) */
 @layer components {
   .tok-var, .tok-ref { color: var(--color-violet-800); background: var(--color-violet-100); border-radius: 0.2rem; }
   .tok-ref[title] { cursor: help; }
@@ -31,8 +30,7 @@
   /* An invariant the fr source doesn't have : editable, flagged */
   .tok-unknown { color: var(--color-red-700); background: var(--color-red-50); text-decoration: wavy underline var(--color-red-400); }
   .tok-mark { color: var(--color-amber-600); }
-  .tok-strong { color: var(--color-stone-950); }
-  .i18n-readonly .tok-strong { font-weight: 600; }
+  .tok-strong { color: var(--color-stone-950); font-weight: 600; }
   .tok-em { font-style: italic; }
   .tok-link { text-decoration: underline var(--color-stone-300); text-underline-offset: 2px; }
   .tok-url { color: var(--color-stone-400); }
@@ -58,8 +56,8 @@
 }
 
 /* Page toolbar (search, filters…) : stays on screen under the sticky site header (3.5rem nav + 1px border).
-   -mt-6 swallows main's py-6, so the space above its content (pt-4) is the same once stuck ; after a flash message
-   (its mb-4, the toolbar first in the page or in its wrapper) only that margin is swallowed. Below : pb-2 + its rows'
+   -mt-6 swallows main's py-6, so the space above its content (pt-4) is the same once stuck ; after a banner (repo fr.yml
+   changed, its mb-4, the toolbar first in the page or in its wrapper) only that margin is swallowed. Below : pb-2 + its rows'
    mb-2 match the pt-4, then mb-4 before the list.
    Background and bottom line (stone-200, as the site header's) span the window : a border-image filling the box,
    outset sideways (ink overflow only : no horizontal scroll), its last pixel on the 1px bottom border.

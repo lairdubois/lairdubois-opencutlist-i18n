@@ -1,6 +1,6 @@
 <%# One revision of TranslationHistory : header, then the text, tinted by the status it produced ; the unit's own
     events, for context, are dimmed. fill = the copy button's script (translator's editor) ; none on the key page,
-    which shows each text's language instead %>
+    which shows each text's language instead. key_link : the unit's key in place of the author (a user's history) %>
 <% e = entry %>
 <% r = e.revision %>
 <% tint = { "untranslated" => "border-transparent bg-yellow-50", "unreviewed" => "border-transparent bg-sky-50",
@@ -13,7 +13,17 @@
       <% if !fill && r.language %><span class="font-mono font-normal"><%= r.language.code.upcase %></span><% end %>
     </span>
     <span><%= l r.created_at, format: :short %></span>
-    <span class="min-w-0 truncate"><%= r.author %></span>
+    <% if local_assigns[:key_link] %>
+      <%# Truncated on the left : the key's end tells it apart %>
+      <%= link_to unit_path(unit), data: { turbo_frame: "_top" }, dir: "rtl",
+                  class: "min-w-0 truncate font-mono text-stone-700 hover:text-stone-900 hover:underline" do %><bdi><%= unit.key %></bdi><% end %>
+    <% else %>
+      <%# The author's page in a new tab : the history sits in a lazy frame, next to unsaved edits %>
+      <%= link_to_if r.user_id && current_user&.admin?, r.author, edit_user_path(r.user_id || 0), target: "_blank",
+                     class: "min-w-0 truncate hover:text-stone-900 hover:underline" do %>
+        <span class="min-w-0 truncate"><%= r.author %></span>
+      <% end %>
+    <% end %>
     <% if fill && e.copyable %>
       <button type="button" onclick="<%= fill %>" data-text="<%= r.new_value %>" title="<%= t(".copy_title") %>"
               class="ml-auto shrink-0 rounded border border-stone-300 bg-white px-1.5 text-stone-700 hover:bg-stone-100"><%= t(".copy") %></button>

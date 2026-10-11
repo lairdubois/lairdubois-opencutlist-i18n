@@ -1,8 +1,6 @@
-<h1 class="mb-4 text-lg font-semibold"><%= @user.name %></h1>
-<%= render "form" %>
-<div class="mt-4 flex items-center gap-6">
-  <%= button_to t(".invite"), invite_user_path(@user), class: "text-sm text-stone-700 hover:underline",
-                form: { data: { turbo_confirm: t(".invite_confirm", email: @user.email) } } %>
-  <%= button_to t(".destroy"), @user, method: :delete, class: "text-sm text-red-700 hover:underline",
-                form: { data: { turbo_confirm: t(".destroy_confirm", name: @user.name) } } %>
+<% content_for :title, "#{@user.name} · OpenCutList Localize" %>
+<%# Same band as the lists' toolbar (.toolbar in application.css) : one row, h-8 as their search bar %>
+<div class="toolbar">
+  <h1 class="mb-2 flex h-8 items-center text-lg font-semibold"><%= @user.name %></h1>
 </div>
+<%= render "form" %>

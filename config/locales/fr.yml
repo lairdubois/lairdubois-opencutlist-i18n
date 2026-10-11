@@ -146,6 +146,7 @@ fr:
       logout: "Déconnexion"
       repo_changed: "Le fr.yml du repo a changé."
       sync_now: "Synchroniser"
+      close: "Fermer"
 
   sessions:
     rate_limited: "Trop de demandes, réessaie plus tard."
@@ -336,8 +337,7 @@ fr:
 
   users:
     index:
-      invite: "Ajouter un nouveau"
-      edit: "Modifier"
+      new: "Ajouter un utilisateur"
       legend: "✓ = relecteur pour la langue"
       contributions:
         one: "%{formatted} contribution"
@@ -380,9 +380,23 @@ fr:
         contributions: "nombre de contributions"
         created: "date d'invitation"
     form:
+      history: "Historique"
+      history_count:
+        one: "%{count} entrée"
+        other: "%{count} entrées"
+      profile: "Profil"
+      locale_browser: "Navigateur"
+      no_role: "Aucun"
       admin: "Administrateur (toutes les langues + gestion des clés)"
+      admin_no: "Non"
+      admin_yes: "Oui"
       languages: "Langues"
       send_invitation: "Envoyer une invitation par e-mail"
+    history:
+      all_languages: "Toutes les langues"
+      all_kinds: "Tous les types"
+      source: "Texte source FR et clés (création, renommage, commentaire YAML…)"
+      empty: "Aucune contribution."
     edit:
       destroy: "Supprimer cet utilisateur"
       destroy_confirm: "Supprimer %{name} ?"

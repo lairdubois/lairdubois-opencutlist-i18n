@@ -30,7 +30,10 @@ Rails.application.routes.draw do
   patch "branches/rename", to: "branches#rename", as: :rename_branch
   patch "branches/note", to: "branches#note", as: :branch_note
   resources :users, except: [:show] do
-    post :invite, on: :member
+    member do
+      post :invite
+      get :history
+    end
   end
 
   get "sync", to: "syncs#new", as: :new_sync

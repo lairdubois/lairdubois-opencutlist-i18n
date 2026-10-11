@@ -107,8 +107,10 @@ Weblate was evaluated and rejected.
   edits kept), saved by a json PATCH. The `q` search on en follows the choice at the next search.
 - The site header is sticky (`h-14` + 1px border) ; page toolbars (translator's list, keys list, duplicates) stick
   below it with the `.toolbar` component (`application.css`, `top: calc(3.5rem + 1px)`) : keep both in sync. It
-  swallows main's `py-6` (or a flash message's `mb-4`) and spans the window through an outset border-image
+  swallows main's `py-6` (or the repo-changed banner's `mb-4`) and spans the window through an outset border-image
   (background + bottom line).
+- Flash messages are toasts (layout, `toast_controller`), fixed under the header : a notice leaves after 5 s, an alert
+  stays until closed ; `data-turbo-temporary` keeps them out of Turbo's cache.
 
 ## List search (translator's list and keys list)
 
@@ -146,6 +148,8 @@ each entry's count under the other filters.
 
 - Tailwind sources are explicit (`source(none)` + `@source` views / helpers / javascript) : the deployed copy has no
   `.git`, so auto-detection scanned `vendor/bundle`. Classes used elsewhere need a new `@source`.
+- Tailwind arbitrary values turn `_` into spaces : escape it in selectors (`group-has-[#user\_admin\_1:checked]/user:hidden`),
+  and check the built rule in `app/assets/builds/tailwind.css`.
 - Turbo ignores a 200 HTML answer to a form POST : forms that render a page need `data: { turbo: false }`.
 - Turbo hover prefetch fires GETs : single-use tokens are consumed by POST (login confirm page).
 - `Unit` default_scope `order(:position)` leaks through `merge` : use `reorder`.

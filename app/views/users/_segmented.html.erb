@@ -1,0 +1,9 @@
+<%# Segmented control : radios hidden behind their labels, the checked one raised.
+    choices : [[label, value, checked classes]] %>
+<span class="inline-flex shrink-0 rounded border border-stone-300 bg-stone-100 p-0.5 text-xs">
+  <% choices.each do |label, value, checked_class| %>
+    <label class="cursor-pointer rounded px-2.5 py-0.5 text-stone-500 select-none hover:text-stone-900 has-checked:shadow-sm has-focus-visible:ring-2 has-focus-visible:ring-sky-500 <%= checked_class %>">
+      <%= radio_button_tag name, value, value.to_s == selected.to_s, class: "sr-only" %><%= label %>
+    </label>
+  <% end %>
+</span>

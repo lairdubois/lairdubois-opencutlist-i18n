@@ -146,6 +146,7 @@ en:
       logout: "Log out"
       repo_changed: "The repo's fr.yml has changed."
       sync_now: "Sync"
+      close: "Close"
 
   sessions:
     rate_limited: "Too many requests, try again later."
@@ -336,8 +337,7 @@ en:
 
   users:
     index:
-      invite: "Add new"
-      edit: "Edit"
+      new: "Add a user"
       legend: "✓ = reviewer for the language"
       contributions:
         one: "%{formatted} contribution"
@@ -380,9 +380,23 @@ en:
         contributions: "number of contributions"
         created: "invitation date"
     form:
+      history: "History"
+      history_count:
+        one: "%{count} entry"
+        other: "%{count} entries"
+      profile: "Profile"
+      locale_browser: "Browser"
+      no_role: "None"
       admin: "Administrator (every language + key management)"
+      admin_no: "No"
+      admin_yes: "Yes"
       languages: "Languages"
       send_invitation: "Send an invitation e-mail"
+    history:
+      all_languages: "All languages"
+      all_kinds: "All kinds"
+      source: "FR source text and keys (creation, rename, YAML comment…)"
+      empty: "No contribution."
     edit:
       destroy: "Delete this user"
       destroy_confirm: "Delete %{name}?"

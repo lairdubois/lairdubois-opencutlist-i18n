@@ -46,21 +46,26 @@ class TranslationHistory
     revisions.each_with_index.map do |r, i|
       if r.language_id.nil?
         source = r.new_value if SOURCE_KINDS.include?(r.kind)
-        Entry.new(revision: r, diff: (WordDiff.call(r.old_value, r.new_value) if r.old_value && %w[source_minor source_major note].include?(r.kind)))
+        Entry.new(revision: r, diff: self.class.diff(r))
       else
-        Entry.new(revision: r, diff: text_diff(r),
+        Entry.new(revision: r, diff: self.class.diff(r),
                   source_then: (source if last_major && i < last_major && source != @unit.source_text),
                   copyable: @language.present? && r.new_value.present? && r.new_value != current)
       end
     end.reverse
   end
 
-  private
+  # A revision on its own (a user's history) : no fr text of its time, nothing to copy
+  def self.entry(revision) = Entry.new(revision: revision, diff: diff(revision))
 
-  # Nothing to compare for a first text or an approval leaving it as is
-  def text_diff(revision)
-    return if revision.old_value.nil? || revision.new_value.nil? || revision.old_value == revision.new_value
-
+  # A fr text or note change against the previous one. For a text : nothing to compare for a first one
+  # or an approval leaving it as is
+  def self.diff(revision)
+    if revision.language_id.nil?
+      return unless revision.old_value && %w[source_minor source_major note].include?(revision.kind)
+    elsif revision.old_value.nil? || revision.new_value.nil? || revision.old_value == revision.new_value
+      return
+    end
     WordDiff.call(revision.old_value, revision.new_value)
   end
 end
