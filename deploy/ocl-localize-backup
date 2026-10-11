@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Daily backup of the primary SQLite database, run as ocl-localize by ocl-localize-backup.timer
+# (installed in /usr/local/bin by deploy/setup.sh). The queue, cache and cable databases are disposable.
+# Keeps 14 days of daily backups and 8 weeks of weekly ones (Sunday's).
+set -euo pipefail
+
+src=/var/www/localize.opencutlist.org/app/storage/production.sqlite3
+dir=/var/backups/ocl-localize
+umask 027
+
+name="ocl-localize-$(date +%F-%H%M).sqlite3"
+tmp="$dir/.$name.partial"
+trap 'rm -f "$tmp" "$tmp-wal" "$tmp-shm" "$tmp.gz"' EXIT
+
+# .backup takes a consistent copy while Puma writes (WAL mode) : never cp the file
+sqlite3 "$src" ".backup '$tmp'"
+# The copy inherits WAL mode : a self-contained file restores without -wal / -shm leftovers
+sqlite3 "$tmp" 'PRAGMA journal_mode=DELETE' >/dev/null
+check=$(sqlite3 "$tmp" 'PRAGMA integrity_check')
+[ "$check" = ok ] || { echo "Integrity check failed: $check" >&2; exit 1; }
+gzip -9 "$tmp"
+mv "$tmp.gz" "$dir/$name.gz"
+
+if [ "$(date +%u)" = 7 ]; then
+  cp "$dir/$name.gz" "$dir/weekly-$(date +%G-W%V).sqlite3.gz"
+fi
+find "$dir" -maxdepth 1 -name 'ocl-localize-*.sqlite3.gz' -mtime +14 -delete
+find "$dir" -maxdepth 1 -name 'weekly-*.sqlite3.gz' -mtime +56 -delete
+
+echo "Backup $dir/$name.gz ($(du -h "$dir/$name.gz" | cut -f1))"

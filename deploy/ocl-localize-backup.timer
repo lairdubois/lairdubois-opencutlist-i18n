@@ -1,0 +1,12 @@
+# /etc/systemd/system/ocl-localize-backup.timer
+# Daily database backup (ocl-localize-backup.service) ; Persistent catches up a run missed while down
+[Unit]
+Description=Daily OpenCutList Localize database backup
+
+[Timer]
+OnCalendar=*-*-* 03:30
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

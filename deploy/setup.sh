@@ -58,6 +58,13 @@ systemctl enable -q ocl-localize
 step "Rails command wrapper (sudo ocl-localize-rails console)"
 install -m 755 "$here/ocl-localize-rails" /usr/local/bin/ocl-localize-rails
 
+step "Daily database backup (/var/backups/ocl-localize, 03:30)"
+install -d -m 750 -o ocl-localize -g ocl-localize /var/backups/ocl-localize
+install -m 755 "$here/ocl-localize-backup" /usr/local/bin/ocl-localize-backup
+install -m 644 "$here/ocl-localize-backup.service" "$here/ocl-localize-backup.timer" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable -q --now ocl-localize-backup.timer
+
 step "Certificate $domain"
 # Webroot : works without certbot's NGINX plugin ; renewals use the same challenge location
 install -d -m 755 "$home/acme"

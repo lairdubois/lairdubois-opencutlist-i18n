@@ -44,6 +44,7 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
    - `/etc/ocl-localize.env` from `ocl-localize.env.example`, with a generated `SECRET_KEY_BASE` and
      `OCL_BASE_BRANCH` (an existing file is kept : the setup only warns if its branch differs)
    - the systemd service, the `ocl-localize-rails` wrapper in `/usr/local/bin`
+   - the nightly database backup (timer, see "Logs and backups")
    - the certificate (certbot webroot, first time only : an HTTP-only site serves the challenge
      from `acme/`) and the NGINX site, then `nginx -t` and reload
 
@@ -111,7 +112,18 @@ install is checked (in a root shell) :
 ## Logs and backups
 
 - Logs : `journalctl -u ocl-localize -f`
-- Backups (as root, from `/var/www/localize.opencutlist.org`) : the SQLite files run in WAL mode, copy them with
-  `sqlite3 app/storage/production.sqlite3 ".backup '/backup/ocl-localize-$(date +%F).sqlite3'"`
-  (`production_queue`, `_cache` and `_cable` are disposable). `storage/ocl_repo` is re-cloned
-  on demand.
+- Backups : `ocl-localize-backup.timer` (installed by `deploy/setup.sh`) runs `/usr/local/bin/ocl-localize-backup`
+  as `ocl-localize` every night at 03:30 (a run missed while the server was down is caught up). It copies
+  `storage/production.sqlite3` with `sqlite3 .backup` (consistent while the app writes, WAL mode : never `cp` it),
+  checks its integrity and gzips it into `/var/backups/ocl-localize/` : 14 days of daily backups, 8 weeks of weekly
+  ones (`weekly-*`). `production_queue`, `_cache` and `_cable` are disposable ; `storage/ocl_repo` is re-cloned on
+  demand. These copies stay on the server : add `/var/backups/ocl-localize` to an off-site backup.
+  - Status : `systemctl list-timers ocl-localize-backup`, `journalctl -u ocl-localize-backup` ;
+    run one now : `sudo systemctl start ocl-localize-backup`.
+  - Restore (as root, from `/var/www/localize.opencutlist.org`) :
+
+        systemctl stop ocl-localize
+        rm -f app/storage/production.sqlite3-wal app/storage/production.sqlite3-shm
+        gunzip -c /var/backups/ocl-localize/<backup>.sqlite3.gz > app/storage/production.sqlite3
+        chown ocl-localize:ocl-localize app/storage/production.sqlite3
+        systemctl start ocl-localize

@@ -1,0 +1,20 @@
+# /etc/systemd/system/ocl-localize-backup.service
+# SQLite backup into /var/backups/ocl-localize, started by ocl-localize-backup.timer
+# Runs as ocl-localize : a root sqlite3 could create the -wal / -shm files owned by root
+[Unit]
+Description=OpenCutList Localize database backup
+
+[Service]
+Type=oneshot
+User=ocl-localize
+Group=ocl-localize
+ExecStart=/usr/local/bin/ocl-localize-backup
+Nice=10
+IOSchedulingClass=idle
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+# storage : sqlite3 may write the -shm file even when reading
+ReadWritePaths=/var/www/localize.opencutlist.org/app/storage /var/backups/ocl-localize
