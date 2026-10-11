@@ -1,0 +1,4 @@
+<%# Lazy : loads once its panel is shown ; replaced by a fresh one after each save (editor) %>
+<%= turbo_frame_tag "history_#{unit.id}_#{language.code}", src: translate_unit_history_path(language.code, unit), loading: :lazy do %>
+  <span class="text-stone-400"><%= t("loading") %></span>
+<% end %>

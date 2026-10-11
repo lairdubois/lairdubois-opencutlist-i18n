@@ -1,0 +1,7 @@
+<%= turbo_frame_tag "unit_history" do %>
+  <div class="flex flex-col gap-1.5 p-4 text-sm">
+    <% entries.each do |e| %>
+      <%= render "translations/history_entry", entry: e, unit: unit, fill: nil %>
+    <% end %>
+  </div>
+<% end %>

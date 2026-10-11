@@ -1,0 +1,10 @@
+<%# Copying refills the row's editor (as a suggestion) : the text is only saved, through the usual buttons, once checked %>
+<% fill = "const f = document.getElementById('#{dom_id(unit, language.code)}'), a = f.querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input')); f.scrollIntoView({ block: 'nearest' })" %>
+<%= turbo_frame_tag "history_#{unit.id}_#{language.code}" do %>
+  <div class="flex flex-col gap-1.5">
+    <% entries.each do |e| %>
+      <%= render "translations/history_entry", entry: e, unit: unit, fill: fill %>
+    <% end %>
+    <% if entries.empty? %><p class="text-stone-400"><%= t(".empty") %></p><% end %>
+  </div>
+<% end %>

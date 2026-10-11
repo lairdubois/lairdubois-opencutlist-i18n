@@ -1,0 +1,153 @@
+<%# The users page's search bar, styled and driven as shared/_search_bar (search_bar_controller) : a text search
+    (name, e-mail, logins), a "Filters" menu (language : a list chip ; roles, OR-ed ; activity, one at a time) and a
+    "Sort" menu (the picked one gets a chip, its arrow reversing it). Every change reloads the list (UserList). Locals : list, languages %>
+<% search = "shared.search_bar" %>
+<% group = "flex items-center gap-1 rounded bg-stone-300 p-0.5 pl-2 text-xs text-stone-900" %>
+<% sub_chip = "flex items-center gap-1.5 rounded border border-transparent bg-white py-0.5 pr-0.5 pl-2 text-stone-900" %>
+<% sub_chip_remove = "flex h-4 w-4 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-200 hover:text-stone-900" %>
+<% item = "flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100" %>
+<% remove = capture do %>
+  <button type="button" title="<%= t("#{search}.remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+<% end %>
+<%= form_with url: users_path, method: :get, class: "min-w-0 flex-1",
+              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut" } do %>
+  <div class="rounded border border-stone-300 bg-white focus-within:border-stone-400">
+    <div class="flex items-center gap-2 pr-1 pl-2.5">
+      <span title="<%= t(".shortcuts").strip %>" class="shrink-0 cursor-help">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-stone-400" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.08 3.08a.75.75 0 1 1-1.06 1.06l-3.08-3.08A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+        </svg>
+      </span>
+      <%= search_field_tag :q, params[:q], id: nil, placeholder: t(".placeholder"), autocomplete: "off",
+                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset" },
+                           class: "peer h-8 min-w-0 flex-1 appearance-none bg-transparent py-1.5 text-sm text-stone-900 outline-none [&::-webkit-search-cancel-button]:appearance-none" %>
+      <button type="button" title="<%= t("#{search}.clear") %>" data-action="search-bar#clear"
+              class="flex h-5 w-5 items-center justify-center rounded leading-none text-stone-400 peer-placeholder-shown:hidden hover:bg-stone-100 hover:text-stone-700">×</button>
+      <span class="text-xs whitespace-nowrap text-stone-500 tabular-nums"><%= t(".count", count: list.users.size) %></span>
+      <button type="button" popovertarget="search-filters" data-popover-target="anchor"
+              data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu" class="<%= group %> h-6.5 pr-1.5 hover:bg-stone-400">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-stone-600" aria-hidden="true">
+          <path fill-rule="evenodd" d="M2.63 3.4A1 1 0 0 1 3.5 3h13a1 1 0 0 1 .78 1.63L12 11.24V16a1 1 0 0 1-.55.9l-2 1A1 1 0 0 1 8 17v-5.76L2.72 4.63a1 1 0 0 1-.09-1.23Z" clip-rule="evenodd" />
+        </svg>
+        <%= t("#{search}.filters") %> <span class="text-stone-600">▾</span>
+      </button>
+      <span data-controller="popover" class="contents">
+        <button type="button" popovertarget="search-sort" data-popover-target="anchor"
+                data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu" class="<%= group %> -ml-1 h-6.5 pr-1.5 hover:bg-stone-400">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-stone-600" aria-hidden="true">
+            <path fill-rule="evenodd" d="M2 3.75A.75.75 0 0 1 2.75 3h11.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75ZM2 7.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 2 7.5ZM14 7a.75.75 0 0 1 .75.75v6.69l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72V7.75A.75.75 0 0 1 14 7ZM2 11.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+          </svg>
+          <%= t("#{search}.sort") %> <span class="text-stone-600">▾</span>
+        </button>
+        <div id="search-sort" popover data-popover-target="panel"
+             data-action="beforetoggle->popover#place toggle->search-bar#focusMenu keydown->search-bar#menuKeydown"
+             class="m-0 min-w-48 rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+          <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t("#{search}.sort_header") %></p>
+          <% UserList::SORTS.each do |key, dir| %>
+            <% on = key == (list.sort || "name") %>
+            <button type="button" role="menuitemradio" aria-checked="<%= on %>" data-action="search-bar#sort"
+                    data-search-bar-sort-param="<%= key %>" data-search-bar-dir-param="<%= dir %>" class="<%= item %>">
+              <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if on %></span>
+              <span class="flex-1"><%= t(".sorts.#{key}").upcase_first %></span>
+            </button>
+          <% end %>
+        </div>
+      </span>
+    </div>
+
+    <%# Chips. The language chip is always rendered : unused, it stays hidden and disabled until picked in the menu %>
+    <div data-search-bar-target="chips" class="flex flex-wrap gap-1.5 border-t border-stone-200 p-1.5" <%= "hidden" unless list.any_chip? %>>
+      <% applied = list.language.present? %>
+      <span data-chip data-search-bar-target="field" data-name="language" class="<%= group %>" <%= "data-applied" if applied %> <%= "hidden" unless applied %>>
+        <%= t(".language") %>
+        <span class="<%= sub_chip %> focus-within:border-stone-500">
+          <span data-controller="popover" data-popover-align-value="left" class="contents">
+            <%= hidden_field_tag :language, list.language&.code, id: nil, disabled: !applied %>
+            <button type="button" popovertarget="search-language" data-popover-target="anchor" data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu"
+                    class="flex items-center gap-1 outline-none">
+              <span class="max-w-44 truncate <%= 'text-stone-400' unless applied %>"><%= list.language&.name || t("#{search}.placeholders.user") %></span>
+              <span class="text-stone-500">▾</span>
+            </button>
+            <div id="search-language" popover data-popover-target="panel" data-action="beforetoggle->popover#place toggle->search-bar#focusMenu toggle->search-bar#listToggled keydown->search-bar#menuKeydown"
+                 class="m-0 max-h-80 min-w-48 overflow-y-auto rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+              <% languages.each do |language| %>
+                <% on = language == list.language %>
+                <% count = list.counts[language.code] %>
+                <button type="button" role="menuitemradio" aria-checked="<%= on %>"
+                        data-action="search-bar#pick" data-search-bar-name-param="language" data-search-bar-id-param="<%= language.code %>"
+                        class="<%= item %> <%= 'text-stone-400' if count.zero? && !on %>">
+                  <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if on %></span>
+                  <span class="flex-1"><%= language.name %></span>
+                  <span class="text-xs text-stone-400 tabular-nums"><%= count %></span>
+                </button>
+              <% end %>
+            </div>
+          </span>
+          <%= remove %>
+        </span>
+      </span>
+      <%# Roles are OR-ed : one group chip, "or" between its inner chips %>
+      <% if list.roles.any? %>
+        <span class="<%= group %>">
+          <%= t(".role") %>
+          <% list.roles.each_with_index do |role, i| %>
+            <% if i > 0 %><span class="text-stone-600"><%= t("#{search}.or") %></span><% end %>
+            <span data-chip class="<%= sub_chip %>">
+              <%= t(".roles.#{role}") %>
+              <%= hidden_field_tag "role[]", role, id: nil %>
+              <%= remove %>
+            </span>
+          <% end %>
+        </span>
+      <% end %>
+      <% if list.days %>
+        <span class="<%= group %>">
+          <%= t(".activity") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".activities.#{list.days}") %>
+            <%= hidden_field_tag :days, list.days, id: nil %>
+            <%= remove %>
+          </span>
+        </span>
+      <% end %>
+      <%# The sort : not a filter (its own colors), its arrow reverses it %>
+      <% if list.sort %>
+        <span class="<%= group.sub('bg-stone-300', 'bg-sky-200').sub('text-stone-900', 'text-sky-950') %>">
+          <%= t("#{search}.sort") %>
+          <span data-chip data-sort class="<%= sub_chip %>">
+            <%= t(".sorts.#{list.sort}") %>
+            <%= hidden_field_tag :sort, list.sort, id: nil %>
+            <%= hidden_field_tag :dir, list.sort_dir, id: nil %>
+            <button type="button" title="<%= t("#{search}.sort_dirs.#{list.sort_dir}") %>" data-action="search-bar#reverse"
+                    class="flex h-4 w-4 items-center justify-center rounded leading-none text-stone-700 hover:bg-stone-200 hover:text-stone-900"><%= list.sort_dir == "desc" ? "↓" : "↑" %></button>
+            <%= remove %>
+          </span>
+        </span>
+      <% end %>
+      <button type="button" title="<%= t("#{search}.remove_all") %>" data-action="search-bar#removeAll"
+              class="ml-auto flex h-6.5 w-6 items-center justify-center rounded leading-none text-stone-400 hover:bg-stone-100 hover:text-stone-700">×</button>
+    </div>
+  </div>
+
+  <%# Filters menu : native popover (light dismiss, Esc), placed under its button by popover_controller %>
+  <div id="search-filters" popover data-popover-target="panel" data-search-bar-target="menu"
+       data-action="beforetoggle->popover#place toggle->search-bar#focusMenu keydown->search-bar#menuKeydown"
+       class="m-0 min-w-64 rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+    <button type="button" data-action="search-bar#add" data-search-bar-name-param="language" class="<%= item %>">
+      <span class="flex-1"><%= t(".language") %></span>
+      <span class="text-xs text-stone-400"><%= t("#{search}.placeholders.user") %></span>
+    </button>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".role") %></p>
+    <% UserList::ROLES.each do |role| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "role[]", value: role, on: list.roles.include?(role), count: list.counts[role],
+                                             label: t(".roles.#{role}"), dot: nil %>
+    <% end %>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".activity_header") %></p>
+    <% UserList::ACTIVITIES.each do |days| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "days", value: days, on: list.days == days, count: list.counts["days_#{days}"],
+                                             label: t(".activities.#{days}").upcase_first, dot: nil, radio: true %>
+    <% end %>
+  </div>
+<% end %>

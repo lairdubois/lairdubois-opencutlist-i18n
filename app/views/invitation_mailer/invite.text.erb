@@ -1,0 +1,20 @@
+<%= t(".hello", name: @user.name) %>
+
+<%= t(".invited", inviter: @inviter.name) %>
+
+<% if @user.admin? %>
+<%= t(".admin") %>
+<% elsif @memberships.any? %>
+<%= t(".languages") %>
+<% @memberships.each do |membership| %>
+<%= t(".language", language: membership.language.name, role: t("roles.#{membership.role}")) %>
+<% end %>
+<% end %>
+
+<%= t(".how") %>
+
+<%= @url %>
+
+<%= t(".email", email: @user.email) %>
+
+<%= t(".magic_link") %>

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# bin/rails as ocl-localize with the production environment, e.g. sudo ocl-localize-rails console
+# (installed in /usr/local/bin by deploy/setup.sh)
+set -euo pipefail
+
+home=/var/www/localize.opencutlist.org
+cd "$home/app"
+exec sudo -u ocl-localize bash -c '
+  set -a; source /etc/ocl-localize.env; set +a
+  export PATH='"$home"'/.rbenv/versions/4.0.1/bin:$PATH
+  exec bin/rails "$@"
+' ocl-localize-rails "$@"

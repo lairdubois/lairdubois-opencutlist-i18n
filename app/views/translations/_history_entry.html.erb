@@ -1,0 +1,35 @@
+<%# One revision of TranslationHistory : header, then the text, tinted by the status it produced ; the unit's own
+    events, for context, are dimmed. fill = the copy button's script (translator's editor) ; none on the key page,
+    which shows each text's language instead %>
+<% e = entry %>
+<% r = e.revision %>
+<% tint = { "untranslated" => "border-transparent bg-yellow-50", "unreviewed" => "border-transparent bg-sky-50",
+            "reviewed" => "border-transparent bg-emerald-50", "outdated" => "border-dashed border-orange-300 bg-orange-50 text-stone-500" } %>
+<div class="rounded border px-2 py-1.5 <%= tint[e.status] || 'border-dashed border-stone-200 text-stone-500' %>">
+  <%# Fixed height : the copy button (bordered) would make the row taller than the others %>
+  <div class="mb-0.5 flex h-5 items-center gap-2 text-stone-500">
+    <span class="flex items-center gap-1 font-medium <%= e.text? ? 'text-stone-700' : 'text-stone-600' %>">
+      <% if e.status %><%= status_dot(e.status) %><% end %><%= t("revision_kinds.#{r.kind}", default: r.kind) %>
+      <% if !fill && r.language %><span class="font-mono font-normal"><%= r.language.code.upcase %></span><% end %>
+    </span>
+    <span><%= l r.created_at, format: :short %></span>
+    <span class="min-w-0 truncate"><%= r.author %></span>
+    <% if fill && e.copyable %>
+      <button type="button" onclick="<%= fill %>" data-text="<%= r.new_value %>" title="<%= t(".copy_title") %>"
+              class="ml-auto shrink-0 rounded border border-stone-300 bg-white px-1.5 text-stone-700 hover:bg-stone-100"><%= t(".copy") %></button>
+    <% end %>
+  </div>
+  <% if e.deleted? %>
+    <p class="font-mono whitespace-pre-wrap"><span class="font-sans italic text-stone-500"><%= t(".deleted") %></span> <del class="text-stone-400"><%= r.old_value %></del></p>
+  <% elsif r.kind == "rename" %>
+    <p class="font-mono break-all"><%= r.old_value %> → <%= r.new_value %></p>
+  <% elsif r.kind == "archive" || r.kind == "restore" %>
+    <p class="font-mono break-all"><%= r.old_value || r.new_value %></p>
+  <% else %>
+    <p class="font-mono whitespace-pre-wrap"><%= e.diff ? word_diff_tag(e.diff) : r.new_value %></p>
+  <% end %>
+  <% if e.source_then %>
+    <p class="mt-1 text-amber-800">⚠ <%= t(".other_source") %></p>
+    <p class="font-mono whitespace-pre-wrap text-stone-600"><%= word_diff_tag(WordDiff.call(e.source_then, unit.source_text)) %></p>
+  <% end %>
+</div>

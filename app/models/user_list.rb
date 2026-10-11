@@ -1,0 +1,124 @@
+# The users page's list (UsersController#index, users/_search_bar), searched, filtered and sorted in memory
+# (a few hundred users at most). Params :
+#   q         name, e-mail, GitHub login or Transifex username (case and accents aside)
+#   role[]    OR-ed : admin, reviewer / translator (in some language, or in the picked one), none (no language, not admin)
+#   language  a language code : a membership in it, combined with AND
+#   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
+#   sort      SORTS (name by default), dir "asc" or "desc" (the sort's own direction by default)
+class UserList
+  ROLES = %w[admin reviewer translator none].freeze
+  ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
+  # Each sort, with its default direction
+  SORTS = { "name" => "asc", "activity" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
+
+  # A user's revisions : how many, the last one's date
+  Stat = Data.define(:count, :last_at)
+
+  attr_reader :q, :roles, :language, :days
+
+  def initialize(params)
+    @q = params[:q].to_s.strip.presence
+    @roles = ROLES & Array(params[:role])
+    @language = params[:language].presence && Language.targets.find_by(code: params[:language])
+    @days = params[:days] if ACTIVITIES.include?(params[:days])
+    @sort = params[:sort] if SORTS.key?(params[:sort])
+    @dir = params[:dir] if %w[asc desc].include?(params[:dir])
+  end
+
+  # The picked sort, nil when none (by name)
+  def sort
+    @sort unless @sort == "name"
+  end
+
+  def sort_dir
+    @dir || SORTS.fetch(sort || "name")
+  end
+
+  def any_chip?
+    roles.any? || language || days || sort
+  end
+
+  def filtered?
+    roles.any? || language || days
+  end
+
+  def users
+    @users ||= sorted(all.select { |user| match?(user) })
+  end
+
+  # Each menu entry's matches under the other filters (and the search)
+  def counts
+    @counts ||= {
+      **ROLES.to_h { |role| [role, all.count { |user| match?(user, roles: [role]) }] },
+      **ACTIVITIES.to_h { |days| ["days_#{days}", all.count { |user| match?(user, days: days) }] },
+      **Language.targets.to_h { |l| [l.code, all.count { |user| match?(user, language: l) }] },
+      searched: all.count { |user| match?(user, roles: [], language: nil, days: nil) }
+    }
+  end
+
+  def stats
+    @stats ||= begin
+      revisions = Revision.unscope(:order)
+      own = revisions.where.not(user_id: nil).group(:user_id)
+      imported = revisions.where(user_id: nil).where("author LIKE 'transifex:%'").group(:author)
+      own_counts, own_last = own.count, own.maximum(:created_at)
+      imported_counts, imported_last = imported.count, imported.maximum(:created_at)
+      all.to_h do |user|
+        author = "transifex:#{user.transifex_username}" if user.transifex_username.present?
+        count = own_counts[user.id].to_i + imported_counts[author].to_i
+        [user.id, (Stat.new(count, [own_last[user.id], imported_last[author]].compact.max) if count > 0)]
+      end
+    end
+  end
+
+  private
+
+  def all
+    @all ||= User.includes(memberships: :language).to_a
+  end
+
+  def match?(user, roles: @roles, language: @language, days: @days)
+    return false if @q && [user.name, user.email, user.github_login, user.transifex_username].compact.none? { |t| SqliteFold.fold(t).include?(folded_q) }
+    return false if language && user.memberships.none? { |m| m.language_id == language.id }
+    return false if roles.any? && roles.none? { |role| role?(user, role, language) }
+
+    stat = stats[user.id]
+    case days
+    when nil then true
+    when "never" then stat.nil?
+    else stat.present? && stat.last_at >= days.to_i.days.ago
+    end
+  end
+
+  def folded_q
+    @folded_q ||= SqliteFold.fold(@q)
+  end
+
+  def role?(user, role, language)
+    memberships = user.memberships.select { |m| language.nil? || m.language_id == language.id }
+    case role
+    when "admin" then user.admin?
+    when "reviewer" then memberships.any?(&:reviewer?)
+    when "translator" then memberships.any?(&:translator?)
+    when "none" then !user.admin? && user.memberships.empty?
+    end
+  end
+
+  # Ties (and users without activity, always last) by name
+  def sorted(users)
+    by_name = users.sort_by { |user| SqliteFold.fold(user.name) }
+    by_name.reverse! if sort.nil? && sort_dir == "desc"
+    return by_name unless sort
+
+    key = ->(user) {
+      case sort
+      when "activity" then stats[user.id]&.last_at
+      when "contributions" then stats[user.id]&.count
+      when "created" then user.created_at
+      end
+    }
+    with, without = by_name.partition { |user| key.(user) }
+    with = with.each_with_index.sort_by { |user, i| [key.(user), sort_dir == "desc" ? -i : i] }.map(&:first)
+    (sort_dir == "desc" ? with.reverse : with) + without
+  end
+end

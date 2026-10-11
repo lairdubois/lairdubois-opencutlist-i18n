@@ -1,0 +1,10 @@
+<%# The translation's status, on the row's key line : the editor's save replaces it through a turbo-stream %>
+<% badge = "inline-flex shrink-0 items-center gap-1 self-center rounded px-1.5" %>
+<span id="<%= "status_#{unit.id}_#{language.code}" %>" class="contents">
+  <% if unit.copied %><span class="<%= badge %> bg-stone-200 text-stone-600" title="<%= t("status.copied_hint") %>"><%= t("status.copied") %></span>
+  <% elsif translation.nil? %><span class="<%= badge %> bg-yellow-100 text-yellow-800"><%= status_dot("untranslated") %><%= t("status.untranslated") %></span>
+  <% elsif translation.outdated? %><span class="<%= badge %> bg-orange-100 text-orange-800"><%= status_dot("outdated") %><%= t("status.outdated") %></span>
+  <% elsif translation.reviewed? %><span class="<%= badge %> bg-emerald-100 text-emerald-800"><%= status_dot("reviewed") %><%= t("status.reviewed") %></span>
+  <% else %><span class="<%= badge %> bg-sky-50 text-sky-800"><%= status_dot("unreviewed") %><%= t("status.translated") %></span>
+  <% end %>
+</span>

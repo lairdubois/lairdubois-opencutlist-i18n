@@ -1,0 +1,29 @@
+# /etc/systemd/system/ocl-localize.service
+# Puma + Solid Queue (in Puma), listening on 127.0.0.1:3007 behind NGINX
+[Unit]
+Description=OpenCutList Localize (Rails)
+After=network.target
+
+[Service]
+Type=simple
+User=ocl-localize
+Group=ocl-localize
+WorkingDirectory=/var/www/localize.opencutlist.org/app
+EnvironmentFile=/etc/ocl-localize.env
+Environment=PATH=/var/www/localize.opencutlist.org/.rbenv/versions/4.0.1/bin:/usr/local/bin:/usr/bin:/bin
+Environment=LD_PRELOAD=libjemalloc.so.2
+ExecStart=/var/www/localize.opencutlist.org/.rbenv/versions/4.0.1/bin/ruby bin/rails server
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillMode=mixed
+
+# Hardening : the app only writes to its storage, log and tmp directories
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/www/localize.opencutlist.org/app/storage /var/www/localize.opencutlist.org/app/log /var/www/localize.opencutlist.org/app/tmp
+
+[Install]
+WantedBy=multi-user.target

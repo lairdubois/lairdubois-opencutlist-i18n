@@ -1,0 +1,42 @@
+<%# locals: (unit:, outdated:, en: nil, en_main: false, en_missing: false, visibility: nil) %>
+<%# Main reference : the fr source, or the en translation when the user chose it (fr stays the official source).
+    Both are rendered when en exists, `visibility` shows the chosen one (ref-en class, reference controller) %>
+<div class="row-span-2 grid min-w-0 grid-rows-subgrid text-sm <%= visibility %>">
+  <% reference = en_main ? en.text : unit.source_text %>
+  <%# The box : the view, then its notices under a dashed line, as the editor's box beside %>
+  <div class="flex min-w-0 flex-col border-y border-stone-200 <%= en_main && en.outdated? ? 'bg-orange-50' : 'bg-stone-50' %>">
+    <%# The edit and copy buttons sit beside the view : i18n-text replaces its element's content %>
+    <div class="group/copy relative flex-1">
+      <div class="px-3 py-2 font-mono whitespace-pre-wrap"
+           data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= refs_json(@refs[unit.id]) %>"><%= reference %></div>
+      <%# Admins edit the fr source on the key page (a new tab : the list and its unsaved edits stay) %>
+      <div class="absolute top-1 right-1 flex gap-1">
+        <% if !en_main && current_user.admin? %>
+          <%= link_to unit_path(unit), target: "_blank", title: t(".edit_source"), aria: { label: t(".edit_source") },
+                      class: "rounded border border-stone-200 bg-white p-1 text-stone-500 opacity-0 hover:text-stone-900 focus:opacity-100 group-hover/copy:opacity-100" do %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3.5 w-3.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          <% end %>
+        <% end %>
+        <%= render "shared/copy_button", text: reference %>
+      </div>
+    </div>
+    <%# One section per notice, each under a dashed line. Only the chosen reference : the fr source joins it when
+        the en no longer matches it %>
+    <div class="flex flex-col *:border-t *:border-dashed *:border-stone-200 *:px-3 *:py-1.5">
+      <% if en_main && en.outdated? %>
+        <div class="flex flex-col items-start gap-1">
+          <span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_outdated") %></span>
+          <p class="whitespace-pre-wrap text-xs text-stone-800"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
+        </div>
+      <% elsif en_missing %>
+        <p class="hidden in-[.ref-en]:block"><span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_missing") %></span></p>
+      <% end %>
+      <% if (previous = @previous_sources[unit.id]) && outdated %>
+        <p class="whitespace-pre-wrap text-xs text-stone-500"><%= "#{Language::SOURCE_CODE.upcase} " if en_main %><%= t(".before") %> <del><%= previous %></del></p>
+      <% end %>
+    </div>
+  </div>
+  <%# The subgrid's second row (extras) stays empty on this side %>
+</div>
