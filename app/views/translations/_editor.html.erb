@@ -90,7 +90,7 @@
         <% if current_user.can_review?(language) %>
           <%# Already reviewed and up to date : nothing to approve until edited (disabled and hidden like the save).
               Hidden while the text is blank, which removes the translation (i18n-text follows the edits) %>
-          <% clean_review = t&.reviewed? && !t.outdated? %>
+          <% clean_review = t&.approved? && !t.outdated? %>
           <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"), disabled: clean_review, hidden: t.nil?,
                          data: { i18n_text_target: "review", dirty_form_target: ("submit" if clean_review) },
                          class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700 disabled:hidden" %>

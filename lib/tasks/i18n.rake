@@ -28,6 +28,7 @@ namespace :i18n do
   desc "Print a single-use login link (30 min), for logging in while e-mails are off : rake i18n:login_link[email]"
   task :login_link, [:email] => :environment do |_, args|
     user = User.find_by!(email: args.fetch(:email).downcase)
+    abort "#{user.email} is disabled" if user.disabled?
     url_options = Rails.application.config.action_mailer.default_url_options || { host: "localhost", port: 3007 }
     puts Rails.application.routes.url_helpers.login_url(token: user.generate_token_for(:login), **url_options)
   end

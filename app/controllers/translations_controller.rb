@@ -105,15 +105,15 @@ class TranslationsController < ApplicationController
   end
 
   # SQL condition of each status, on the units LEFT JOIN translations of the edited language.
-  # They partition the units : an outdated translation is neither "unreviewed" nor "reviewed".
+  # They partition the units : an outdated translation is neither "not_approved" nor "approved".
   # A copied unit has none (its translations are left out of the export).
   def status_conditions
     up_to_date = "translations.source_hash = units.source_hash"
     {
-      "untranslated" => "translations.id IS NULL",
+      "not_translated" => "translations.id IS NULL",
       "outdated" => "translations.source_hash <> units.source_hash",
-      "unreviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:translated]]),
-      "reviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:reviewed]])
+      "not_approved" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:translated]]),
+      "approved" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:approved]])
     }.transform_values { |sql| "units.copied = FALSE AND #{sql}" }
   end
 

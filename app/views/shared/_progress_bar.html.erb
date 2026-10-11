@@ -1,7 +1,7 @@
 <%# A language's progress (Language.stats) : reviewed, then translated but not reviewed. Locals : stats, css (size, margins) %>
 <div class="<%= css %> overflow-hidden rounded bg-stone-200">
   <div class="flex h-full">
-    <span class="bg-emerald-600" style="width: <%= stats[:total].zero? ? 0 : 100.0 * stats[:reviewed] / stats[:total] %>%"></span>
-    <span class="bg-emerald-300" style="width: <%= stats[:total].zero? ? 0 : 100.0 * (stats[:translated] - stats[:reviewed]) / stats[:total] %>%"></span>
+    <span class="bg-emerald-600" style="width: <%= stats[:total].zero? ? 0 : 100.0 * stats[:approved] / stats[:total] %>%"></span>
+    <span class="bg-emerald-300" style="width: <%= stats[:total].zero? ? 0 : 100.0 * (stats[:translated] - stats[:approved]) / stats[:total] %>%"></span>
   </div>
 </div>

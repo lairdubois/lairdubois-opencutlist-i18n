@@ -2,7 +2,7 @@ class Translation < ApplicationRecord
   belongs_to :unit
   belongs_to :language
 
-  enum :status, { translated: 0, reviewed: 1 }
+  enum :status, { translated: 0, approved: 1 }
 
   validates :text, presence: true
   validates :language_id, uniqueness: { scope: :unit_id }

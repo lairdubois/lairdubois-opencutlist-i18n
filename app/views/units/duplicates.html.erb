@@ -40,7 +40,7 @@
           <span class="min-w-0 flex-1 whitespace-pre-wrap <%= 'text-amber-800' if group.divergent? && translation != usual %>"
                 dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= translation %></span>
         <% else %>
-          <span class="flex-1 italic text-stone-400"><%= t("status.untranslated") %></span>
+          <span class="flex-1 italic text-stone-400"><%= t("status.not_translated") %></span>
         <% end %>
         <%= link_to t(".edit"), translate_path(@language.code, at: @indexes[unit.id], focus: 1), target: "_blank",
                     class: "shrink-0 self-start rounded border border-stone-300 px-1.5 text-xs text-stone-600 hover:border-stone-400 hover:text-stone-900" %>

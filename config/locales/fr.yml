@@ -14,9 +14,9 @@ fr:
   refs:
     open_hint: "⌘-clic (Ctrl-clic) : ouvrir la clé"
   status:
-    untranslated: "non traduit"
+    not_translated: "non traduit"
     translated: "traduit"
-    reviewed: "relu"
+    approved: "approuvé"
     outdated: "FR modifié, à revoir"
     copied: "recopiée"
     copied_hint: "Rien à traduire : la source fr (un $t() ou une variable seule) est recopiée telle quelle dans chaque langue"
@@ -34,7 +34,7 @@ fr:
     source_major: "changement FR"
     note: "commentaire YAML"
     translate: "traduction"
-    review: "relecture"
+    review: "approbation"
     archive: "suppression"
     restore: "restauration"
   flash:
@@ -78,10 +78,10 @@ fr:
         user: "choisir…"
         at: "120, 120-180, 120-…"
       statuses:
-        untranslated: "Non traduites"
+        not_translated: "Non traduites"
         outdated: "À revoir"
-        unreviewed: "Non relues"
-        reviewed: "Relues"
+        not_approved: "Non approuvées"
+        approved: "Approuvées"
       questions: "Questions ouvertes"
       with: "Avec"
       questions_chip: "question ouverte"
@@ -254,7 +254,7 @@ fr:
 
   units:
     index:
-      status_hint: "Dans au moins une langue (Relues : dans toutes)"
+      status_hint: "Dans au moins une langue (Approuvées : dans toutes)"
       duplicates: "Doublons FR"
     duplicates:
       title: "Doublons FR"
@@ -349,6 +349,7 @@ fr:
         one: "Voir l'utilisateur sans filtre →"
         other: "Voir les %{count} utilisateurs sans filtre →"
       empty: "Aucun utilisateur."
+      disabled: "désactivé"
     search_bar:
       placeholder: "Rechercher un nom, un e-mail…"
       shortcuts: |
@@ -366,6 +367,7 @@ fr:
         reviewer: "Relecteurs"
         translator: "Traducteurs"
         none: "Sans langue"
+        disabled: "Désactivés"
       activity: "Actifs"
       activity_header: "Activité"
       activities:
@@ -400,6 +402,10 @@ fr:
     edit:
       destroy: "Supprimer cet utilisateur"
       destroy_confirm: "Supprimer %{name} ?"
+      disable: "Désactiver cet utilisateur"
+      disable_confirm: "Désactiver %{name} ? Il ne pourra plus se connecter ni recevoir d'e-mails ; ses langues et son historique sont conservés."
+      enable: "Réactiver cet utilisateur"
+      disabled: "désactivé"
       invite: "Renvoyer l'invitation"
       invite_confirm: "Envoyer une invitation à %{email} ?"
     create:
@@ -409,6 +415,12 @@ fr:
     invite:
       sent: "Invitation envoyée à %{email}."
       disabled: "Les envois d'e-mails sont désactivés (OCL_MAIL_ENABLED) : aucune invitation n'a été envoyée."
+      user_disabled: "Cet utilisateur est désactivé : réactive-le d'abord."
+    disable:
+      self: "Tu ne peux pas te désactiver toi-même."
+      disabled: "%{name} désactivé(e)."
+    enable:
+      enabled: "%{name} réactivé(e)."
     destroy:
       self: "Tu ne peux pas te supprimer toi-même."
       destroyed: "%{name} supprimé(e) (son historique reste attribué par nom)."

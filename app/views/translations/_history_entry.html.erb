@@ -3,8 +3,8 @@
     which shows each text's language instead. key_link : the unit's key in place of the author (a user's history) %>
 <% e = entry %>
 <% r = e.revision %>
-<% tint = { "untranslated" => "border-transparent bg-yellow-50", "unreviewed" => "border-transparent bg-sky-50",
-            "reviewed" => "border-transparent bg-emerald-50", "outdated" => "border-dashed border-orange-300 bg-orange-50 text-stone-500" } %>
+<% tint = { "not_translated" => "border-transparent bg-yellow-50", "not_approved" => "border-transparent bg-sky-50",
+            "approved" => "border-transparent bg-emerald-50", "outdated" => "border-dashed border-orange-300 bg-orange-50 text-stone-500" } %>
 <div class="rounded border px-2 py-1.5 <%= tint[e.status] || 'border-dashed border-stone-200 text-stone-500' %>">
   <%# Fixed height : the copy button (bordered) would make the row taller than the others %>
   <div class="mb-0.5 flex h-5 items-center gap-2 text-stone-500">

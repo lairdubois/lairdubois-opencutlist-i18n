@@ -7,7 +7,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by(email: params[:email].to_s.strip.downcase)
+    user = User.enabled.find_by(email: params[:email].to_s.strip.downcase)
     if user
       mail = LoginMailer.link(user)
       mail.deliver_later
@@ -21,12 +21,12 @@ class SessionsController < ApplicationController
   # Opening the link only shows a button : mail scanners and link prefetching
   # follow GET links, and must not burn the single-use token
   def show
-    @user = User.find_by_token_for(:login, params[:token])
+    @user = User.enabled.find_by_token_for(:login, params[:token])
     redirect_to(new_session_path, alert: t("sessions.invalid_link")) unless @user
   end
 
   def consume
-    user = User.find_by_token_for(:login, params[:token])
+    user = User.enabled.find_by_token_for(:login, params[:token])
     return redirect_to(new_session_path, alert: t("sessions.invalid_link")) unless user
 
     user.touch # burns the token

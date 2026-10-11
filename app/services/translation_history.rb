@@ -17,9 +17,9 @@ class TranslationHistory
     # fr change makes translations outdated. Transifex imports don't record whether they were reviewed.
     def status
       if text?
-        if deleted? then "untranslated"
-        elsif revision.kind == "review" then "reviewed"
-        else "unreviewed"
+        if deleted? then "not_translated"
+        elsif revision.kind == "review" then "approved"
+        else "not_approved"
         end
       elsif revision.kind == "source_major"
         "outdated"

@@ -18,8 +18,8 @@ class UnitList
     Translation.joins(:unit).merge(Unit.active).group(:unit_id)
                .pluck(:unit_id, Arel.sql("COUNT(*)"), Arel.sql("SUM(translations.source_hash <> units.source_hash)"),
                       Arel.sql("SUM(translations.status = #{Translation.statuses[:translated].to_i} AND #{up_to_date})"),
-                      Arel.sql("SUM(translations.status = #{Translation.statuses[:reviewed].to_i} AND #{up_to_date})"))
-               .to_h { |id, n, outdated, unreviewed, reviewed| [id, [n, outdated.to_i, unreviewed.to_i, reviewed.to_i]] }
+                      Arel.sql("SUM(translations.status = #{Translation.statuses[:approved].to_i} AND #{up_to_date})"))
+               .to_h { |id, n, outdated, not_approved, approved| [id, [n, outdated.to_i, not_approved.to_i, approved.to_i]] }
   end
 
   # Branches whose keys are all out of the translators' work, among every key (not only the listed ones) :
@@ -114,17 +114,17 @@ class UnitList
     !query.warnings? || warning_ids.include?(unit.id)
   end
 
-  # Statuses apply across every target language : "untranslated" = missing in at least one of them,
-  # but "reviewed" = reviewed and up to date in all of them. A copied unit has none (its translations are left out).
+  # Statuses apply across every target language : "not_translated" = missing in at least one of them,
+  # but "approved" = reviewed and up to date in all of them. A copied unit has none (its translations are left out).
   def status?(key, unit)
     return false if unit.copied
 
-    translated, outdated, unreviewed, reviewed = stats.fetch(unit.id, [0, 0, 0, 0])
+    translated, outdated, not_approved, approved = stats.fetch(unit.id, [0, 0, 0, 0])
     case key
-    when "untranslated" then translated < @languages
+    when "not_translated" then translated < @languages
     when "outdated" then outdated > 0
-    when "unreviewed" then unreviewed > 0
-    when "reviewed" then reviewed == @languages
+    when "not_approved" then not_approved > 0
+    when "approved" then approved == @languages
     end
   end
 

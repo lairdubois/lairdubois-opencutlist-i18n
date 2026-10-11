@@ -32,6 +32,8 @@ Rails.application.routes.draw do
   resources :users, except: [:show] do
     member do
       post :invite
+      patch :disable
+      patch :enable
       get :history
     end
   end

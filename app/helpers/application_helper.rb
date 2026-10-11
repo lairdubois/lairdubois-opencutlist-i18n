@@ -1,10 +1,10 @@
 module ApplicationHelper
   # Status dot classes, shared by the search bar filters and the translator's editor badges
   STATUS_DOTS = {
-    "untranslated" => "bg-yellow-400",
+    "not_translated" => "bg-yellow-400",
     "outdated" => "bg-orange-500",
-    "unreviewed" => "bg-sky-500",
-    "reviewed" => "bg-emerald-500"
+    "not_approved" => "bg-sky-500",
+    "approved" => "bg-emerald-500"
   }.freeze
 
   # Header sections, by the controllers their pages belong to

@@ -113,14 +113,14 @@ Weblate was evaluated and rejected.
   below it with the `.toolbar` component (`application.css`, `top: calc(3.5rem + 1px)`) : keep both in sync. It
   swallows main's `py-6` (or the repo-changed banner's `mb-4`) and spans the window through an outset border-image
   (background + bottom line).
-- Flash messages are toasts (layout, `toast_controller`), fixed under the header : a notice leaves after 5 s, an alert
+- Flash messages are toasts (layout, `toast_controller`), centered at the bottom of the window : a notice leaves after 5 s, an alert
   stays until closed ; `data-turbo-temporary` keeps them out of Turbo's cache.
 
 ## List search (translator's list and keys list)
 
 `shared/_search_bar` + `search_bar_controller` + `ListFilters`. Every change submits the GET form ; the menu shows
 each entry's count under the other filters.
-- `q` searches the texts only ; `status[]` (untranslated / outdated / unreviewed / reviewed, a partition) is OR-ed ;
+- `q` searches the texts only ; `status[]` (not_translated / outdated / not_approved / approved, a partition) is OR-ed ;
   `questions=1`, `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
   max `updated_at` + the rules file's digest. `days` = `ListFilters::PERIODS`, one at a time, a revision since then
   (same kinds as the sort on the translator's list, any on the keys list).
@@ -133,8 +133,10 @@ each entry's count under the other filters.
   `#120-180`, `key:…`, `branch:…`, `user:…` (a name or its start, `_` for a space, left in `q` unless exactly one
   matches) words of `q` move to their chip.
 - Users page : its own `users/_search_bar` (same look, same `search_bar_controller`) over `UserList` (in memory) :
-  `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language),
+  `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language, `disabled` too),
   `days` (activity, or `never`), sorts name / activity / contributions / created.
+- Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request
+  (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
 - Sort (translator's list only, `sorts:` local) : `sort` = `index` (default) / `updated` (last revision in the language
   or fr source one, `TranslationsController::SOURCE_KINDS`, never revised last), `dir`. Not a filter : its own menu,
   a sky chip whose arrow reverses it (removed by "remove all" / Shift-Esc), kept by a single `at`.

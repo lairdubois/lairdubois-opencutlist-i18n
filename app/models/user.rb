@@ -11,12 +11,20 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :reference_language, inclusion: { in: REFERENCE_LANGUAGES }
 
+  # A disabled user can't log in (their session ends at the next request) nor receives e-mails : memberships,
+  # revisions and comments are kept, re-enabling gives everything back
+  scope :enabled, -> { where(disabled_at: nil) }
+
   # Admins' GitHub user access tokens (GithubOauth)
   encrypts :github_access_token, :github_refresh_token
 
   # Single use : the token dies as soon as the user logs in (last_login_at changes)
   generates_token_for :login, expires_in: 30.minutes do
     updated_at.to_f
+  end
+
+  def disabled?
+    disabled_at.present?
   end
 
   def github_connected?

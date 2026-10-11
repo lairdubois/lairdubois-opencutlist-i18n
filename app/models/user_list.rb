@@ -1,12 +1,13 @@
 # The users page's list (UsersController#index, users/_search_bar), searched, filtered and sorted in memory
 # (a few hundred users at most). Params :
 #   q         name, e-mail, GitHub login or Transifex username (case and accents aside)
-#   role[]    OR-ed : admin, reviewer / translator (in some language, or in the picked one), none (no language, not admin)
+#   role[]    OR-ed : admin, reviewer / translator (in some language, or in the picked one), none (no language, not admin),
+#             disabled
 #   language  a language code : a membership in it, combined with AND
 #   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
 #   sort      SORTS (name by default), dir "asc" or "desc" (the sort's own direction by default)
 class UserList
-  ROLES = %w[admin reviewer translator none].freeze
+  ROLES = %w[admin reviewer translator none disabled].freeze
   ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
   # Each sort, with its default direction
   SORTS = { "name" => "asc", "activity" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
@@ -101,6 +102,7 @@ class UserList
     when "reviewer" then memberships.any?(&:reviewer?)
     when "translator" then memberships.any?(&:translator?)
     when "none" then !user.admin? && user.memberships.empty?
+    when "disabled" then user.disabled?
     end
   end
 

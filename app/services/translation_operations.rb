@@ -21,7 +21,7 @@ class TranslationOperations
 
     reviewed &&= @user.can_review?(language)
     unchanged = old_text == text && !translation.outdated?
-    status = if reviewed then :reviewed
+    status = if reviewed then :approved
     elsif unchanged then translation.status
     else :translated
     end

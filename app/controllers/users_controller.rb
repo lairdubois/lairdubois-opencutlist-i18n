@@ -1,7 +1,7 @@
 # Admins invite people and give them languages (translator or reviewer)
 class UsersController < ApplicationController
   before_action :require_admin
-  before_action :set_user, only: [:edit, :update, :destroy, :invite, :history]
+  before_action :set_user, only: [:edit, :update, :destroy, :invite, :history, :disable, :enable]
 
   HISTORY_PER_PAGE = 50
 
@@ -64,9 +64,23 @@ class UsersController < ApplicationController
   # Re-sends the invitation, e.g. when the first one got lost
   def invite
     return redirect_to(edit_user_path(@user), alert: t(".disabled")) unless ActionMailer::Base.perform_deliveries
+    return redirect_to(edit_user_path(@user), alert: t(".user_disabled")) if @user.disabled?
 
     InvitationMailer.invite(@user, current_user).deliver_later
     redirect_to edit_user_path(@user), notice: t(".sent", email: @user.email)
+  end
+
+  # Disabling keeps the user (memberships, history) but ends their access : see User.enabled
+  def disable
+    return redirect_to(edit_user_path(@user), alert: t(".self")) if @user == current_user
+
+    @user.update!(disabled_at: Time.current)
+    redirect_to edit_user_path(@user), notice: t(".disabled", name: @user.name)
+  end
+
+  def enable
+    @user.update!(disabled_at: nil)
+    redirect_to edit_user_path(@user), notice: t(".enabled", name: @user.name)
   end
 
   def destroy

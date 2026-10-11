@@ -35,10 +35,12 @@
   .tok-link { text-decoration: underline var(--color-stone-300); text-underline-offset: 2px; }
   .tok-url { color: var(--color-stone-400); }
 
-  /* Whitespace : the character keeps its width, a mark is drawn over it when html.show-ws */
+  /* Whitespace : the character keeps its width, a mark is drawn over it when html.show-ws.
+     overflow: hidden : the mark's line box (the editor's line-height) is taller than the span's box (the font's content
+     area) ; sticking out of the last line, it gave .cm-scroller (overflow auto) a few pixels of vertical scroll. */
   .ws-space, .ws-nbsp, .ws-tab { position: relative; }
   .show-ws .ws-space::before, .show-ws .ws-nbsp::before, .show-ws .ws-tab::before {
-    position: absolute; inset: 0; text-align: center; color: var(--color-stone-400); pointer-events: none;
+    position: absolute; inset: 0; overflow: hidden; text-align: center; color: var(--color-stone-400); pointer-events: none;
   }
   .show-ws .ws-space::before { content: "·"; }
   .show-ws .ws-nbsp::before { content: "°"; color: var(--color-orange-500); }

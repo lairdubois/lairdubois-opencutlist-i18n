@@ -43,12 +43,12 @@ class TransifexImport
         r.updates.each do |unit, text, username, reviewed|
           translation = unit.translations.find_or_initialize_by(language: r.language)
           old = translation.text
-          translation.update!(text: text, source_hash: unit.source_hash, status: reviewed ? :reviewed : :translated)
+          translation.update!(text: text, source_hash: unit.source_hash, status: reviewed ? :approved : :translated)
           unit.revisions.create!(kind: "import", language: r.language, old_value: old, new_value: text, author: "transifex:#{username || '?'}")
         end
         r.reviews.each do |unit|
           translation = unit.translations.find_by(language: r.language) or next
-          translation.update!(status: :reviewed)
+          translation.update!(status: :approved)
           unit.revisions.create!(kind: "review", language: r.language, new_value: translation.text, author: "transifex")
         end
       end
@@ -86,7 +86,7 @@ class TransifexImport
       reviewed = t.dig("attributes", "reviewed") || t.dig("attributes", "proofread")
       if mine.nil? || mine.text != text
         (edited_here.include?(unit.id) ? report.conflicts : report.updates) << [unit, text, username, reviewed]
-      elsif reviewed && !mine.reviewed?
+      elsif reviewed && !mine.approved?
         report.reviews << unit
       end
     end

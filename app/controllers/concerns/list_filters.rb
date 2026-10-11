@@ -18,7 +18,7 @@
 module ListFilters
   extend ActiveSupport::Concern
 
-  STATUSES = %w[untranslated outdated unreviewed reviewed].freeze
+  STATUSES = %w[outdated not_translated not_approved approved].freeze
   FIELDS = %w[key prefix user at].freeze
   # Offered periods of the days filter, in days
   PERIODS = %w[1 7 30 90].freeze

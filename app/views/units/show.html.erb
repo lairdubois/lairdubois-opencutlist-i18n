@@ -130,10 +130,10 @@
       <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
       <%= t(".translations") %>
       <%# Status counts, readable while folded. A copied key's translations are kept but not exported : no status %>
-      <% counts = @unit.copied ? {} : @languages.map { |l| (tr = @translations[l]).nil? ? "untranslated" : tr.outdated? ? "outdated" : tr.reviewed? ? "reviewed" : "unreviewed" }.tally %>
+      <% counts = @unit.copied ? {} : @languages.map { |l| (tr = @translations[l]).nil? ? "not_translated" : tr.outdated? ? "outdated" : tr.approved? ? "approved" : "not_approved" }.tally %>
       <span class="ml-auto flex items-center gap-3 text-xs font-normal text-stone-500">
         <% if @unit.copied %><span class="rounded bg-stone-200 px-1 text-stone-600"><%= t("status.copied") %></span><% end %>
-        <% %w[reviewed unreviewed outdated untranslated].each do |status| %>
+        <% %w[approved not_approved outdated not_translated].each do |status| %>
           <% next unless counts[status] %>
           <span class="flex items-center gap-1 tabular-nums" title="<%= t("shared.search_bar.statuses.#{status}") %>"><%= status_dot(status) %><%= counts[status] %></span>
         <% end %>
@@ -155,7 +155,7 @@
           <%= render "shared/copy_button", text: t.text, class: "h-fit shrink-0" %>
           <% if t.outdated? %><span class="h-fit rounded bg-orange-100 px-1.5 text-xs text-orange-800"><%= t("status.outdated") %></span><% end %>
         <% else %>
-          <span class="flex-1 text-sm italic text-stone-400"><%= t("status.untranslated") %></span>
+          <span class="flex-1 text-sm italic text-stone-400"><%= t("status.not_translated") %></span>
         <% end %>
       </div>
     <% end %>

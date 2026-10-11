@@ -21,8 +21,9 @@
     <% @list.users.each do |user| %>
       <% stat = @list.stats[user.id] %>
       <%# The whole row opens the user's page %>
-      <%= link_to edit_user_path(user), class: "flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0 hover:bg-stone-50" do %>
-        <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %></span>
+      <%# A disabled user's row is faded %>
+      <%= link_to edit_user_path(user), class: "flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0 hover:bg-stone-50 #{'opacity-50' if user.disabled?}" do %>
+        <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %><%= " (#{t('.disabled')})" if user.disabled? %></span>
         <span class="w-64 truncate text-stone-500"><%= user.email %></span>
         <span class="flex flex-1 flex-wrap gap-1">
           <% user.memberships.sort_by { |m| m.language.code }.each do |m| %>

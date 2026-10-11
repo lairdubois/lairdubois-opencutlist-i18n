@@ -1,5 +1,5 @@
 # Who hears about a comment : admins and the language's reviewers for a question,
-# everyone who already took part in the discussion otherwise. Never the author.
+# everyone who already took part in the discussion otherwise. Never the author, nor a disabled user.
 class CommentNotifier
   def initialize(comment)
     @comment = comment
@@ -15,6 +15,6 @@ class CommentNotifier
       users += User.where(admin: true)
       users += User.joins(:memberships).merge(Membership.reviewer).where(memberships: { language_id: @comment.language_id }) if @comment.language
     end
-    users.uniq - [@comment.user]
+    users.uniq.reject(&:disabled?) - [@comment.user]
   end
 end

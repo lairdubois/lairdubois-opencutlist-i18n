@@ -1,6 +1,11 @@
 <% content_for :title, "#{@user.name} · OpenCutList Localize" %>
 <%# Same band as the lists' toolbar (.toolbar in application.css) : one row, h-8 as their search bar %>
 <div class="toolbar">
-  <h1 class="mb-2 flex h-8 items-center text-lg font-semibold"><%= @user.name %></h1>
+  <h1 class="mb-2 flex h-8 items-center gap-2 text-lg font-semibold">
+    <%= @user.name %>
+    <% if @user.disabled? %>
+      <span title="<%= l(@user.disabled_at, format: :long) %>" class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-normal text-amber-800"><%= t(".disabled") %></span>
+    <% end %>
+  </h1>
 </div>
 <%= render "form" %>

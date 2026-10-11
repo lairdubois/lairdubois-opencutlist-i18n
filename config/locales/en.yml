@@ -14,9 +14,9 @@ en:
   refs:
     open_hint: "⌘-click (Ctrl-click): open the key"
   status:
-    untranslated: "untranslated"
+    not_translated: "not translated"
     translated: "translated"
-    reviewed: "approved"
+    approved: "approved"
     outdated: "FR changed, to review"
     copied: "copied"
     copied_hint: "Nothing to translate: the fr source (a $t() or a variable alone) is copied as is into every language"
@@ -34,7 +34,7 @@ en:
     source_major: "FR change"
     note: "YAML comment"
     translate: "translation"
-    review: "review"
+    review: "approval"
     archive: "deletion"
     restore: "restore"
   flash:
@@ -78,10 +78,10 @@ en:
         user: "choose…"
         at: "120, 120-180, 120-…"
       statuses:
-        untranslated: "Untranslated"
+        not_translated: "Not translated"
         outdated: "To review"
-        unreviewed: "Not reviewed"
-        reviewed: "Reviewed"
+        not_approved: "Not approved"
+        approved: "Approved"
       questions: "Open questions"
       with: "With"
       questions_chip: "open question"
@@ -254,7 +254,7 @@ en:
 
   units:
     index:
-      status_hint: "In at least one language (Reviewed: in all of them)"
+      status_hint: "In at least one language (Approved: in all of them)"
       duplicates: "FR duplicates"
     duplicates:
       title: "FR duplicates"
@@ -349,6 +349,7 @@ en:
         one: "See the user without filters →"
         other: "See the %{count} users without filters →"
       empty: "No user."
+      disabled: "disabled"
     search_bar:
       placeholder: "Search a name, an e-mail…"
       shortcuts: |
@@ -366,6 +367,7 @@ en:
         reviewer: "Reviewers"
         translator: "Translators"
         none: "Without language"
+        disabled: "Disabled"
       activity: "Active"
       activity_header: "Activity"
       activities:
@@ -400,6 +402,10 @@ en:
     edit:
       destroy: "Delete this user"
       destroy_confirm: "Delete %{name}?"
+      disable: "Disable this user"
+      disable_confirm: "Disable %{name}? They won't be able to log in or receive e-mails; their languages and history are kept."
+      enable: "Enable this user again"
+      disabled: "disabled"
       invite: "Resend the invitation"
       invite_confirm: "Send an invitation to %{email}?"
     create:
@@ -409,6 +415,12 @@ en:
     invite:
       sent: "Invitation sent to %{email}."
       disabled: "E-mail delivery is disabled (OCL_MAIL_ENABLED): no invitation was sent."
+      user_disabled: "This user is disabled: enable them again first."
+    disable:
+      self: "You can't disable yourself."
+      disabled: "%{name} disabled."
+    enable:
+      enabled: "%{name} enabled again."
     destroy:
       self: "You can't delete yourself."
       destroyed: "%{name} deleted (their history stays attributed by name)."
