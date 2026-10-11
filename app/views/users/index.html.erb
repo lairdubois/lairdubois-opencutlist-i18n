@@ -1,19 +1,44 @@
-<div class="mb-4 flex items-center">
-  <h1 class="text-lg font-semibold"><%= t("layouts.application.users") %></h1>
-  <%= link_to t(".invite"), new_user_path, class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-sm text-white" %>
+<% content_for :title, "#{t("layouts.application.users")} · OpenCutList Localize" %>
+<%# Toolbar (search, filters, sort, invite) stays on screen above the list (.toolbar in application.css) %>
+<div class="toolbar">
+  <div class="mb-2 flex flex-wrap items-start gap-3">
+    <%= render "search_bar", list: @list, languages: @languages %>
+    <%# The border matches the search bar's : same height as its first row %>
+    <%= link_to t(".invite"), new_user_path, class: "rounded border border-stone-800 bg-stone-800 px-3 py-1.5 text-sm text-white" %>
+  </div>
 </div>
-<div class="rounded border border-stone-200 bg-white text-sm">
-  <% @users.each do |user| %>
-    <div class="flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
-      <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %></span>
-      <span class="w-64 text-stone-500"><%= user.email %></span>
-      <span class="flex flex-1 flex-wrap gap-1">
-        <% user.memberships.each do |m| %>
-          <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
-        <% end %>
-      </span>
-      <%= link_to t(".edit"), edit_user_path(user), class: "text-stone-600 underline" %>
-    </div>
-  <% end %>
-</div>
-<p class="mt-2 text-xs text-stone-500"><%= t(".legend") %></p>
+<% if @list.users.empty? %>
+  <p class="text-sm text-stone-500">
+    <% if @list.filtered? && @list.counts[:searched].positive? %>
+      <%= t(".filtered") %>
+      <%= link_to t(".show_unfiltered", count: @list.counts[:searched]), users_path(q: params[:q]), class: "text-stone-900 underline" %>
+    <% else %>
+      <%= t(".empty") %>
+    <% end %>
+  </p>
+<% else %>
+  <div class="rounded border border-stone-200 bg-white text-sm">
+    <% @list.users.each do |user| %>
+      <% stat = @list.stats[user.id] %>
+      <div class="flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
+        <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %></span>
+        <span class="w-64 truncate text-stone-500"><%= user.email %></span>
+        <span class="flex flex-1 flex-wrap gap-1">
+          <% user.memberships.sort_by { |m| m.language.code }.each do |m| %>
+            <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
+          <% end %>
+        </span>
+        <span class="w-56 text-right text-xs text-stone-400 tabular-nums">
+          <% if stat %>
+            <%= t(".contributions", count: stat.count, formatted: number_with_delimiter(stat.count)) %> ·
+            <time datetime="<%= stat.last_at.iso8601 %>" title="<%= l(stat.last_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(stat.last_at)) %></time>
+          <% else %>
+            <%= t(".no_contribution") %>
+          <% end %>
+        </span>
+        <%= link_to t(".edit"), edit_user_path(user), class: "text-stone-600 underline" %>
+      </div>
+    <% end %>
+  </div>
+  <p class="mt-2 text-xs text-stone-500"><%= t(".legend") %></p>
+<% end %>

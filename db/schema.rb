@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_090000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -131,6 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_090000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "translatable", default: true, null: false
+    t.boolean "copied", default: false, null: false
     t.index ["key"], name: "index_units_on_key", unique: true, where: "archived_at IS NULL"
   end
 

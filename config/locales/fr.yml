@@ -11,11 +11,15 @@ fr:
       other: "%{count} modifications non enregistrées"
     save_shortcut: "⌘/Ctrl + Entrée"
     review_shortcut: "⌘/Ctrl + Maj + Entrée"
+  refs:
+    open_hint: "⌘-clic (Ctrl-clic) : ouvrir la clé"
   status:
     untranslated: "non traduit"
     translated: "traduit"
     reviewed: "relu"
     outdated: "FR modifié, à revoir"
+    copied: "recopiée"
+    copied_hint: "Rien à traduire : la source fr (un $t() ou une variable seule) est recopiée telle quelle dans chaque langue"
     outdated_count:
       one: "%{count} à revoir"
       other: "%{count} à revoir"
@@ -83,8 +87,14 @@ fr:
       questions_chip: "question ouverte"
       warnings: "Avertissements"
       warnings_chip: "avertissement"
-      notranslate: "Clés @no-translate"
-      notranslate_chip: "@no-translate"
+      notranslates:
+        "1": "Clés hors traduction"
+        directive: "dont @no-translate"
+        copied: "dont recopiées"
+      notranslate_chips:
+        "1": "hors traduction"
+        directive: "@no-translate"
+        copied: "recopiée"
       days_header: "Modifiées dans les…"
       days_chip: "Modifiées dans les"
       periods:
@@ -164,6 +174,7 @@ fr:
       reference: "Référence :"
       show_whitespace: "Afficher les espaces et retours à la ligne"
       show_keys: "Toujours afficher les noms des clés"
+      switch_language: "Changer de langue"
       pretranslate:
         one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
         other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
@@ -172,13 +183,14 @@ fr:
       never_revised: "jamais modifiée"
     reference:
       source: "source"
+      edit_source: "Éditer le FR"
       en_outdated: "EN obsolète, le FR fait foi"
       en_missing: "EN manquant"
       before: "avant :"
     editor:
       saved: "enregistré"
       save: "Enregistrer"
-      save_and_review: "Valider"
+      save_and_review: "Approuver"
       machine: "Proposition :"
       same_text: "Même texte ailleurs :"
       history: "Historique"
@@ -241,7 +253,6 @@ fr:
 
   units:
     index:
-      title: "Clés"
       status_hint: "Dans au moins une langue (Relues : dans toutes)"
       duplicates: "Doublons FR"
     duplicates:
@@ -255,6 +266,7 @@ fr:
         one: "%{count} clé"
         other: "%{count} clés"
       divergent: "traductions différentes"
+      edit: "Éditer"
     node:
       note: "commentaire"
       note_placeholder: "# commentaire YAML, @no-translate pour retirer la branche de la traduction"
@@ -285,6 +297,7 @@ fr:
       note: "Commentaire YAML"
       note_hint: "Écrit au-dessus de la clé dans chaque fichier de langue, sans le « # ». Vide = aucun. Une ligne @no-translate retire la clé du travail des traducteurs, @translate l'y remet dans une branche @no-translate."
       notranslate_self: "hors du travail des traducteurs (commentaire de la clé)"
+      copied: "hors du travail des traducteurs : la source fr (un $t() ou une variable seule) est recopiée telle quelle dans chaque langue, ses traductions ne sont plus exportées. Une ligne @translate dans le commentaire de la clé la remet en traduction."
       notranslate_branch_html: "hors du travail des traducteurs (commentaire de la branche %{path})"
       minor: "Correction mineure : garder les traductions"
       major: "Changement de sens : traductions à revoir"
@@ -323,20 +336,65 @@ fr:
 
   users:
     index:
-      invite: "Inviter"
+      invite: "Ajouter un nouveau"
       edit: "Modifier"
       legend: "✓ = relecteur pour la langue"
+      contributions:
+        one: "%{formatted} contribution"
+        other: "%{formatted} contributions"
+      ago: "il y a %{time}"
+      no_contribution: "aucune contribution"
+      filtered: "Aucun utilisateur avec ces filtres."
+      show_unfiltered:
+        one: "Voir l'utilisateur sans filtre →"
+        other: "Voir les %{count} utilisateurs sans filtre →"
+      empty: "Aucun utilisateur."
+    search_bar:
+      placeholder: "Rechercher un nom, un e-mail…"
+      shortcuts: |
+        ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
+        Entrée : rechercher (nom, e-mail, login GitHub ou Transifex)
+        Échap : quitter le champ
+        Maj + Échap : tout effacer, texte, filtres et tri
+      count:
+        one: "%{count} utilisateur"
+        other: "%{count} utilisateurs"
+      language: "Langue"
+      role: "Rôle"
+      roles:
+        admin: "Administrateurs"
+        reviewer: "Relecteurs"
+        translator: "Traducteurs"
+        none: "Sans langue"
+      activity: "Actifs"
+      activity_header: "Activité"
+      activities:
+        "1": "dans les dernières 24 heures"
+        "7": "dans les 7 derniers jours"
+        "30": "dans les 30 derniers jours"
+        "90": "dans les 90 derniers jours"
+        never: "jamais"
+      sorts:
+        name: "nom"
+        activity: "dernière activité"
+        contributions: "nombre de contributions"
+        created: "date d'invitation"
     form:
       admin: "Administrateur (toutes les langues + gestion des clés)"
       languages: "Langues"
-      send_link: "Envoyer un lien de connexion"
+      send_invitation: "Envoyer une invitation par e-mail"
     edit:
       destroy: "Supprimer cet utilisateur"
       destroy_confirm: "Supprimer %{name} ?"
+      invite: "Renvoyer l'invitation"
+      invite_confirm: "Envoyer une invitation à %{email} ?"
     create:
       created: "%{name} ajouté(e)."
     update:
       updated: "%{name} mis(e) à jour."
+    invite:
+      sent: "Invitation envoyée à %{email}."
+      disabled: "Les envois d'e-mails sont désactivés (OCL_MAIL_ENABLED) : aucune invitation n'a été envoyée."
     destroy:
       self: "Tu ne peux pas te supprimer toi-même."
       destroyed: "%{name} supprimé(e) (son historique reste attribué par nom)."
@@ -470,7 +528,7 @@ fr:
       apply_confirm: "Appliquer l'import Transifex ?"
     roster:
       title: "Traducteurs Transifex"
-      intro: "Transifex ne fournit pas les e-mails : saisis ceux que tu connais, chaque personne reçoit un lien de connexion avec ses langues et son rôle."
+      intro: "Transifex ne fournit pas les e-mails : saisis ceux que tu connais, chaque personne reçoit une invitation avec ses langues et son rôle."
       invited: "invité : %{email}"
     apply:
       applied: "Import Transifex appliqué : %{texts} texte(s), %{reviews} statut(s) relu."
@@ -481,10 +539,21 @@ fr:
 
   login_mailer:
     link:
-      subject: "Connexion à OCL Localize"
+      subject: "Connexion à OpenCutList Localize"
       hello: "Bonjour %{name},"
-      body: "Voici ton lien de connexion à OCL Localize (valable 30 minutes, une seule fois) :"
+      body: "Voici ton lien de connexion à Localize (valable 30 minutes, une seule fois) :"
       ignore: "Si tu n'as rien demandé, ignore ce message."
+  invitation_mailer:
+    invite:
+      subject: "Invitation à traduire OpenCutList"
+      hello: "Bonjour %{name},"
+      invited: "%{inviter} t'invite à participer à la traduction d'OpenCutList sur Localize."
+      admin: "Tu es administrateur : toutes les langues et la gestion des clés."
+      languages: "Tes langues :"
+      language: "- %{language} : %{role}"
+      how: "Pour te connecter, va sur Localize :"
+      email: "et saisis ton adresse e-mail : %{email}"
+      magic_link: "Il n'y a pas de mot de passe : tu recevras à cette adresse un lien de connexion, valable 30 minutes et utilisable une seule fois. Refais la même chose chaque fois que tu dois te reconnecter."
   comment_mailer:
     posted:
       subject_question: "Question sur %{key}"

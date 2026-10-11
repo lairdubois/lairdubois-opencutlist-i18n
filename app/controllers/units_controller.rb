@@ -3,6 +3,8 @@ class UnitsController < ApplicationController
 
   PER_PAGE = 200
 
+  helper_method :ref_url
+
   before_action :require_admin
   before_action :set_unit, only: [:show, :history, :rename, :source, :note, :archive]
 
@@ -40,6 +42,8 @@ class UnitsController < ApplicationController
     @language = @languages.find { |l| l.code == params[:lang] } || @languages.find { |l| l.code == "en" } || @languages.first
     @duplicates = SourceDuplicates.new(@language)
     @groups = params[:divergent] == "1" ? @duplicates.divergent : @duplicates.groups
+    # Each key's "edit" link opens it alone in the language's translator's list (?at=index)
+    @indexes = Unit.tree_indexes(@groups.flat_map { |g| g.units.map(&:id) })
   end
 
   def show
@@ -51,9 +55,9 @@ class UnitsController < ApplicationController
 
     @translations = @unit.translations.includes(:language).index_by(&:language)
     @languages = Language.targets
-    @refs = Unit.ref_texts([@unit])[@unit.id]
+    @refs = Unit.refs([@unit])[@unit.id]
     @history_count = @unit.revisions.count
-    @notranslate_source = Unit.directive_source(@unit.key, @unit.note, BranchNote.to_map) unless @unit.translatable
+    @notranslate_source = Unit.directive_source(@unit.key, @unit.note, BranchNote.to_map) unless @unit.translatable || @unit.copied
     return if @unit.archived_at # out of the tree
 
     # Walked within the keys list the page was opened from (a single index aside : it lists one key)
@@ -94,6 +98,11 @@ class UnitsController < ApplicationController
   end
 
   private
+
+  # A $t() key, alone in the keys list (a key page has no edited language)
+  def ref_url(ref)
+    units_path(at: ref.index)
+  end
 
   def units_list_url
     session[:units_list_url].presence || units_path

@@ -4,6 +4,25 @@
 <%# Spans the row's 2 subgrid rows (box, extras) so its box shares the height of its neighbours %>
 <%# group : the frame's parts follow the form's unsaved state (dirty-form) %>
 <%= turbo_frame_tag dom_id(unit, language.code), class: "group row-span-2 grid min-w-0 grid-rows-subgrid" do %>
+  <%# Copied as is into every language (Unit::COPIED_SOURCE) : read-only, what the export writes %>
+  <% if unit.copied %>
+    <div class="flex min-w-0 flex-col border-y border-stone-200 bg-stone-50 md:border-l">
+      <p class="flex-1 px-3 py-2 font-mono text-sm whitespace-pre-wrap text-stone-500" dir="ltr"><%= unit.source_text %></p>
+      <%# Under a dashed line, as the editor's warnings, in a neutral tone (an information) %>
+      <div class="flex flex-col gap-1 border-t border-dashed border-stone-200 px-3 py-1.5">
+        <p class="flex items-start gap-1 text-xs text-stone-500">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+          </svg>
+          <%= t("status.copied_hint") %>
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 px-3 py-1.5">
+      <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+                                    question: data[:open_questions].include?(unit.id) %>
+    </div>
+  <% else %>
   <%# hidden : the streams stay out of the frame's grid until Turbo performs and drops them %>
   <% if local_assigns[:saved] %>
     <div hidden>
@@ -16,7 +35,8 @@
   <% end %>
   <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
   <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
-                data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: @ref_texts[unit.id].to_json } do %>
+                data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: refs_json(@refs[unit.id]),
+                        i18n_text_autofocus_value: local_assigns[:autofocus] } do %>
     <%# The box : the editor, then the proposals under it, so they grow the row (the source box beside follows).
         Its background, the translation's status (or unsaved), runs under both %>
     <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.outdated? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
@@ -77,5 +97,6 @@
         <% end %>
       </div>
     </div>
+  <% end %>
   <% end %>
 <% end %>

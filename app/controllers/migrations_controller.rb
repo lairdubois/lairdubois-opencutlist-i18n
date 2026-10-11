@@ -47,7 +47,7 @@ class MigrationsController < ApplicationController
         membership = user.memberships.find_or_initialize_by(language: languages.fetch(code))
         membership.update!(role: membership.reviewer? ? "reviewer" : role)
       end
-      LoginMailer.link(user).deliver_later
+      InvitationMailer.invite(user, current_user).deliver_later
       created += 1
     end
     redirect_to migration_roster_path, notice: t(".sent", count: created)

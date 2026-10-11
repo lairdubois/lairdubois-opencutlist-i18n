@@ -1,10 +1,11 @@
 # Admins invite people and give them languages (translator or reviewer)
 class UsersController < ApplicationController
   before_action :require_admin
-  before_action :set_user, only: [:edit, :update, :destroy]
+  before_action :set_user, only: [:edit, :update, :destroy, :invite]
 
   def index
-    @users = User.includes(memberships: :language).order(:name)
+    @list = UserList.new(params)
+    @languages = Language.targets
   end
 
   def new
@@ -15,7 +16,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       save_memberships
-      LoginMailer.link(@user).deliver_later if params[:send_link] == "1"
+      InvitationMailer.invite(@user, current_user).deliver_later if params[:send_invitation] == "1"
       redirect_to users_path, notice: t(".created", name: @user.name)
     else
       render :new, status: :unprocessable_entity
@@ -32,6 +33,14 @@ class UsersController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  # Re-sends the invitation, e.g. when the first one got lost
+  def invite
+    return redirect_to(edit_user_path(@user), alert: t(".disabled")) unless ActionMailer::Base.perform_deliveries
+
+    InvitationMailer.invite(@user, current_user).deliver_later
+    redirect_to edit_user_path(@user), notice: t(".sent", email: @user.email)
   end
 
   def destroy

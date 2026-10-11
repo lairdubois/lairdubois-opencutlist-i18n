@@ -7,6 +7,9 @@ class Unit < ApplicationRecord
   # A line of a key's or a branch's note : "@no-translate" takes the key (or the whole branch) out of the
   # translators' work, "@translate" puts it back inside such a branch. The closest one wins.
   DIRECTIVE = /\A\s*@(no-)?translate\s*\z/
+  # A fr source holding nothing to translate : a $t(key) or a {{ var }} alone. Copied as is into every language
+  # (YamlExport), out of the translators' work unless the key's own note says @translate.
+  COPIED_SOURCE = /\A\s*(\$t\([^()\n]*\)|\{\{-?\s*[\w.]+\s*-?\}\})\s*\z/
 
   has_many :translations, dependent: :destroy
   has_many :revisions, dependent: :destroy
@@ -23,12 +26,25 @@ class Unit < ApplicationRecord
   default_scope { order(:position) }
   scope :active, -> { where(archived_at: nil) }
   scope :translatable, -> { where(translatable: true) }
+  scope :copied, -> { where(copied: true) }
 
-  # unit id => { key => fr text } of the $t(key) in each source (tooltips in the text views)
-  def self.ref_texts(units)
+  # A $t(key) of a source : the key's fr text (tooltip in the text views), its index in the flattened tree
+  # and whether translators work on it (Mod-click opens it, ApplicationHelper#refs_json)
+  Ref = Data.define(:text, :index, :translatable)
+
+  # unit id => { key => Ref } of the $t(key) in each source
+  def self.refs(units)
     keys = units.to_h { |u| [u.id, u.source_text.to_s.scan(/\$t\(([^),\n]+)/).flatten.map(&:strip).uniq] }
-    texts = active.where(key: keys.values.flatten.uniq).pluck(:key, :source_text).to_h
-    keys.transform_values { |k| texts.slice(*k) }
+    targets = active.reorder(nil).where(key: keys.values.flatten.uniq).pluck(:key, :id, :source_text, :translatable)
+    indexes = tree_indexes(targets.map { |row| row[1] })
+    refs = targets.to_h { |key, id, text, translatable| [key, Ref.new(text:, index: indexes[id], translatable:)] }
+    keys.transform_values { |k| refs.slice(*k) }
+  end
+
+  # id => 1-based index in the flattened tree (positions can have gaps and ties), of the given active units
+  def self.tree_indexes(ids)
+    ranked = active.reorder(nil).select("units.id, ROW_NUMBER() OVER (ORDER BY units.position, units.id) AS idx")
+    unscoped.from(ranked, :units).where(id: ids).pluck(:id, :idx).to_h
   end
 
   # true (@translate), false (@no-translate) or nil (no directive) : the note's last directive line
@@ -51,13 +67,21 @@ class Unit < ApplicationRecord
     source.nil? || directive(source == :self ? note : branch_notes[source])
   end
 
-  # Recomputes the translatable flag of the active units, under a branch (or the key itself) or all of them
+  # Nothing to translate, copied : wins over a @no-translate (copying is always right), not over the key's own @translate
+  def self.copied?(source_text, note)
+    source_text.to_s.match?(COPIED_SOURCE) && directive(note) != true
+  end
+
+  # Recomputes the translatable and copied flags of the active units, under a branch (or the key itself) or all of them
   def self.refresh_translatable!(prefix = nil)
     branch_notes = BranchNote.to_map
     scope = active.reorder(nil)
     scope = scope.where("key = :p OR key LIKE :like ESCAPE '\\'", p: prefix, like: "#{sanitize_sql_like(prefix)}.%") if prefix
-    ids = scope.pluck(:id, :key, :note).group_by { |_, key, note| translatable?(key, note, branch_notes) }.transform_values { |rows| rows.map(&:first) }
-    ids.each { |value, unit_ids| where(id: unit_ids).update_all(translatable: value) }
+    flags = scope.pluck(:id, :key, :note, :source_text).group_by do |_, key, note, text|
+      copied = copied?(text, note)
+      [!copied && translatable?(key, note, branch_notes), copied]
+    end
+    flags.each { |(translatable, copied), rows| where(id: rows.map(&:first)).update_all(translatable: translatable, copied: copied) }
   end
 
   def self.hash_text(text)

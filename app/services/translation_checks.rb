@@ -45,7 +45,8 @@ class TranslationChecks
   # (no bulk write touches a text without its updated_at) or these rules do.
   def self.unit_ids(language = nil)
     units = Unit.active.reorder(nil)
-    translations = Translation.joins(:unit).merge(units)
+    # A copied key's translations are left out of the export
+    translations = Translation.joins(:unit).merge(units.where(copied: false))
     translations = translations.where(language: language) if language
     fingerprint = [units, translations].map { |scope| scope.pick(Arel.sql("COUNT(*)"), Arel.sql("MAX(#{scope.table_name}.updated_at)")) }
     Rails.cache.fetch(["translation_checks", RULES_DIGEST, language&.id, fingerprint]) do

@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Search bar (shared/_search_bar) : every change submits its GET form, which reloads the list.
-// Field chips (key, branch, user, index) are rendered hidden and disabled until picked in the filters menu ;
-// the user one holds a list of names (a popover) filling a hidden field, submitted as soon as a name is picked ;
+// Field chips (key, branch, user, index ; language on the users page) are rendered hidden and disabled until picked
+// in the filters menu ; a list chip (user, language) holds a list (a popover) filling a hidden field, submitted as soon
+// as an entry is picked ;
 // a status, the questions / warnings flag or the period is a hidden input inside its chip, so removing the chip drops it.
 // A single index (no "-") is exclusive : applying it drops every other filter, any other change drops it.
 // A range mixes with the rest.
@@ -65,9 +66,11 @@ export default class extends Controller {
     return origin
   }
 
-  // Returns false when a user keyword matches no name
+  // Returns false when a user keyword matches no name, or the list has no such chip (users page)
   fill(name, value) {
     const chip = this.fieldTargets.find((c) => c.dataset.name === name)
+    if (!chip) return false
+
     const input = chip.querySelector("input")
     if (name === "user") {
       value = this.userId(chip, value)
@@ -131,7 +134,7 @@ export default class extends Controller {
     this.submit()
   }
 
-  // Shows a field chip and focuses its input, or opens its list of names
+  // Shows a field chip and focuses its input, or opens its list
   add({ params: { name } }) {
     const chip = this.fieldTargets.find((c) => c.dataset.name === name)
     const input = chip.querySelector("input")
@@ -139,15 +142,17 @@ export default class extends Controller {
     input.disabled = false
     this.chipsTarget.hidden = false
     this.menuTarget.hidePopover()
-    if (name === "user") {
-      chip.querySelector("[popover]").showPopover()
+    const list = chip.querySelector("[popover]")
+    if (list) {
+      list.showPopover()
     } else {
       input.focus()
     }
   }
 
-  pickUser({ params: { id } }) {
-    const input = this.fieldTargets.find((c) => c.dataset.name === "user").querySelector("input")
+  // An entry of a list chip
+  pick({ params: { name, id } }) {
+    const input = this.fieldTargets.find((c) => c.dataset.name === name).querySelector("input")
     input.value = id
     input.disabled = false
     this.submit()
@@ -178,8 +183,8 @@ export default class extends Controller {
     items[(next + items.length) % items.length].focus()
   }
 
-  // The list of names closed without a pick : an empty chip goes away, as a field left empty (drop)
-  userToggled(event) {
+  // A list chip's list closed without a pick : an empty chip goes away, as a field left empty (drop)
+  listToggled(event) {
     if (event.newState !== "closed") return
 
     const chip = event.target.closest("[data-chip]")

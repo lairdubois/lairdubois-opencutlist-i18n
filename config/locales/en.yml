@@ -11,11 +11,15 @@ en:
       other: "%{count} unsaved changes"
     save_shortcut: "⌘/Ctrl + Enter"
     review_shortcut: "⌘/Ctrl + Shift + Enter"
+  refs:
+    open_hint: "⌘-click (Ctrl-click): open the key"
   status:
     untranslated: "untranslated"
     translated: "translated"
-    reviewed: "reviewed"
+    reviewed: "approved"
     outdated: "FR changed, to review"
+    copied: "copied"
+    copied_hint: "Nothing to translate: the fr source (a $t() or a variable alone) is copied as is into every language"
     outdated_count:
       one: "%{count} to review"
       other: "%{count} to review"
@@ -83,8 +87,14 @@ en:
       questions_chip: "open question"
       warnings: "Warnings"
       warnings_chip: "warning"
-      notranslate: "@no-translate keys"
-      notranslate_chip: "@no-translate"
+      notranslates:
+        "1": "Keys out of translation"
+        directive: "of which @no-translate"
+        copied: "of which copied"
+      notranslate_chips:
+        "1": "out of translation"
+        directive: "@no-translate"
+        copied: "copied"
       days_header: "Changed in the…"
       days_chip: "Changed in the"
       periods:
@@ -164,6 +174,7 @@ en:
       reference: "Reference:"
       show_whitespace: "Show spaces and line breaks"
       show_keys: "Always show the key names"
+      switch_language: "Switch language"
       pretranslate:
         one: "🤖 Suggest translations (%{language}) for the first string to do"
         other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
@@ -172,6 +183,7 @@ en:
       never_revised: "never changed"
     reference:
       source: "source"
+      edit_source: "Edit FR"
       en_outdated: "EN outdated, FR prevails"
       en_missing: "EN missing"
       before: "before:"
@@ -241,7 +253,6 @@ en:
 
   units:
     index:
-      title: "Keys"
       status_hint: "In at least one language (Reviewed: in all of them)"
       duplicates: "FR duplicates"
     duplicates:
@@ -255,6 +266,7 @@ en:
         one: "%{count} key"
         other: "%{count} keys"
       divergent: "different translations"
+      edit: "Edit"
     node:
       note: "comment"
       note_placeholder: "# YAML comment, @no-translate to take the branch out of translation"
@@ -285,6 +297,7 @@ en:
       note: "YAML comment"
       note_hint: "Written above the key in every language file, without the \"#\". Empty = none. A @no-translate line takes the key out of the translators' work, @translate puts it back inside a @no-translate branch."
       notranslate_self: "out of the translators' work (the key's comment)"
+      copied: "out of the translators' work: the fr source (a $t() or a variable alone) is copied as is into every language, its translations are no longer exported. A @translate line in the key's comment puts it back into translation."
       notranslate_branch_html: "out of the translators' work (comment of the branch %{path})"
       minor: "Minor fix: keep the translations"
       major: "Meaning changed: translations to review"
@@ -323,20 +336,65 @@ en:
 
   users:
     index:
-      invite: "Invite"
+      invite: "Add new"
       edit: "Edit"
       legend: "✓ = reviewer for the language"
+      contributions:
+        one: "%{formatted} contribution"
+        other: "%{formatted} contributions"
+      ago: "%{time} ago"
+      no_contribution: "no contribution"
+      filtered: "No user with these filters."
+      show_unfiltered:
+        one: "See the user without filters →"
+        other: "See the %{count} users without filters →"
+      empty: "No user."
+    search_bar:
+      placeholder: "Search a name, an e-mail…"
+      shortcuts: |
+        ⌘/Ctrl + F: go to the search (twice: the browser's find)
+        Enter: search (name, e-mail, GitHub or Transifex login)
+        Esc: leave the field
+        Shift + Esc: clear everything, text, filters and sort
+      count:
+        one: "%{count} user"
+        other: "%{count} users"
+      language: "Language"
+      role: "Role"
+      roles:
+        admin: "Administrators"
+        reviewer: "Reviewers"
+        translator: "Translators"
+        none: "Without language"
+      activity: "Active"
+      activity_header: "Activity"
+      activities:
+        "1": "in the last 24 hours"
+        "7": "in the last 7 days"
+        "30": "in the last 30 days"
+        "90": "in the last 90 days"
+        never: "never"
+      sorts:
+        name: "name"
+        activity: "last activity"
+        contributions: "number of contributions"
+        created: "invitation date"
     form:
       admin: "Administrator (every language + key management)"
       languages: "Languages"
-      send_link: "Send a login link"
+      send_invitation: "Send an invitation e-mail"
     edit:
       destroy: "Delete this user"
       destroy_confirm: "Delete %{name}?"
+      invite: "Resend the invitation"
+      invite_confirm: "Send an invitation to %{email}?"
     create:
       created: "%{name} added."
     update:
       updated: "%{name} updated."
+    invite:
+      sent: "Invitation sent to %{email}."
+      disabled: "E-mail delivery is disabled (OCL_MAIL_ENABLED): no invitation was sent."
     destroy:
       self: "You can't delete yourself."
       destroyed: "%{name} deleted (their history stays attributed by name)."
@@ -470,7 +528,7 @@ en:
       apply_confirm: "Apply the Transifex import?"
     roster:
       title: "Transifex translators"
-      intro: "Transifex doesn't provide e-mails: enter the ones you know, each person receives a login link with their languages and role."
+      intro: "Transifex doesn't provide e-mails: enter the ones you know, each person receives an invitation with their languages and role."
       invited: "invited: %{email}"
     apply:
       applied: "Transifex import applied: %{texts} text(s), %{reviews} review status(es)."
@@ -481,10 +539,21 @@ en:
 
   login_mailer:
     link:
-      subject: "Log in to OCL Localize"
+      subject: "Log in to OpenCutList Localize"
       hello: "Hello %{name},"
-      body: "Here is your login link to OCL Localize (valid for 30 minutes, single use):"
+      body: "Here is your login link to Localize (valid for 30 minutes, single use):"
       ignore: "If you didn't ask for anything, ignore this message."
+  invitation_mailer:
+    invite:
+      subject: "Invitation to translate OpenCutList"
+      hello: "Hello %{name},"
+      invited: "%{inviter} invites you to help translate OpenCutList on Localize."
+      admin: "You are an administrator: every language and key management."
+      languages: "Your languages:"
+      language: "- %{language}: %{role}"
+      how: "To log in, go to Localize:"
+      email: "and enter your e-mail address: %{email}"
+      magic_link: "There is no password: you will receive a login link at this address, valid for 30 minutes and usable once. Do the same whenever you need to log in again."
   comment_mailer:
     posted:
       subject_question: "Question about %{key}"

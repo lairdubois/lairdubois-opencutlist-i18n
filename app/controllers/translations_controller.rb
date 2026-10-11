@@ -5,6 +5,14 @@ class TranslationsController < ApplicationController
   PER_PAGE = 40
   # fr source revisions (no language) counting as a change for every language, in the sort by date
   SOURCE_KINDS = %w[import create source_minor source_major].freeze
+  # SQL condition of each notranslate value (ListFilters::NOTRANSLATE)
+  NOTRANSLATE_CONDITIONS = {
+    "1" => "units.translatable = FALSE",
+    "directive" => "units.translatable = FALSE AND units.copied = FALSE",
+    "copied" => "units.copied = TRUE"
+  }.freeze
+
+  helper_method :ref_url
 
   before_action :set_language
   before_action :set_reference, only: [:index]
@@ -35,12 +43,19 @@ class TranslationsController < ApplicationController
     # Shown on the rows when sorted by date
     @revised_at = @units.to_h { |u| [u.id, ActiveRecord::Type.lookup(:datetime).deserialize(u.attributes["revised_at"])&.in_time_zone] } if list_sort == "updated"
     # Infinite scroll : the next page is loaded into the lazy frame at the bottom of the list
-    render partial: "page_frame" if turbo_frame_request?
+    return render partial: "page_frame" if turbo_frame_request?
+
+    # The language switch, with each one's progress
+    languages = current_user.editable_languages.to_a
+    @language_stats = Language.stats(languages) if languages.size > 1
   end
 
   def update
+    # Copied as is into every language : nothing to save (the editor is read-only)
+    return head :unprocessable_content if @unit.copied
+
     operations.save(@unit, @language, params[:text], reviewed: params[:reviewed] == "1")
-    @ref_texts = Unit.ref_texts([@unit])
+    @refs = Unit.refs([@unit])
     render partial: "editor", locals: { unit: @unit, language: @language, data: preload_language(@language, [@unit]), saved: true }
   end
 
@@ -63,21 +78,26 @@ class TranslationsController < ApplicationController
     @en_reference = @en.present? && current_user.reference_language == "en"
   end
 
-  # Keys out of the translators' work (@no-translate) : admins only
+  # A $t() key, alone in this language's list : none for a translator when out of their work
+  def ref_url(ref)
+    translate_path(@language.code, at: ref.index) if ref.translatable || current_user.admin?
+  end
+
+  # Keys out of the translators' work (@no-translate, copied) : admins only
   def set_unit
     @unit = (current_user.admin? ? Unit.active : Unit.active.translatable).find(params[:unit_id])
   end
 
-  # The @no-translate keys instead of the others : an admin's filter
+  # The keys out of the translators' work instead of the others : an admin's filter
   def notranslate?
     current_user.admin? && list_query.notranslate?
   end
 
-  # The translators' keys, or (notranslate) the others. An admin's single index shows its key either way.
+  # The translators' keys, or (notranslate) the picked kind of the others. An admin's single index shows its key either way.
   def translatable_condition
     return "1 = 1" if single_index? && current_user.admin?
 
-    Unit.sanitize_sql_array(["units.translatable = ?", !notranslate?])
+    notranslate? ? NOTRANSLATE_CONDITIONS.fetch(list_query.notranslate) : "units.translatable = TRUE"
   end
 
   def operations
@@ -86,6 +106,7 @@ class TranslationsController < ApplicationController
 
   # SQL condition of each status, on the units LEFT JOIN translations of the edited language.
   # They partition the units : an outdated translation is neither "unreviewed" nor "reviewed".
+  # A copied unit has none (its translations are left out of the export).
   def status_conditions
     up_to_date = "translations.source_hash = units.source_hash"
     {
@@ -93,7 +114,7 @@ class TranslationsController < ApplicationController
       "outdated" => "translations.source_hash <> units.source_hash",
       "unreviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:translated]]),
       "reviewed" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:reviewed]])
-    }
+    }.transform_values { |sql| "units.copied = FALSE AND #{sql}" }
   end
 
   # Checked statuses, OR-ed (none = every unit)
@@ -142,7 +163,9 @@ class TranslationsController < ApplicationController
                          .merge(PERIODS.to_h { |days| ["days_#{days}", "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND #{period_condition(days.to_i)}"] })
                          .merge(list: others, searched: "1 = 1")
                          .transform_values { |sql| "(#{sql}) AND #{translatable_condition}" }
-    conditions["notranslate"] = "#{others} AND units.translatable = FALSE" if current_user.admin?
+    if current_user.admin?
+      NOTRANSLATE_CONDITIONS.each { |value, sql| conditions[value == "1" ? "notranslate" : "notranslate_#{value}"] = "#{others} AND #{sql}" }
+    end
     counts = scope.reorder(nil).pick(*conditions.values.map { |sql| Arel.sql("COUNT(CASE WHEN #{sql} THEN 1 END)") })
     conditions.keys.zip(counts || Array.new(conditions.size, 0)).to_h
   end
@@ -209,10 +232,8 @@ class TranslationsController < ApplicationController
   def preload_rows(units)
     ids = units.map(&:id)
     @data = preload_language(@language, units)
-    # 1-based index of the key in the flattened tree (positions can have gaps and ties)
-    ranked = Unit.active.reorder(nil).select("units.id, ROW_NUMBER() OVER (ORDER BY units.position, units.id) AS idx")
-    @indexes = Unit.unscoped.from(ranked, :units).where(id: ids).pluck(:id, :idx).to_h
-    @ref_texts = Unit.ref_texts(units)
+    @indexes = Unit.tree_indexes(ids)
+    @refs = Unit.refs(units)
     @references = @en ? Translation.where(unit_id: ids, language: @en).includes(:unit).index_by(&:unit_id) : {}
     # Previous fr text, to show what changed on an outdated translation
     @previous_sources = Revision.where(unit_id: ids, kind: "source_major").group(:unit_id).maximum(:id)

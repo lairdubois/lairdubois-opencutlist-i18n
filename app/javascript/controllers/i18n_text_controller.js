@@ -1,16 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
-import { createI18nView, replaceText, insertText, missingInvariants } from "lib/i18n_text"
+import { createI18nView, replaceText, insertText, focusEnd, missingInvariants } from "lib/i18n_text"
 
 // Shows an OCL string in CodeMirror : invariants highlighted, whitespace revealed on demand.
 // On a form with a `field` textarea : an editor, the textarea kept hidden and in sync. With a `source`
 // value (translator's editor), the source's {{ variables }}, $t() and tags are locked and the missing ones
 // offered as chips ; without (fr source editor), nothing is locked. Mod-Enter submits, Shift-Mod-Enter
 // through the `review` button, hidden while the text is blank (a blank save removes the translation).
+// `autofocus` : focused on load, the cursor at the end.
 // On any other element : a read-only view of the `text` value, invariants missing from `source` (if
 // given) flagged.
 export default class extends Controller {
   static targets = ["field", "chips", "review"]
-  static values = { text: String, source: String, refs: Object }
+  static values = { text: String, source: String, refs: Object, autofocus: Boolean }
 
   connect() {
     // A Turbo cache snapshot keeps the previous view's DOM : start clean
@@ -63,6 +64,7 @@ export default class extends Controller {
     field.addEventListener("input", this.pull)
     this.renderChips()
     this.toggleReview()
+    if (this.autofocusValue) focusEnd(this.view)
   }
 
   toggleReview() {

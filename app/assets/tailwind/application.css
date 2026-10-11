@@ -25,6 +25,8 @@
 @layer components {
   .tok-var, .tok-ref { color: var(--color-violet-800); background: var(--color-violet-100); border-radius: 0.2rem; }
   .tok-ref[title] { cursor: help; }
+  /* Mod-click opens the key (i18n_text.js) : shown as a link while Cmd / Ctrl is down over the editor */
+  .cm-editor[data-mod-key] .tok-ref[data-ref-url] { cursor: pointer; text-decoration: underline; }
   .tok-tag, .tok-entity { color: var(--color-stone-500); background: var(--color-stone-100); border-radius: 0.2rem; }
   /* An invariant the fr source doesn't have : editable, flagged */
   .tok-unknown { color: var(--color-red-700); background: var(--color-red-50); text-decoration: wavy underline var(--color-red-400); }
@@ -53,4 +55,19 @@
     color: var(--color-violet-800); background: var(--color-violet-50); border: 1px dashed var(--color-violet-300);
   }
   .tok-chip:hover { background: var(--color-violet-100); }
+}
+
+/* Page toolbar (search, filters…) : stays on screen under the sticky site header (3.5rem nav + 1px border).
+   -mt-6 swallows main's py-6, so the space above its content (pt-4) is the same once stuck ; after a flash message
+   (its mb-4, the toolbar first in the page or in its wrapper) only that margin is swallowed. Below : pb-2 + its rows'
+   mb-2 match the pt-4, then mb-4 before the list.
+   Background and bottom line (stone-200, as the site header's) span the window : a border-image filling the box,
+   outset sideways (ink overflow only : no horizontal scroll), its last pixel on the 1px bottom border.
+   z-10 : the translator's rows hold positioned spans (whitespace marks) that would otherwise paint over it. */
+@layer components {
+  .toolbar {
+    @apply sticky top-[calc(3.5rem+1px)] z-10 -mx-4 -mt-6 mb-4 border-b bg-stone-100 px-4 pt-4 pb-2;
+    border-image: linear-gradient(var(--color-stone-100) calc(100% - 1px), var(--color-stone-200) 0) fill 0 / 0 / 0 100vmax;
+  }
+  p + .toolbar, p + * > .toolbar:first-child { @apply -mt-4; }
 }

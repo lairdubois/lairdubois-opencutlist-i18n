@@ -25,8 +25,22 @@ module ApplicationHelper
                     active ? "border-stone-800 font-medium text-stone-900" : "border-transparent text-stone-600 hover:text-stone-900"]
   end
 
+  # Progress percentage, floored : 100 % only when nothing is left to do
+  def progress_percent(done, total)
+    number_to_percentage(total.zero? ? 100 : done * 100 / total, precision: 0)
+  end
+
   def status_dot(status, extra = nil)
     tag.span(class: ["h-2 w-2 shrink-0 rounded-full", STATUS_DOTS[status], extra])
+  end
+
+  # The $t() refs of a text view (Unit.refs), as i18n-text's refs value : key => { title, url }.
+  # url : the page's ref_url (Mod-click opens it in a new tab), the title's hint telling so
+  def refs_json(refs)
+    refs.to_h do |key, ref|
+      url = ref_url(ref)
+      [key, { title: [ref.text, (t("refs.open_hint") if url)].compact.join("\n"), url: url }.compact]
+    end.to_json
   end
 
   # A collapsible section's state, as the user left it (collapsible controller's cookie)

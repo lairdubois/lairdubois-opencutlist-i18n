@@ -1,5 +1,6 @@
 <% count, translated, outdated, translatable = node.stats %>
 <% notranslate = capture do %><span class="rounded bg-stone-200 px-1 font-mono text-xs text-stone-600" title="<%= t(".notranslate_hint") %>">@no-translate</span><% end %>
+<% copied = capture do %><span class="rounded bg-stone-200 px-1 text-xs text-stone-600" title="<%= t("status.copied_hint") %>"><%= t("status.copied") %></span><% end %>
 <% if node.branch? %>
   <details class="border-b border-stone-100 last:border-0" <%= "open" if open %>
            data-branch-tree-target="branch" data-path="<%= node.path %>" <%= "data-continued" if node.continued %>>
@@ -7,10 +8,10 @@
       <span class="font-medium"><%= node.name %></span>
       <% if node.continued %><span class="text-xs text-stone-400"><%= t(".continued") %></span><% end %>
       <span class="text-xs text-stone-500"><%= count %></span>
-      <%# Badge : every key of the branch is @no-translate (whatever the filters). No progress for a branch listing none
-          to translate (a parent of @no-translate keys, under the notranslate filter) %>
-      <% if @notranslate_branches.include?(node.path) %>
-        <%= notranslate %>
+      <%# Badge : every key of the branch is out of the translators' work, all copied or not (whatever the filters).
+          No progress for a branch listing none to translate (a parent of such keys, under the notranslate filter) %>
+      <% if (kind = @notranslate_branches[node.path]) %>
+        <%= kind == :copied ? copied : notranslate %>
       <% elsif translatable.positive? %>
         <%= render "progress", value: translated, max: translatable * languages, outdated: outdated %>
       <% end %>
@@ -56,6 +57,8 @@
     <span class="flex-1 truncate font-mono text-xs"><%= node.unit.source_text %></span>
     <% if node.unit.translatable %>
       <%= render "progress", value: translated, max: languages, outdated: outdated %>
+    <% elsif node.unit.copied %>
+      <%= copied %>
     <% else %>
       <%= notranslate %>
     <% end %>

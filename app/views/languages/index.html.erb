@@ -10,14 +10,9 @@
         <span class="font-medium"><%= language.name %></span>
         <span class="text-sm text-stone-500"><%= language.code.upcase %></span>
       </div>
-      <div class="mb-2 h-2 overflow-hidden rounded bg-stone-200">
-        <div class="flex h-full">
-          <span class="bg-emerald-600" style="width: <%= 100.0 * s[:reviewed] / s[:total] %>%"></span>
-          <span class="bg-emerald-300" style="width: <%= 100.0 * (s[:translated] - s[:reviewed]) / s[:total] %>%"></span>
-        </div>
-      </div>
+      <%= render "shared/progress_bar", stats: s, css: "mb-2 h-2" %>
       <p class="text-sm text-stone-600">
-        <%= t(".translated", percent: number_to_percentage(100.0 * s[:translated] / s[:total], precision: 0)) %> ·
+        <%= t(".translated", percent: progress_percent(s[:translated], s[:total])) %> ·
         <%= t(".todo", count: s[:total] - s[:translated]) %>
         <% if s[:outdated] > 0 %>· <span class="text-orange-700"><%= t("status.outdated_count", count: s[:outdated]) %></span><% end %>
       </p>

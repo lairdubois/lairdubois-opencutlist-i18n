@@ -1,4 +1,4 @@
-<% outdated = @data[:translations][unit.id]&.outdated? %>
+<% outdated = !unit.copied && @data[:translations][unit.id]&.outdated? %>
 <div id="<%= dom_id(unit) %>" data-controller="disclosure" class="group/row rounded border border-stone-200 bg-white">
   <div class="flex items-baseline gap-1 px-3 py-1.5 text-xs">
     <span class="text-stone-400 tabular-nums">#<%= @indexes[unit.id] %></span>
@@ -29,7 +29,8 @@
     <% else %>
       <%= render "reference", unit: unit, outdated: outdated, en_missing: @en.present? %>
     <% end %>
-    <%= render "editor", unit: unit, language: @language, data: @data %>
+    <%# ?focus=1 (the FR duplicates' links) : the editor takes the focus on load %>
+    <%= render "editor", unit: unit, language: @language, data: @data, autofocus: params[:focus] == "1" %>
     <%# Comments : opened from the editor's buttons row, on the next row under the language's column ; lazy frame loads once shown %>
     <div data-disclosure-target="panel" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
       <%= turbo_frame_tag "comments_#{unit.id}_#{@language.code}", src: unit_comments_path(unit, lang: @language.code), loading: :lazy do %>

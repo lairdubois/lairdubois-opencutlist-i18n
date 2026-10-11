@@ -21,7 +21,7 @@
     <% end %>
   </div>
   <% if @user.new_record? %>
-    <label class="mb-4 block text-sm"><%= check_box_tag :send_link, "1", true %> <%= t(".send_link") %></label>
+    <label class="mb-4 block text-sm"><%= check_box_tag :send_invitation, "1", true %> <%= t(".send_invitation") %></label>
   <% end %>
   <div class="flex items-center gap-3">
     <%= f.submit t("save"), class: "rounded bg-stone-800 px-3 py-1.5 text-white" %>

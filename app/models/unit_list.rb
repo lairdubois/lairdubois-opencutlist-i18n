@@ -22,18 +22,21 @@ class UnitList
                .to_h { |id, n, outdated, unreviewed, reviewed| [id, [n, outdated.to_i, unreviewed.to_i, reviewed.to_i]] }
   end
 
-  # Paths of the branches whose keys are all @no-translate, among every key (not only the listed ones)
+  # Branches whose keys are all out of the translators' work, among every key (not only the listed ones) :
+  # { path => :copied (all of them copied) or :directive (@no-translate, some maybe copied) }
   def notranslate_branches
     @notranslate_branches ||= begin
       translated = Set.new
+      directive = Set.new
       all = Set.new
       units.each do |unit|
         parts = unit.key.split(".")
         paths = (1...parts.size).map { |n| parts.first(n).join(".") }
         all.merge(paths)
         translated.merge(paths) if unit.translatable
+        directive.merge(paths) unless unit.translatable || unit.copied
       end
-      all - translated
+      (all - translated).to_h { |path| [path, directive.include?(path) ? :directive : :copied] }
     end
   end
 
@@ -72,7 +75,7 @@ class UnitList
     ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) }] }
                          .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
                                 "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && warning_ids.include?(u.id) && notranslate_match?(u) && days_match?(u) },
-                                "notranslate" => searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && !u.translatable && days_match?(u) })
+                                **notranslate_counts)
                          .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
                          .merge(searched: searched.size)
   end
@@ -90,7 +93,13 @@ class UnitList
   end
 
   def notranslate_match?(unit)
-    !query.notranslate? || !unit.translatable
+    !query.notranslate? || query.notranslate_match?(unit)
+  end
+
+  # Each notranslate value's matches with the other filters : "notranslate" (all), "notranslate_directive", "notranslate_copied"
+  def notranslate_counts
+    others = searched.select { |u| !u.translatable && status_match?(u) && questions_match?(u) && warnings_match?(u) && days_match?(u) }
+    { "notranslate" => others.size, "notranslate_directive" => others.count { |u| !u.copied }, "notranslate_copied" => others.count(&:copied) }
   end
 
   def days_match?(unit)
@@ -106,8 +115,10 @@ class UnitList
   end
 
   # Statuses apply across every target language : "untranslated" = missing in at least one of them,
-  # but "reviewed" = reviewed and up to date in all of them
+  # but "reviewed" = reviewed and up to date in all of them. A copied unit has none (its translations are left out).
   def status?(key, unit)
+    return false if unit.copied
+
     translated, outdated, unreviewed, reviewed = stats.fetch(unit.id, [0, 0, 0, 0])
     case key
     when "untranslated" then translated < @languages

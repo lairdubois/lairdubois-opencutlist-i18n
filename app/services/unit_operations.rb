@@ -47,6 +47,8 @@ class UnitOperations
     unit.update!(source_text: text)
     unit.translations.where(source_hash: old_hash).update_all(source_hash: unit.source_hash) unless major
     unit.revisions.create!(kind: major ? "source_major" : "source_minor", old_value: old_text, new_value: text, author: @author, user: @user)
+    # A $t() alone is copied instead of translated (Unit::COPIED_SOURCE)
+    Unit.refresh_translatable!(unit.key)
   end
 
   # Values nest other strings with i18next's $t(key) or $t(key, {options}) : follow the rename.

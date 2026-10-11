@@ -3,8 +3,9 @@
 #   status[]   translation statuses, combined with OR (none = every status)
 #   questions  "1" : with an open question, combined with AND
 #   warnings   "1" : with a TranslationChecks warning, combined with AND
-#   notranslate "1" : the keys out of the translators' work (@no-translate), instead of the others on the translator's
-#              list (admins only), among them on the keys list ; combined with AND
+#   notranslate the keys out of the translators' work, instead of the others on the translator's list (admins only),
+#              among them on the keys list ; combined with AND. One of NOTRANSLATE : "1" all of them, "directive"
+#              the @no-translate ones, "copied" the copied ones (Unit::COPIED_SOURCE)
 #   days       one of PERIODS : changed (a revision) in the last n days, combined with AND
 #   key        substring of the key
 #   prefix     branch : the key itself or anything under it
@@ -21,6 +22,8 @@ module ListFilters
   FIELDS = %w[key prefix user at].freeze
   # Offered periods of the days filter, in days
   PERIODS = %w[1 7 30 90].freeze
+  # Values of the notranslate filter : all the keys out of the translators' work, or one kind of them
+  NOTRANSLATE = %w[1 directive copied].freeze
   # Each sort, with its default direction
   SORTS = { "index" => "asc", "updated" => "desc" }.freeze
 
@@ -58,8 +61,22 @@ module ListFilters
       self[:warnings] == "1"
     end
 
+    # The picked notranslate value (NOTRANSLATE), nil when none
+    def notranslate
+      self[:notranslate] if NOTRANSLATE.include?(self[:notranslate])
+    end
+
     def notranslate?
-      self[:notranslate] == "1"
+      notranslate.present?
+    end
+
+    # Whether a unit out of the translators' work matches the picked notranslate value
+    def notranslate_match?(unit)
+      case notranslate
+      when "directive" then !unit.translatable && !unit.copied
+      when "copied" then unit.copied
+      else !unit.translatable
+      end
     end
 
     # The picked period, in days (nil when none)
@@ -92,7 +109,7 @@ module ListFilters
     # As link params
     def to_params
       { q: self[:q], status: statuses.presence, questions: ("1" if questions?), warnings: ("1" if warnings?),
-        notranslate: ("1" if notranslate?), days: days&.to_s }
+        notranslate: notranslate, days: days&.to_s }
         .merge(FIELDS.to_h { |name| [name.to_sym, self[name]] }, sort: sort, dir: (sort_dir if sort)).compact
     end
 
@@ -113,7 +130,7 @@ module ListFilters
   end
 
   included do
-    helper_method :list_params, :statuses, :questions?, :warnings?, :notranslate?, :list_days, :list_sort, :list_sort_dir
+    helper_method :list_params, :statuses, :questions?, :warnings?, :notranslate?, :list_notranslate, :list_days, :list_sort, :list_sort_dir
     before_action :exclusive_index
   end
 
@@ -127,6 +144,10 @@ module ListFilters
 
   def list_days
     list_query.days
+  end
+
+  def list_notranslate
+    list_query.notranslate
   end
 
   def list_sort

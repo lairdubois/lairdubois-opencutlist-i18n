@@ -80,10 +80,13 @@ function analyse(text, { source, refs, editable }) {
   const tokens = invariants(text)
   const marks = []
   const locked = []
+  const links = []
   for (const t of tokens) {
     const known = !expected || expected.has(normalize(t.text))
-    const attributes = t.kind === "ref" && refs[refKey(t.text)] ? { title: refs[refKey(t.text)] } : undefined
+    const ref = t.kind === "ref" ? refs[refKey(t.text)] : null
+    const attributes = ref ? { title: ref.title, ...(ref.url && { "data-ref-url": "" }) } : undefined
     marks.push(Decoration.mark({ class: `tok-${t.kind}${known ? "" : " tok-unknown"}`, attributes }).range(t.from, t.to))
+    if (ref?.url) links.push({ from: t.from, to: t.to, url: ref.url })
     if (editable && expected && known) locked.push(t)
   }
   for (const m of markup(text, tokens)) marks.push(Decoration.mark({ class: m.cls }).range(m.from, m.to))
@@ -97,6 +100,7 @@ function analyse(text, { source, refs, editable }) {
     decorations: Decoration.set(marks, true),
     atomic: Decoration.set(locked.map((t) => Decoration.mark({}).range(t.from, t.to))),
     locked,
+    links,
   }
 }
 
@@ -126,6 +130,25 @@ const protectInvariants = (field) => EditorState.transactionFilter.of((tr) => {
   return ok ? tr : []
 })
 
+// Mod-click (Cmd, or Ctrl) on a $t() opens its key in a new tab, instead of adding a cursor. While the key is down,
+// data-mod-key on the editor shows the links (application.css).
+const modKey = (event) => event.metaKey || event.ctrlKey
+const openRefs = (field) => EditorView.domEventHandlers({
+  mousedown(event, view) {
+    if (!modKey(event) || event.button !== 0) return false
+    const pos = view.posAtCoords({ x: event.clientX, y: event.clientY }, false)
+    const link = view.state.field(field).links.find((l) => pos >= l.from && pos < l.to)
+    if (!link) return false
+    event.preventDefault()
+    window.open(link.url, "_blank", "noopener")
+    return true
+  },
+  mousemove(event, view) { view.dom.toggleAttribute("data-mod-key", modKey(event)) },
+  mouseleave(event, view) { view.dom.removeAttribute("data-mod-key") },
+  keydown(event, view) { view.dom.toggleAttribute("data-mod-key", modKey(event)) },
+  keyup(event, view) { view.dom.toggleAttribute("data-mod-key", modKey(event)) },
+})
+
 // Font size and family come from the host (text-sm font-mono) : a size set here would beat Tailwind's
 const layout = EditorView.theme({
   "&.cm-focused": { outline: "2px solid var(--color-stone-400)", outlineOffset: "-1px" },
@@ -136,7 +159,7 @@ const layout = EditorView.theme({
 
 // A CodeMirror view of an OCL string : the translator's editor, or a read-only reference.
 // source : the fr text ; invariants it lacks are flagged, the ones it has are locked in an editor (null :
-// nothing flagged nor locked, e.g. the fr source itself) ; refs : $t() key => fr text (tooltips).
+// nothing flagged nor locked, e.g. the fr source itself) ; refs : $t() key => { title (tooltip), url (opened by Mod-click) }.
 // className : extra classes of the editor element (CodeMirror rewrites its class attribute, classList.add doesn't last).
 export function createI18nView({ parent, text, source = null, refs = {}, editable = false, lang, dir = "ltr", className = "", onChange, onSubmit }) {
   const options = { source, refs, editable }
@@ -147,6 +170,7 @@ export function createI18nView({ parent, text, source = null, refs = {}, editabl
   })
   const extensions = [
     field,
+    openRefs(field),
     layout,
     EditorView.lineWrapping,
     highlightSpecialChars(),
@@ -178,5 +202,11 @@ export function replaceText(view, text) {
 export function insertText(view, text) {
   const { from, to } = view.state.selection.main
   view.dispatch({ changes: { from, to, insert: text }, selection: { anchor: from + text.length }, scrollIntoView: true, userEvent: "input" })
+  view.focus()
+}
+
+// Focuses the editor, cursor at the end of the text
+export function focusEnd(view) {
+  view.dispatch({ selection: { anchor: view.state.doc.length }, scrollIntoView: true })
   view.focus()
 }
