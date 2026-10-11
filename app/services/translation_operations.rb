@@ -22,9 +22,9 @@ class TranslationOperations
     reviewed &&= @user.can_review?(language)
     unchanged = old_text == text && !translation.outdated?
     status = if reviewed then :reviewed
-             elsif unchanged then translation.status
-             else :translated
-             end
+    elsif unchanged then translation.status
+    else :translated
+    end
     translation.assign_attributes(text: text, source_hash: unit.source_hash, status: status)
     return translation unless translation.changed?
 

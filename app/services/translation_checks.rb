@@ -5,7 +5,7 @@ class TranslationChecks
   TOKENS = {
     variable: /\{\{\s*[\w.]+\s*\}\}/,         # {{ count }}
     reference: /\$t\([^)]*\)/,                 # $t(tab.cutlist.label)
-    tag: %r{</?[a-z][^>]*>}i,                   # <br>, <strong>
+    tag: %r{</?[a-z][^>]*>}i                   # <br>, <strong>
   }.freeze
 
   TEXT_RULES = {
@@ -17,7 +17,7 @@ class TranslationChecks
     url_space: %r{https?://\s},
     loose_bold: /\s\*\*\s/,                     # ** bold ** isn't bold
     triple_star: /\*{3,}/,
-    invisible: /[\u200B\u2060\uFEFF\u00AD]/,    # zero width space, word joiner, BOM, soft hyphen
+    invisible: /[\u200B\u2060\uFEFF\u00AD]/    # zero width space, word joiner, BOM, soft hyphen
   }.freeze
 
   # 'Name' : a quoted identifier (attribute, css class) the code relies on. The lookarounds skip

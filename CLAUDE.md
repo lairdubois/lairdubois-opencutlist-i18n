@@ -20,6 +20,10 @@ Weblate was evaluated and rejected.
   `bin/importmap pin` / `update` / `pristine` download unminified files, re-fetch the `.min.js` after.
 - `.env` (git-ignored) holds `TRANSIFEX_TOKEN` (secret : never print it, `source .env` without echoing)
   and `TRANSIFEX_RESOURCE=v6`.
+- CI (`.github/workflows/ci.yml`, on push to main) runs `bin/rubocop`, `bin/brakeman --no-pager`, `bin/bundler-audit`
+  and `bin/importmap audit` : run `bin/rubocop` (`-a` fixes) and `bin/brakeman` after changing Ruby code. Style is
+  rubocop-rails-omakase without `Layout/SpaceInsideArrayLiteralBrackets` (`[a, b]`). Brakeman skips `storage/`
+  (`config/brakeman.yml`, the OCL checkout) ; a vetted false positive goes into `config/brakeman.ignore` with a `note`.
 - Without `OCL_REPO_URL` the app points to the real GitHub repo : don't click / call "Publier" while testing.
 - Not deployed yet : target is the user's Debian 12 server next to L'Air du Bois, behind its NGINX,
   at `localize.opencutlist.org`, systemd + rbenv, no Docker (`deploy/`).

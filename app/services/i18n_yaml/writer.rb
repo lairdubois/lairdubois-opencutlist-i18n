@@ -61,9 +61,9 @@ module I18nYaml
 
     def block(value, pad)
       chomp = if value.end_with?("\n\n") then "+"
-              elsif value.end_with?("\n") then ""
-              else "-"
-              end
+      elsif value.end_with?("\n") then ""
+      else "-"
+      end
       body = value.end_with?("\n") ? value.chomp : value
       lines = body.split("\n", -1).map { |l| l.empty? ? "" : pad + l }
       " |#{chomp}\n#{lines.join("\n")}"

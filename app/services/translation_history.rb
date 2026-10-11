@@ -37,9 +37,9 @@ class TranslationHistory
     revisions = if @language
                   @unit.revisions.where(language: @language, kind: TEXT_KINDS)
                        .or(@unit.revisions.where(language: nil, kind: UNIT_KINDS)).to_a
-                else
+    else
                   @unit.revisions.includes(:language).to_a
-                end
+    end
     last_major = revisions.rindex { |r| r.language_id.nil? && r.kind == "source_major" }
     current = @unit.translations.find_by(language: @language)&.text if @language
     source = nil

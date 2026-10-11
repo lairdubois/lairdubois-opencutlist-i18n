@@ -1,0 +1,33 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "7903a1a7a84033bba85d58e1fbea0a89f7d2014033bbec6968368d57a7b71a8d",
+      "warning_type": "Mass Assignment",
+      "file": "app/controllers/users_controller.rb",
+      "line": 102,
+      "note": "UsersController is admins only (require_admin) : only an admin can grant admin"
+    },
+    {
+      "fingerprint": "2236fe34fbbd9f04b1e02a2a6828363d659c18aeb336dfa37a01e98204876da9",
+      "warning_type": "SQL Injection",
+      "file": "app/controllers/translations_controller.rb",
+      "line": 169,
+      "note": "Conditions are built from constants and whitelisted params only (STATUSES &, NOTRANSLATE_CONDITIONS.fetch, to_i ids, bound dates)"
+    },
+    {
+      "fingerprint": "f98cdb8f485b8cb4796b7b44ba685d45e4778314ff62e7d5e64025bc968f3b69",
+      "warning_type": "File Access",
+      "file": "app/controllers/syncs_controller.rb",
+      "line": 27,
+      "note": "upload_path keeps [0-9a-f] only : no path traversal ; admins only"
+    },
+    {
+      "fingerprint": "3952eab11007e5bf853cca7ba18cb8889795735de2aedbda8692036ae86eba60",
+      "warning_type": "File Access",
+      "file": "app/controllers/syncs_controller.rb",
+      "line": 33,
+      "note": "upload_path keeps [0-9a-f] only : no path traversal ; admins only"
+    }
+  ],
+  "brakeman_version": "8.1.0"
+}

@@ -15,10 +15,10 @@ class GithubPulls
     existing = request(:get, "/repos/#{@config.github_repo}/pulls?state=open&head=#{owner}:#{@config.i18n_branch}").first
     pr = if existing
            request(:patch, "/repos/#{@config.github_repo}/pulls/#{existing['number']}", title: title, body: body)
-         else
+    else
            request(:post, "/repos/#{@config.github_repo}/pulls", title: title, body: body,
                                                                  head: @config.i18n_branch, base: OclRepo.base_branch(@config))
-         end
+    end
     pr["html_url"]
   end
 

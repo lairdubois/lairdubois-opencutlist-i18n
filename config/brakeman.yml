@@ -1,0 +1,4 @@
+---
+# storage/ocl_repo is the OCL extension's checkout (OclRepo), not our code
+:skip_files:
+- storage/
