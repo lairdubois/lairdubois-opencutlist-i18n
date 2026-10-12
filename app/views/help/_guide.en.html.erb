@@ -1,23 +1,23 @@
 <h1>Help</h1>
-<p>
-  Each row of the list is a <strong>key</strong> of OpenCutList's interface: on the left the reference text (the French
-  source, or the English translation if you pick it above the column), on the right your translation. Write it, then
-  save: it is saved without leaving the page.
+<p>Each row in the list is a <strong>key</strong> of OpenCutList's interface: on the left is 
+the reference text (either the French original or the English translation, depending on your 
+selection above the column), and on the right is your translation. Write your translation, 
+then click Save to save it without leaving the page.
 </p>
 
 <h2>Statuses</h2>
 <dl>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text changed since your translation. Check it, fix it if needed, then save, even unchanged, to validate it again.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since your translation. Check it, fix it if needed, then save, even unchanged, to validate it again.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Not translated</strong></dt><dd>Nothing written in your language yet.</dd>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Not approved</strong></dt><dd>Translated, not reviewed yet.</dd>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approved</strong></dt><dd>Validated by a reviewer of the language.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Not approved</strong></dt><dd>Translated, but not approved yet.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approved</strong></dt><dd>Approved by a reviewer of the language.</dd>
 </dl>
-<p>Reviewers have an <strong>Approve</strong> button next to <strong>Save</strong>.</p>
+<p>Reviewers have an <strong>Approve</strong> button next to <strong>Save</strong>. An approved text should only be modified with care!</p>
 
-<h2>The editor</h2>
+<h2>The Editor</h2>
 <ul>
   <li>
-    Some parts of the French text must be found as is in the translation: variables <code>{{ count }}</code>, references
+    Some parts of the French text must be used as-is in the translation: variables <code>{{ count }}</code>, references
     to other keys <code>$t(tab.cutlist.title)</code>, HTML tags <code>&lt;strong&gt;</code> and entities
     <code>&amp;nbsp;</code>. They are <strong>locked</strong>: you can move them within the sentence, not change them. When
     one is missing, a chip under the editor puts it back; an unknown one shows in red.
@@ -25,22 +25,22 @@
   <li><kbd>⌘</kbd>-click (<kbd>Ctrl</kbd>-click) on a <code>$t(…)</code> reference opens the key it points to in a new tab.</li>
   <li>
     Keep the Markdown: <code>**bold**</code>, <code>*italic*</code>, links <code>[text](url)</code>. Translate the link's
-    text, keep its url.
+    text, keep its url (or adapt it if there is a language version that matches your language).
   </li>
   <li>
-    The <strong>proposals</strong> under the editor (🤖 machine translation, "Same text elsewhere") fill it in one click:
-    read it again before saving.
+    <strong>Proposals</strong> under the editor (🤖 machine translation, "Same text elsewhere") can be filled with one click.
+    Read it again before saving.
   </li>
   <li>
-    <strong>Warnings</strong> ⚠ (final dot, spaces, line count…) don't prevent saving: they point at what deserves a
-    look.
+    <strong>Warnings</strong> ⚠ (final dot, spaces, line count…) do not prevent saving: they indicate what requires attention.
   </li>
-  <li>Greyed keys are <strong>copied</strong> as is into every language: nothing to translate.</li>
+  <li>Greyed keys are <strong>copied</strong> as-is into every language: nothing to translate.</li>
   <li>
-    Above the list, <kbd>¶</kbd> shows spaces and line breaks, the key button always shows the keys' names (else on
-    hover).
+    Above the list, <kbd>¶</kbd> shows spaces and line breaks, the key button always shows the keys' names (otherwise on
+    hover only).
   </li>
-  <li>An edited translation not saved yet has a blue background; the page warns you before leaving if any are left.</li>
+  <li>If you have made changes to a translation that have not yet been saved, the background will be blue. 
+  The page will warn you before you leave if you have any unsaved changes.</li>
 </ul>
 
 <h2>Shortcuts</h2>
@@ -52,11 +52,11 @@
   <dt><kbd>Esc</kbd> <kbd>Esc</kbd></dt><dd>Clear the search, filters and sort</dd>
 </dl>
 
-<h2>Search and filters</h2>
+<h2>Search and Filters</h2>
 <p>
-  The search looks into the texts. The <strong>Filters</strong> menu narrows the list by status, to open questions,
-  warnings or recently changed keys; the <strong>Sort</strong> menu orders it by modification date. In the search field,
-  before <kbd>Enter</kbd>:
+  The search looks through the texts. The <strong>Filters</strong> menu narrows the list by status, to open questions,
+  warnings or recently changed keys; the <strong>Sort</strong> menu orders the list by modification date. In the search field,
+  before pressing <kbd>Enter</kbd>:
 </p>
 <dl>
   <dt><code>#120</code>, <code>#120-180</code></dt><dd>by row number</dd>
@@ -65,9 +65,9 @@
   <dt><code>user:…</code></dt><dd>by author (name or its start)</dd>
 </dl>
 
-<h2>Asking a question</h2>
+<h2>Asking a Question</h2>
 <p>
   Unsure what a text means? The <strong>comments</strong> button under each translation lets you ask a question about
-  that key: the admins and your language's reviewers are told, and the answer shows in the same place. For anything else
+  that key: the admins and your language's reviewers are notified, and the answer shows in the same place. For anything else
   (access, a new language, a problem with the tool…), write to us with the form.
 </p>
