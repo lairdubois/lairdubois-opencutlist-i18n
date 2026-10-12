@@ -14,15 +14,20 @@ module ApplicationHelper
     sync: %w[syncs],
     users: %w[users],
     migration: %w[migrations],
-    publish: %w[publications github_accounts]
+    publish: %w[publications github_accounts],
+    help: %w[help help_requests]
   }.freeze
 
-  # Header link, underlined (tab-like, on the header's bottom edge) when the current page is in its section
-  def nav_link(section, path)
+  # Header link, underlined (tab-like, on the header's bottom edge) when the current page is in its section.
+  # badge : a count shown after the label when positive
+  def nav_link(section, path, badge: nil, title: nil)
     active = NAV_SECTIONS[section].include?(controller_name)
-    link_to t("layouts.application.#{section}"), path, aria: { current: ("page" if active) },
-            class: ["flex h-full items-center border-b-2 pt-0.5",
-                    active ? "border-stone-800 font-medium text-stone-900" : "border-transparent text-stone-600 hover:text-stone-900"]
+    link_to path, aria: { current: ("page" if active) }, title: title,
+            class: ["flex h-full items-center gap-1.5 border-b-2 pt-0.5",
+                    active ? "border-stone-800 font-medium text-stone-900" : "border-transparent text-stone-600 hover:text-stone-900"] do
+      safe_join([t("layouts.application.#{section}"),
+                 (tag.span(badge, class: "rounded-full bg-sky-600 px-1.5 text-xs leading-4 font-medium text-white tabular-nums") if badge.to_i.positive?)])
+    end
   end
 
   # Progress percentage, floored : 100 % only when nothing is left to do

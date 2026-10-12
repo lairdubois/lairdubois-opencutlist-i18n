@@ -83,6 +83,10 @@ Weblate was evaluated and rejected.
 - Key page sections Translations, Comments (counts kept in step by the thread's turbo-stream ; lazy frame when folded)
   and History (lazy frame, `units#history`) fold (`collapsible`) ; state in a `section_<name>` cookie read by
   `section_open?`, so the server renders it as left.
+- Help (`/help`, header link, everyone) : a guide (`help/_guide.fr` / `.en`, locale-specific partials) and a form to
+  the admins. `HelpRequest` is stored first (`page` = the app path the link was clicked on, `HelpRequest.safe_page`,
+  its `/translate/:lang` language), then mailed to the enabled admins (`HelpMailer`, `reply_to` the sender) when
+  e-mails are on ; listed and resolved on `/help/requests`, open ones counted on the admins' header badge.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_090000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -40,6 +40,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_180000) do
     t.index ["language_id"], name: "index_comments_on_language_id"
     t.index ["unit_id"], name: "index_comments_on_unit_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "help_requests", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "language_id"
+    t.text "body", null: false
+    t.string "page"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["language_id"], name: "index_help_requests_on_language_id"
+    t.index ["resolved_at"], name: "index_help_requests_on_resolved_at"
+    t.index ["user_id"], name: "index_help_requests_on_user_id"
   end
 
   create_table "languages", force: :cascade do |t|
@@ -159,6 +172,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_180000) do
   add_foreign_key "comments", "languages"
   add_foreign_key "comments", "units"
   add_foreign_key "comments", "users"
+  add_foreign_key "help_requests", "languages"
+  add_foreign_key "help_requests", "users"
   add_foreign_key "memberships", "languages"
   add_foreign_key "memberships", "users"
   add_foreign_key "publications", "users"

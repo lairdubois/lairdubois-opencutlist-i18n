@@ -147,6 +147,38 @@ fr:
       repo_changed: "Le fr.yml du repo a changé."
       sync_now: "Synchroniser"
       close: "Fermer"
+      help: "Aide"
+      help_open:
+        one: "%{count} demande d'aide ouverte"
+        other: "%{count} demandes d'aide ouvertes"
+
+  help:
+    show:
+      title: "Aide"
+      open_requests:
+        one: "%{count} demande d'aide ouverte."
+        other: "%{count} demandes d'aide ouvertes."
+      see_requests: "Voir les demandes"
+      contact: "Écrire aux administrateurs"
+      contact_hint: "Un accès, une nouvelle langue, un problème avec l'outil… Pour une question sur une traduction précise, utilise plutôt les commentaires de la clé."
+      placeholder: "Ton message…"
+      page: "Envoyé avec la page :"
+      reply_hint: "La réponse arrivera par e-mail à %{email}."
+      send: "Envoyer"
+
+  help_requests:
+    index:
+      title: "Demandes d'aide"
+      guide: "Guide"
+      mail_disabled: "Les envois d'e-mails sont désactivés (OCL_MAIL_ENABLED) : les demandes ne sont visibles qu'ici."
+      ago: "il y a %{time}"
+      resolve: "Marquer résolue"
+      resolved: "résolue"
+      reopen: "Rouvrir"
+      empty: "Aucune demande."
+    create:
+      sent: "Message transmis aux administrateurs."
+      empty: "Le message est vide."
 
   sessions:
     rate_limited: "Trop de demandes, réessaie plus tard."
@@ -588,3 +620,12 @@ fr:
       commented: "%{name} a commenté %{key}%{language} :"
       source: "Texte FR :"
       reply: "Répondre :"
+
+  help_mailer:
+    requested:
+      subject: "Demande d'aide de %{name}"
+      asked: "%{name} (%{email}) demande de l'aide :"
+      page: "Depuis la page :"
+      language: "Langue :"
+      reply: "Répondre à cet e-mail répond à l'utilisateur."
+      list: "Toutes les demandes :"

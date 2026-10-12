@@ -147,6 +147,38 @@ en:
       repo_changed: "The repo's fr.yml has changed."
       sync_now: "Sync"
       close: "Close"
+      help: "Help"
+      help_open:
+        one: "%{count} open help request"
+        other: "%{count} open help requests"
+
+  help:
+    show:
+      title: "Help"
+      open_requests:
+        one: "%{count} open help request."
+        other: "%{count} open help requests."
+      see_requests: "See the requests"
+      contact: "Write to the admins"
+      contact_hint: "Access, a new language, a problem with the tool… For a question about a given translation, use the key's comments instead."
+      placeholder: "Your message…"
+      page: "Sent with the page:"
+      reply_hint: "The answer will come by e-mail to %{email}."
+      send: "Send"
+
+  help_requests:
+    index:
+      title: "Help requests"
+      guide: "Guide"
+      mail_disabled: "E-mail delivery is disabled (OCL_MAIL_ENABLED): requests are only visible here."
+      ago: "%{time} ago"
+      resolve: "Mark resolved"
+      resolved: "resolved"
+      reopen: "Reopen"
+      empty: "No request."
+    create:
+      sent: "Message sent to the admins."
+      empty: "The message is empty."
 
   sessions:
     rate_limited: "Too many requests, try again later."
@@ -588,3 +620,12 @@ en:
       commented: "%{name} commented on %{key}%{language}:"
       source: "FR text:"
       reply: "Reply:"
+
+  help_mailer:
+    requested:
+      subject: "Help request from %{name}"
+      asked: "%{name} (%{email}) asks for help:"
+      page: "From the page:"
+      language: "Language:"
+      reply: "Replying to this e-mail answers the user."
+      list: "All requests:"

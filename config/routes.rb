@@ -14,6 +14,12 @@ Rails.application.routes.draw do
   get "translate/:lang/:unit_id/history", to: "translations#history", as: :translate_unit_history
   post "translate/:lang/pretranslate", to: "translations#pretranslate", as: :pretranslate
 
+  # Everyone : the guide and the form to the admins (who list and resolve the requests)
+  get "help", to: "help#show", as: :help
+  resources :help_requests, path: "help/requests", only: [:index, :create] do
+    patch :resolve, on: :member
+  end
+
   # Admins
   resources :units, only: [:index, :show] do
     get :duplicates, on: :collection

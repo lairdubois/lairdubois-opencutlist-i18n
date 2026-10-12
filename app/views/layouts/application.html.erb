@@ -33,7 +33,13 @@
             <%= nav_link :migration, migration_path %>
             <%= nav_link :publish, publications_path %>
           <% end %>
-          <span class="ml-auto flex gap-1 text-xs">
+          <%# Help : the guide and the form to the admins, told where the user was (from) ; the admins' badge counts the open requests %>
+          <% help_open = HelpRequest.unresolved.count if current_user.admin? %>
+          <div class="ml-auto flex h-full">
+            <%= nav_link :help, help_path(from: (request.fullpath unless ApplicationHelper::NAV_SECTIONS[:help].include?(controller_name))),
+                         badge: help_open, title: (t(".help_open", count: help_open) if help_open.to_i.positive?) %>
+          </div>
+          <span class="flex gap-1 text-xs">
             <% I18n.available_locales.each do |locale| %>
               <%= button_to locale.upcase, locale_path, method: :patch, params: { locale: locale },
                             class: "rounded px-1.5 py-0.5 #{locale == I18n.locale ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-200'}" %>
