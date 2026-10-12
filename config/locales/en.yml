@@ -52,7 +52,7 @@ en:
         ⌘/Ctrl + F: go to the search (twice: the browser's find)
         Enter: search
         Esc: leave the field
-        Shift + Esc: clear everything, text, filters and sort
+        Esc + Esc: clear everything, text, filters and sort
         In the text, before Enter:
         #120, #120-180: by number
         key:…: by key
@@ -163,7 +163,7 @@ en:
       contact_hint: "Access, a new language, a problem with the tool… For a question about a given translation, use the key's comments instead."
       placeholder: "Your message…"
       page: "Sent with the page:"
-      reply_hint: "The answer will come by e-mail to %{email}."
+      reply_hint: "The answer will be sent e-mail to %{email}."
       send: "Send"
 
   help_requests:

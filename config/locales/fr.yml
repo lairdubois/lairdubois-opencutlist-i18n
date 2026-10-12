@@ -52,7 +52,7 @@ fr:
         ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
         Entrée : rechercher
         Échap : quitter le champ
-        Maj + Échap : tout effacer, texte, filtres et tri
+        Échap + Échap : tout effacer, texte, filtres et tri
         Dans le texte, avant Entrée :
         #120, #120-180 : par numéro
         key:… : par clé
