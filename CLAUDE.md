@@ -132,10 +132,10 @@ each entry's count under the other filters.
   revisions (in the edited language on the translator's list ; `Revision.by_user` includes Transifex imports through
   `transifex_username`). A single `at` index (no `-`) is exclusive : applying it drops the others, any other change
   drops it (`ListFilters` too ; the menu's counts leave it out).
-- Keys : Mod-F focuses `q` (again in it : the browser's find), Esc blurs it and the chips' inputs, Shift-Esc resets
-  the search ; Enter and Shift-Esc keep the focus across the Turbo visit (sessionStorage flag). On Enter, `#120` /
-  `#120-180`, `key:…`, `branch:…`, `user:…` (a name or its start, `_` for a space, left in `q` unless exactly one
-  matches) words of `q` move to their chip.
+- Keys : Mod-F focuses `q` (again in it : the browser's find), Esc blurs it and the chips' inputs, a second Esc
+  within 500 ms resets the search (not Shift-Esc : Chrome's task manager) ; Enter and the reset keep the focus across
+  the Turbo visit (sessionStorage flag). On Enter, `#120` / `#120-180`, `key:…`, `branch:…`, `user:…` (a name or its
+  start, `_` for a space, left in `q` unless exactly one matches) words of `q` move to their chip.
 - Users page : its own `users/_search_bar` (same look, same `search_bar_controller`) over `UserList` (in memory) :
   `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language, `disabled` too),
   `days` (activity, or `never`), sorts name / activity / contributions / created.
@@ -143,7 +143,7 @@ each entry's count under the other filters.
   (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
 - Sort (translator's list only, `sorts:` local) : `sort` = `index` (default) / `updated` (last revision in the language
   or fr source one, `TranslationsController::SOURCE_KINDS`, never revised last), `dir`. Not a filter : its own menu,
-  a sky chip whose arrow reverses it (removed by "remove all" / Shift-Esc), kept by a single `at`.
+  a sky chip whose arrow reverses it (removed by "remove all" / Esc twice), kept by a single `at`.
 
 ## YAML I/O
 

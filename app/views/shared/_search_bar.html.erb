@@ -13,7 +13,7 @@
 <% sub_chip_remove = "flex h-4 w-4 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-200 hover:text-stone-900" %>
 <% item = "flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100" %>
 <%= form_with url: url, method: :get, class: "min-w-0 flex-1",
-              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut" } do %>
+              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut keydown.esc@window->search-bar#escape" } do %>
   <% hidden.compact_blank.each do |name, value| %>
     <%= hidden_field_tag name, value, id: nil %>
   <% end %>
@@ -26,7 +26,7 @@
         </svg>
       </span>
       <%= search_field_tag :q, params[:q], id: nil, placeholder: t(".placeholder"), autocomplete: "off",
-                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset" },
+                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur" },
                            class: "peer h-8 min-w-0 flex-1 appearance-none bg-transparent py-1.5 text-sm text-stone-900 outline-none [&::-webkit-search-cancel-button]:appearance-none" %>
       <button type="button" title="<%= t(".clear") %>" data-action="search-bar#clear"
               class="flex h-5 w-5 items-center justify-center rounded leading-none text-stone-400 peer-placeholder-shown:hidden hover:bg-stone-100 hover:text-stone-700">×</button>
@@ -99,7 +99,7 @@
               </span>
             <% else %>
               <%= text_field_tag name, params[name], id: nil, disabled: !applied, autocomplete: "off", placeholder: t(".placeholders.#{name}"),
-                                 data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset blur->search-bar#drop" },
+                                 data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur blur->search-bar#drop" },
                                  class: "bg-transparent text-stone-900 outline-none placeholder:text-stone-400 #{name == 'at' ? 'w-28 tabular-nums' : 'w-44 font-mono'}" %>
             <% end %>
             <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>

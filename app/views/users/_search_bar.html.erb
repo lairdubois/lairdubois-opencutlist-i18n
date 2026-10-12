@@ -10,7 +10,7 @@
   <button type="button" title="<%= t("#{search}.remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
 <% end %>
 <%= form_with url: users_path, method: :get, class: "min-w-0 flex-1",
-              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut" } do %>
+              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut keydown.esc@window->search-bar#escape" } do %>
   <div class="rounded border border-stone-300 bg-white focus-within:border-stone-400">
     <div class="flex items-center gap-2 pr-1 pl-2.5">
       <span title="<%= t(".shortcuts").strip %>" class="shrink-0 cursor-help">
@@ -19,7 +19,7 @@
         </svg>
       </span>
       <%= search_field_tag :q, params[:q], id: nil, placeholder: t(".placeholder"), autocomplete: "off",
-                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur keydown.shift+esc->search-bar#reset" },
+                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur" },
                            class: "peer h-8 min-w-0 flex-1 appearance-none bg-transparent py-1.5 text-sm text-stone-900 outline-none [&::-webkit-search-cancel-button]:appearance-none" %>
       <button type="button" title="<%= t("#{search}.clear") %>" data-action="search-bar#clear"
               class="flex h-5 w-5 items-center justify-center rounded leading-none text-stone-400 peer-placeholder-shown:hidden hover:bg-stone-100 hover:text-stone-700">×</button>

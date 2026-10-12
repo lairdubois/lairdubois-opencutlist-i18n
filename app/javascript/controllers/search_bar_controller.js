@@ -17,7 +17,7 @@ export default class extends Controller {
   static KEYWORDS = { at: /^#(\d+(?:-\d*)?|-\d+)$/, key: /^(?:key|cl[eé]):(.+)$/i, prefix: /^(?:branch|branche):(.+)$/i, user: /^(?:user|utilisateur):(.+)$/i }
   static REFOCUS = "search-bar:refocus"
 
-  // A field submitted with Enter (or reset with Shift-Esc) gets the focus back on the rendered page,
+  // A field submitted with Enter (or reset with Esc twice) gets the focus back on the rendered page,
   // the caret at the end (not on Turbo's cache preview). The text search if that chip went away.
   connect() {
     if (document.documentElement.hasAttribute("data-turbo-preview")) return
@@ -127,6 +127,16 @@ export default class extends Controller {
   blur(event) {
     event.preventDefault()
     event.target.blur()
+    this.blurredAt = event.timeStamp
+  }
+
+  // Esc again right after leaving a field resets the search (Shift-Esc is the browser's task manager in Chrome).
+  // The Esc that left the field reaches the window too, already handled (defaultPrevented)
+  escape(event) {
+    if (event.defaultPrevented || event.timeStamp - (this.blurredAt ?? -Infinity) > 500) return
+
+    this.blurredAt = null
+    this.reset()
   }
 
   clear(event) {
@@ -211,7 +221,7 @@ export default class extends Controller {
     this.submit()
   }
 
-  // Shift-Esc : the text search and every chip
+  // Esc twice : the text search and every chip
   reset() {
     this.element.querySelector("input[name=q]").value = ""
     this.refocus("q")
