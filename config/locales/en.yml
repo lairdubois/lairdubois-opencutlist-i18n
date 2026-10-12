@@ -43,8 +43,8 @@ en:
 
   shared:
     copy_button:
-      label: "Copy the text"
-      copied: "Copied to the clipboard"
+      label: "Copy to clipboard"
+      copied: "Copied to clipboard"
     search_bar:
       placeholder: "Search the texts..."
       clear: "Clear"

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
@@ -15,7 +18,10 @@
     <%# Sticky : 3.5rem nav + 1px border, page toolbars stick below it (.toolbar in application.css) %>
     <header class="sticky top-0 z-20 border-b border-stone-200 bg-white">
       <nav class="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 text-sm">
-        <%= link_to "OpenCutList Localize", root_path, class: "text-base font-semibold" %>
+        <%= link_to root_path, class: "flex items-center gap-2 text-base font-semibold" do %>
+          <img src="/icon.svg" alt="" class="size-7">
+          OpenCutList Localize
+        <% end %>
         <% if current_user %>
           <% if current_user.admin? %>
             <%= nav_link :keys, units_path %>

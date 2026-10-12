@@ -1,11 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
-import { createI18nView, replaceText, insertText, focusEnd, missingInvariants } from "lib/i18n_text"
+import { createI18nView, replaceText, insertText, focusEnd, focusSibling, missingInvariants } from "lib/i18n_text"
 
 // Shows an OCL string in CodeMirror : invariants highlighted, whitespace revealed on demand.
 // On a form with a `field` textarea : an editor, the textarea kept hidden and in sync. With a `source`
 // value (translator's editor), the source's {{ variables }}, $t() and tags are locked and the missing ones
 // offered as chips ; without (fr source editor), nothing is locked. Mod-Enter submits, Shift-Mod-Enter
-// through the `review` button, hidden while the text is blank (a blank save removes the translation).
+// through the `review` button, hidden while the text is blank (a blank save removes the translation) ;
+// both then move the focus to the page's next editor.
 // `autofocus` : focused on load, the cursor at the end.
 // On any other element : a read-only view of the `text` value, invariants missing from `source` (if
 // given) flagged.
@@ -54,8 +55,7 @@ export default class extends Controller {
       className: field.className,
       // Announced for dirty-form : setting the value doesn't fire `input`
       onChange: (text) => { field.value = text; this.renderChips(); this.toggleReview(); this.dispatch("change") },
-      // Without a review button (not a reviewer, or a blank text), Shift-Mod-Enter is a plain save
-      onSubmit: ({ review } = {}) => this.element.requestSubmit(review && this.hasReviewTarget && !this.reviewTarget.hidden ? this.reviewTarget : undefined),
+      onSubmit: ({ review } = {}) => this.submit(review),
     })
     field.after(this.view.dom)
     field.hidden = true
@@ -65,6 +65,16 @@ export default class extends Controller {
     this.renderChips()
     this.toggleReview()
     if (this.autofocusValue) focusEnd(this.view)
+  }
+
+  // Without a review button (not a reviewer, or a blank text), Shift-Mod-Enter is a plain save.
+  // The focus moves on once the submission is under way : not when dirty-form refuses a clean form (its
+  // listener, added at its connect, runs before this one). The saved row's re-rendered editor doesn't take it back.
+  submit(review) {
+    const moveOn = (event) => { if (!event.defaultPrevented) focusSibling(this.view, 1) }
+    this.element.addEventListener("submit", moveOn, { once: true })
+    this.element.requestSubmit(review && this.hasReviewTarget && !this.reviewTarget.hidden ? this.reviewTarget : undefined)
+    this.element.removeEventListener("submit", moveOn)
   }
 
   toggleReview() {

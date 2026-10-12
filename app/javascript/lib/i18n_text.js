@@ -182,7 +182,9 @@ export function createI18nView({ parent, text, source = null, refs = {}, editabl
       history(),
       // Plain newline : no indentation copied from the previous line
       // Mod-Enter saves, Shift-Mod-Enter saves and approves
-      keymap.of([{ key: "Mod-Enter", run: () => { onSubmit?.(); return true }, shift: () => { onSubmit?.({ review: true }); return true } }, { key: "Enter", run: insertNewline }, ...defaultKeymap, ...historyKeymap]),
+      // Tab / Shift-Tab : the page's next / previous editor, skipping the buttons between them
+      keymap.of([{ key: "Mod-Enter", run: () => { onSubmit?.(); return true }, shift: () => { onSubmit?.({ review: true }); return true } }, { key: "Enter", run: insertNewline },
+        { key: "Tab", run: (view) => focusSibling(view, 1), shift: (view) => focusSibling(view, -1) }, ...defaultKeymap, ...historyKeymap]),
       EditorView.contentAttributes.of({ spellcheck: "true", lang: lang || "", autocorrect: "off", autocapitalize: "off" }),
       EditorView.updateListener.of((update) => { if (update.docChanged) onChange?.(update.state.doc.toString()) }),
     )
@@ -203,6 +205,17 @@ export function insertText(view, text) {
   const { from, to } = view.state.selection.main
   view.dispatch({ changes: { from, to, insert: text }, selection: { anchor: from + text.length }, scrollIntoView: true, userEvent: "input" })
   view.focus()
+}
+
+// Moves the focus to the next (1) or previous (-1) visible editor of the page, cursor at the end. None
+// (the first or last one) : false, the browser's Tab goes on (e.g. to the buttons after the last one)
+export function focusSibling(view, step) {
+  const editors = [...document.querySelectorAll(".cm-editor.i18n-editor")].filter((el) => el.getClientRects().length)
+  const target = editors[editors.indexOf(view.dom) + step]
+  const sibling = target && EditorView.findFromDOM(target)
+  if (!sibling) return false
+  focusEnd(sibling)
+  return true
 }
 
 // Focuses the editor, cursor at the end of the text

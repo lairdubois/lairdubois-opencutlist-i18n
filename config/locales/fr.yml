@@ -43,7 +43,7 @@ fr:
 
   shared:
     copy_button:
-      label: "Copier le texte"
+      label: "Copier dans le presse-papier"
       copied: "Copié dans le presse-papier"
     search_bar:
       placeholder: "Rechercher dans les textes..."
