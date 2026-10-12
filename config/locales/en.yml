@@ -208,6 +208,9 @@ en:
       show_whitespace: "Show spaces and line breaks"
       show_keys: "Always show the key names"
       switch_language: "Switch language"
+      only_status: "Show only the \"%{status}\" keys"
+      remove_status: "Remove the \"%{status}\" filter"
+      more_filters: "More…"
       pretranslate:
         one: "🤖 Suggest translations (%{language}) for the first string to do"
         other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"

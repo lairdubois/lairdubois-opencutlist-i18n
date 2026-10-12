@@ -67,6 +67,27 @@
         <% else %>
           <h2 class="text-lg font-semibold"><%= @language.name %></h2>
         <% end %>
+        <%# Shortcuts to the outdated and not translated keys, the other filters kept (their counts are the menu's) ;
+            pressed when it is the only status, a click then drops it. A single index is exclusive : left out either way.
+            Hidden without matches, unless pressed (to drop it). "More…" opens the search bar's filters menu, under its button %>
+        <div class="flex shrink-0 items-center gap-1">
+          <% %w[outdated not_translated].each do |status| %>
+            <% on = statuses == [status] %>
+            <% next if @counts[status].zero? && !on %>
+            <% status_params = list_params.except(:status).merge(on ? {} : { status: [status] }) %>
+            <% status_params = status_params.except(:at) unless status_params[:at].to_s.include?("-") %>
+            <% label = t("shared.search_bar.statuses.#{status}") %>
+            <%= link_to translate_path(@language.code, status_params), aria: { pressed: on },
+                        title: t(on ? ".remove_status" : ".only_status", status: label),
+                        class: "flex items-center gap-1.5 rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-100 aria-pressed:border-stone-800 aria-pressed:bg-stone-800 aria-pressed:text-white" do %>
+              <%= status_dot(status) %>
+              <%= label %>
+              <span class="tabular-nums opacity-70"><%= number_with_delimiter(@counts[status]) %></span>
+            <% end %>
+          <% end %>
+          <button type="button" popovertarget="search-filters"
+                  class="rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-100"><%= t(".more_filters") %></button>
+        </div>
         <button type="button" hidden data-unsaved-guard-target="count" data-action="unsaved-guard#reveal"
                 class="rounded bg-sky-50 px-2 py-0.5 text-sm text-sky-800 hover:bg-sky-100"></button>
       </div>

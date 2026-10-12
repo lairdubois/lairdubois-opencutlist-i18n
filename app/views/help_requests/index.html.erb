@@ -1,0 +1,32 @@
+<% content_for :title, "#{t(".title")} · OpenCutList Localize" %>
+<div class="mb-4 flex items-baseline gap-4">
+  <h1 class="text-lg font-semibold"><%= t(".title") %></h1>
+  <%= link_to t(".guide"), help_path, class: "text-sm text-stone-600 underline" %>
+</div>
+<% unless ActionMailer::Base.perform_deliveries %>
+  <p class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900"><%= t(".mail_disabled") %></p>
+<% end %>
+<div class="flex flex-col gap-3">
+  <% @help_requests.each do |r| %>
+    <div class="rounded border border-stone-200 bg-white px-4 py-3 text-sm <%= "opacity-60" if r.resolved? %>">
+      <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
+        <span class="font-medium text-stone-900"><%= r.user.name %></span>
+        <%= mail_to r.user.email, class: "underline" %>
+        <span title="<%= l r.created_at %>"><%= t(".ago", time: time_ago_in_words(r.created_at)) %></span>
+        <% if r.language %><span><%= r.language.name %></span><% end %>
+        <% if r.page %><%= link_to r.page, r.page, class: "max-w-80 truncate font-mono underline", target: "_blank" %><% end %>
+        <span class="ml-auto"></span>
+        <% if r.resolved? %>
+          <span><%= t(".resolved") %></span>
+          <%= button_to t(".reopen"), resolve_help_request_path(r), method: :patch, params: { reopen: 1 },
+                        class: "rounded px-2 py-0.5 hover:bg-stone-100" %>
+        <% else %>
+          <%= button_to t(".resolve"), resolve_help_request_path(r), method: :patch,
+                        class: "rounded border border-stone-300 px-2 py-0.5 text-stone-700 hover:bg-stone-100" %>
+        <% end %>
+      </div>
+      <p class="whitespace-pre-wrap"><%= r.body %></p>
+    </div>
+  <% end %>
+  <% if @help_requests.empty? %><p class="text-sm text-stone-500"><%= t(".empty") %></p><% end %>
+</div>

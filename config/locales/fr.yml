@@ -208,6 +208,9 @@ fr:
       show_whitespace: "Afficher les espaces et retours à la ligne"
       show_keys: "Toujours afficher les noms des clés"
       switch_language: "Changer de langue"
+      only_status: "Afficher seulement les clés « %{status} »"
+      remove_status: "Retirer le filtre « %{status} »"
+      more_filters: "Plus…"
       pretranslate:
         one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
         other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"

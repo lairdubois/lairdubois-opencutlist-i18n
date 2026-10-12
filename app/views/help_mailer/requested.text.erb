@@ -1,0 +1,9 @@
+<%= t(".asked", name: @help_request.user.name, email: @help_request.user.email) %>
+
+<%= @help_request.body %>
+
+<% if @page_url %><%= t(".page") %> <%= @page_url %>
+<% end %><% if @help_request.language %><%= t(".language") %> <%= @help_request.language.name %>
+<% end %>
+<%= t(".reply") %>
+<%= t(".list") %> <%= help_requests_url %>

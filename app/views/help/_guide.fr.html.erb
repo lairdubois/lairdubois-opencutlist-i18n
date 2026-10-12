@@ -1,0 +1,77 @@
+<h1>Aide</h1>
+<p>
+  Chaque ligne de la liste est une <strong>clé</strong> de l'interface d'OpenCutList : à gauche le texte de référence
+  (la source française, ou la traduction anglaise si tu la choisis au-dessus de la colonne), à droite ta traduction.
+  Écris-la puis enregistre : elle est enregistrée sans quitter la page.
+</p>
+
+<h2>Statuts</h2>
+<dl>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>À revoir</strong></dt><dd>Le texte français a changé depuis ta traduction. Vérifie-la, corrige-la si besoin, puis enregistre, même sans rien changer, pour la valider à nouveau.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Non traduite</strong></dt><dd>Rien n'a encore été écrit dans ta langue.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Non approuvée</strong></dt><dd>Traduite, pas encore relue.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approuvée</strong></dt><dd>Validée par un relecteur de la langue.</dd>
+</dl>
+<p>Les relecteurs ont un bouton <strong>Approuver</strong> en plus de <strong>Enregistrer</strong>.</p>
+
+<h2>L'éditeur</h2>
+<ul>
+  <li>
+    Certaines parties du texte français doivent se retrouver telles quelles dans la traduction : les variables
+    <code>{{ count }}</code>, les références à d'autres clés <code>$t(tab.cutlist.title)</code>, les balises HTML
+    <code>&lt;strong&gt;</code> et les entités <code>&amp;nbsp;</code>. Elles sont <strong>verrouillées</strong> : tu peux les
+    déplacer dans la phrase, pas les modifier. S'il en manque une, une pastille sous l'éditeur permet de la remettre ;
+    une inconnue apparaît en rouge.
+  </li>
+  <li><kbd>⌘</kbd>-clic (<kbd>Ctrl</kbd>-clic) sur une référence <code>$t(…)</code> ouvre la clé qu'elle désigne dans un nouvel onglet.</li>
+  <li>
+    Le Markdown est à conserver : <code>**gras**</code>, <code>*italique*</code>, liens <code>[texte](url)</code>.
+    Traduis le texte du lien, garde l'url.
+  </li>
+  <li>
+    Les <strong>propositions</strong> sous l'éditeur (🤖 traduction automatique, « Même texte ailleurs ») le remplissent d'un
+    clic : relis avant d'enregistrer.
+  </li>
+  <li>
+    Les <strong>avertissements</strong> ⚠ (point final, espaces, nombre de lignes…) ne bloquent pas l'enregistrement :
+    ils signalent ce qui mérite un coup d'œil.
+  </li>
+  <li>Les clés grisées sont <strong>recopiées</strong> telles quelles dans chaque langue : rien à traduire.</li>
+  <li>
+    Au-dessus de la liste, <kbd>¶</kbd> montre les espaces et retours à la ligne, le bouton clé affiche toujours les noms
+    des clés (sinon au survol).
+  </li>
+  <li>
+    Une traduction modifiée et pas encore enregistrée apparaît sur fond bleu ; la page prévient avant de partir s'il en
+    reste.
+  </li>
+</ul>
+
+<h2>Raccourcis</h2>
+<dl>
+  <dt><kbd>⌘/Ctrl</kbd> + <kbd>Entrée</kbd></dt><dd>Enregistrer</dd>
+  <dt><kbd>⌘/Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>Entrée</kbd></dt><dd>Enregistrer et approuver (relecteurs)</dd>
+  <dt><kbd>⌘/Ctrl</kbd> + <kbd>F</kbd></dt><dd>Aller à la recherche (une 2e fois : celle du navigateur)</dd>
+  <dt><kbd>Échap</kbd></dt><dd>Quitter le champ de recherche</dd>
+  <dt><kbd>Maj</kbd> + <kbd>Échap</kbd></dt><dd>Effacer la recherche, les filtres et le tri</dd>
+</dl>
+
+<h2>Rechercher et filtrer</h2>
+<p>
+  La recherche porte sur les textes. Le menu <strong>Filtres</strong> restreint la liste par statut, aux questions
+  ouvertes, aux avertissements ou aux clés modifiées récemment ; le menu <strong>Tri</strong> la classe par date de
+  modification. Dans le champ de recherche, avant <kbd>Entrée</kbd> :
+</p>
+<dl>
+  <dt><code>#120</code>, <code>#120-180</code></dt><dd>par numéro de ligne</dd>
+  <dt><code>key:…</code></dt><dd>par nom de clé</dd>
+  <dt><code>branch:…</code></dt><dd>par branche (<code>tab.cutlist</code>)</dd>
+  <dt><code>user:…</code></dt><dd>par auteur (nom ou début du nom)</dd>
+</dl>
+
+<h2>Poser une question</h2>
+<p>
+  Un doute sur le sens d'un texte ? Le bouton <strong>commentaires</strong> sous chaque traduction permet de poser une
+  question sur cette clé : les administrateurs et les relecteurs de ta langue sont prévenus, et la réponse s'affiche au même
+  endroit. Pour tout le reste (accès, nouvelle langue, problème avec l'outil…), écris-nous avec le formulaire.
+</p>
