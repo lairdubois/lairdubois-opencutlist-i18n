@@ -1,0 +1,35 @@
+<%# A language's card on the home page. Locals : language, stats, state (LanguagesController#state), editable
+    (else greyed out, not linked) %>
+<%= content_tag editable ? :a : :div, href: (translate_path(language.code) if editable),
+                title: (t("languages.index.not_editable") unless editable),
+                class: ["block rounded border p-4", editable ? ApplicationHelper::LANGUAGE_CARDS[state] : "cursor-default border-stone-200 bg-stone-50 opacity-50 grayscale"] do %>
+  <div class="mb-2 flex items-baseline justify-between">
+    <span class="flex items-center gap-1.5 font-medium">
+      <%= language.name %>
+      <% if state == :approved %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4 self-center text-emerald-600" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+      <% end %>
+    </span>
+    <span class="text-sm text-stone-500"><%= language.code.upcase %></span>
+  </div>
+  <%= render "shared/progress_bar", stats: stats, css: "mb-2 h-2" %>
+  <p class="text-sm text-stone-600">
+    <% case state %>
+    <% when :outdated, :translating %>
+      <%= t("languages.index.translated", percent: progress_percent(stats[:translated], stats[:total])) %>
+      <% if stats[:translated] < stats[:total] %>
+        · <span class="inline-flex items-center gap-1"><%= status_dot("not_translated") %><%= t("languages.index.todo", count: stats[:total] - stats[:translated]) %></span>
+      <% end %>
+      <% if stats[:outdated] > 0 %>
+        · <span class="inline-flex items-center gap-1 text-orange-700"><%= status_dot("outdated") %><%= t("status.outdated_count", count: stats[:outdated]) %></span>
+      <% end %>
+    <% when :translated %>
+      <span class="font-medium text-sky-700"><%= t("languages.index.complete") %></span>
+      · <span class="inline-flex items-center gap-1"><%= status_dot("not_approved") %><%= t("languages.index.to_approve", count: stats[:total] - stats[:approved]) %></span>
+    <% else %>
+      <span class="font-medium text-emerald-700"><%= t("languages.index.approved") %></span>
+    <% end %>
+  </p>
+<% end %>

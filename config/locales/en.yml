@@ -207,6 +207,14 @@ en:
         one: "%{count} to approve"
         other: "%{count} to approve"
       approved: "All approved"
+      columns:
+        todo: "To translate / review"
+        to_approve: "To approve"
+        ready: "Ready!"
+      empty: "No language"
+      not_editable: "Language not assigned to you"
+      all: "All"
+      mine: "My languages"
 
   translations:
     index:

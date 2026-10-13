@@ -1,44 +1,33 @@
-<h1 class="mb-4 text-lg font-semibold"><%= t(".title") %></h1>
-<% if @languages.empty? %>
-  <p class="text-stone-600"><%= t(".none") %></p>
+<div class="mb-4 flex items-center gap-4">
+  <h1 class="text-lg font-semibold"><%= t(".title") %></h1>
+  <% if @mine_filter %>
+    <span class="inline-flex shrink-0 rounded border border-stone-300 bg-stone-100 p-0.5 text-xs">
+      <% [[t(".all"), translate_root_path, !@mine], [t(".mine"), translate_root_path(mine: 1), @mine]].each do |label, path, current| %>
+        <%= link_to label, path, aria: { current: current ? "page" : nil },
+                    class: "rounded px-2.5 py-0.5 text-stone-500 hover:text-stone-900 aria-[current=page]:bg-white aria-[current=page]:text-stone-900 aria-[current=page]:shadow-sm" %>
+      <% end %>
+    </span>
+  <% end %>
+</div>
+<% if @editable.empty? %>
+  <p class="mb-4 text-stone-600"><%= t(".none") %></p>
 <% end %>
-<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-  <% @languages.each do |language| %>
-    <% s = @stats[language] %>
-    <% state = if s[:outdated] > 0 then :outdated
-               elsif s[:translated] < s[:total] then :translating
-               elsif s[:approved] < s[:total] then :translated
-               else :approved end %>
-    <%= link_to translate_path(language.code), class: ["block rounded border p-4", ApplicationHelper::LANGUAGE_CARDS[state]] do %>
-      <div class="mb-2 flex items-baseline justify-between">
-        <span class="flex items-center gap-1.5 font-medium">
-          <%= language.name %>
-          <% if state == :approved %>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4 self-center text-emerald-600" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-          <% end %>
-        </span>
-        <span class="text-sm text-stone-500"><%= language.code.upcase %></span>
-      </div>
-      <%= render "shared/progress_bar", stats: s, css: "mb-2 h-2" %>
-      <p class="text-sm text-stone-600">
-        <% case state %>
-        <% when :outdated, :translating %>
-          <%= t(".translated", percent: progress_percent(s[:translated], s[:total])) %>
-          <% if s[:translated] < s[:total] %>
-            · <span class="inline-flex items-center gap-1"><%= status_dot("not_translated") %><%= t(".todo", count: s[:total] - s[:translated]) %></span>
-          <% end %>
-          <% if s[:outdated] > 0 %>
-            · <span class="inline-flex items-center gap-1 text-orange-700"><%= status_dot("outdated") %><%= t("status.outdated_count", count: s[:outdated]) %></span>
-          <% end %>
-        <% when :translated %>
-          <span class="font-medium text-sky-700"><%= t(".complete") %></span>
-          · <span class="inline-flex items-center gap-1"><%= status_dot("not_approved") %><%= t(".to_approve", count: s[:total] - s[:approved]) %></span>
-        <% else %>
-          <span class="font-medium text-emerald-700"><%= t(".approved") %></span>
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <% @columns.each do |column, languages| %>
+    <section>
+      <h2 class="mb-2 flex items-baseline gap-2 text-sm font-semibold text-stone-700">
+        <%= t(".columns.#{column}") %>
+        <span class="font-normal text-stone-400"><%= languages.size %></span>
+      </h2>
+      <div class="space-y-3">
+        <% languages.each do |language| %>
+          <%= render "card", language: language, stats: @stats[language], state: @states[language],
+                              editable: @editable.include?(language.id) %>
         <% end %>
-      </p>
-    <% end %>
+        <% if languages.empty? %>
+          <p class="rounded border border-dashed border-stone-300 p-4 text-center text-sm text-stone-400"><%= t(".empty") %></p>
+        <% end %>
+      </div>
+    </section>
   <% end %>
 </div>

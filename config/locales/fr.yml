@@ -207,6 +207,14 @@ fr:
         one: "%{count} à approuver"
         other: "%{count} à approuver"
       approved: "Tout est approuvé"
+      columns:
+        todo: "À traduire / revoir"
+        to_approve: "À approuver"
+        ready: "Prêtes !"
+      empty: "Aucune langue"
+      not_editable: "Langue qui ne t'est pas attribuée"
+      all: "Toutes"
+      mine: "Mes langues"
 
   translations:
     index:
