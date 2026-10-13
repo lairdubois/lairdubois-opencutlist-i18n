@@ -62,3 +62,7 @@ the PR in their name ; it only reaches the repos the App is installed on, and on
 permissions. The account is refused unless it has write access to the OCL repo. Without a connected
 account, publishing falls back to the App. Disconnecting revokes the authorization on GitHub.
 Encryption keys are derived from `secret_key_base` : changing it means admins reconnect.
+
+## License
+
+GNU General Public License v3.0, like OpenCutList : see `LICENSE`.
