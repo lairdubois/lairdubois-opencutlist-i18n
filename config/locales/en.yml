@@ -58,6 +58,7 @@ en:
         key:…: by key
         branch:…: by branch
         user:…: by user (name or start of it)
+        "Word ": exact text between quotes (spaces, case and accents included)
       remove: "Remove"
       remove_all: "Remove every filter and the sort"
       count:
@@ -201,6 +202,11 @@ en:
       todo:
         one: "%{count} to translate"
         other: "%{count} to translate"
+      complete: "Fully translated"
+      to_approve:
+        one: "%{count} to approve"
+        other: "%{count} to approve"
+      approved: "All approved"
 
   translations:
     index:

@@ -126,7 +126,9 @@ Weblate was evaluated and rejected.
 
 `shared/_search_bar` + `search_bar_controller` + `ListFilters`. Every change submits the GET form ; the menu shows
 each entry's count under the other filters.
-- `q` searches the texts only ; `status[]` (not_translated / outdated / not_approved / approved, a partition) is OR-ed ;
+- `q` searches the texts only, case and accents aside (`"…"` : exact, spaces, case and accents included,
+  `Query#exact?`), matches highlighted (`SearchHelper#highlight_search`, `data-search-text` / `-exact` for the
+  `i18n-text` views) ; `status[]` (not_translated / outdated / not_approved / approved, a partition) is OR-ed ;
   `questions=1`, `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
   max `updated_at` + the rules file's digest. `days` = `ListFilters::PERIODS`, one at a time, a revision since then
   (same kinds as the sort on the translator's list, any on the keys list).

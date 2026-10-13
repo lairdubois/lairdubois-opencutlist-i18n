@@ -1,7 +1,9 @@
 <% content_for :title, "#{@language.name} · OpenCutList Localize" %>
 <%# reference : the ref-en class shows the en reference instead of the fr source in the rows, switched without a reload %>
+<%# data-search-text : the searched text, highlighted by the rows' i18n-text views (data-search-exact : case and
+    accents included) %>
 <div data-controller="reference" data-reference-url-value="<%= reference_language_path %>"
-     class="<%= 'ref-en' if @en_reference %>">
+     data-search-text="<%= list_text %>" data-search-exact="<%= list_exact? %>" class="<%= 'ref-en' if @en_reference %>">
 <%# Toolbar (filters, search, column headers) stays on screen above the rows (.toolbar in application.css) %>
 <div class="toolbar">
   <div class="mb-2 flex flex-wrap items-start gap-3">

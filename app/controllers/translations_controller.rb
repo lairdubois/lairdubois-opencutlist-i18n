@@ -180,13 +180,17 @@ class TranslationsController < ApplicationController
       user = list_query.user
       scope = user ? scope.where(units: { id: Revision.unscope(:order).where(language: @language).by_user(user).select(:unit_id) }) : scope.none
     end
-    if params[:q].present?
-      like = "%#{Unit.sanitize_sql_like(SqliteFold.fold(params[:q]))}%"
+    if (text = list_query.text)
+      columns = ["units.source_text", "translations.text"]
       if @en_reference
         scope = scope.joins(Unit.sanitize_sql_array(["LEFT JOIN translations refs ON refs.unit_id = units.id AND refs.language_id = ?", @en.id]))
-                     .where("fold(units.source_text) LIKE :q ESCAPE '\\' OR fold(translations.text) LIKE :q ESCAPE '\\' OR fold(refs.text) LIKE :q ESCAPE '\\'", q: like)
+        columns << "refs.text"
+      end
+      # Exact ("quoted") : instr, case and accents included ; else fold LIKE, both aside
+      scope = if list_query.exact?
+        scope.where(columns.map { |c| "instr(#{c}, :q) > 0" }.join(" OR "), q: text)
       else
-        scope = scope.where("fold(units.source_text) LIKE :q ESCAPE '\\' OR fold(translations.text) LIKE :q ESCAPE '\\'", q: like)
+        scope.where(columns.map { |c| "fold(#{c}) LIKE :q ESCAPE '\\'" }.join(" OR "), q: "%#{Unit.sanitize_sql_like(SqliteFold.fold(text))}%")
       end
     end
     single_index? ? scope : filter_by_index(scope)

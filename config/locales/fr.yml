@@ -58,6 +58,7 @@ fr:
         key:… : par clé
         branch:… : par branche
         user:… : par utilisateur (nom ou début du nom)
+        "Mot " : texte exact entre guillemets (espaces, majuscules et accents compris)
       remove: "Retirer"
       remove_all: "Retirer tous les filtres et le tri"
       count:
@@ -201,6 +202,11 @@ fr:
       todo:
         one: "%{count} à traduire"
         other: "%{count} à traduire"
+      complete: "Traduction complète"
+      to_approve:
+        one: "%{count} à approuver"
+        other: "%{count} à approuver"
+      approved: "Tout est approuvé"
 
   translations:
     index:

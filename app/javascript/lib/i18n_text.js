@@ -74,8 +74,35 @@ class EndOfLine extends WidgetType {
 }
 const endOfLine = Decoration.widget({ widget: new EndOfLine(), side: 1 })
 
+// Case and accents aside, as the server's search (SqliteFold)
+const fold = (text) => text.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase()
+
+// The ranges of text matching search : exact, or folded
+function searchHits(text, search, exact) {
+  const pattern = exact ? search : fold(search)
+  if (!pattern) return []
+
+  // The folded text, and the offset in text of each folded character's source
+  let folded = ""
+  const origins = []
+  for (let i = 0; i < text.length;) {
+    const char = String.fromCodePoint(text.codePointAt(i))
+    const f = exact ? char : fold(char)
+    folded += f
+    for (let k = 0; k < f.length; k++) origins.push(i)
+    i += char.length
+  }
+  origins.push(text.length)
+  const hits = []
+  for (let at = folded.indexOf(pattern); at >= 0; at = folded.indexOf(pattern, at + pattern.length)) {
+    const last = origins[at + pattern.length - 1]
+    hits.push({ from: origins[at], to: last + String.fromCodePoint(text.codePointAt(last)).length })
+  }
+  return hits
+}
+
 // Decorations of a text, and the ranges locked in the editor (invariants also in the source)
-function analyse(text, { source, refs, editable }) {
+function analyse(text, { source, refs, editable, search, searchExact }) {
   const expected = source == null ? null : new Set(invariants(source).map((t) => normalize(t.text)))
   const tokens = invariants(text)
   const marks = []
@@ -96,6 +123,7 @@ function analyse(text, { source, refs, editable }) {
   }
   for (const m of text.matchAll(/[ \u00a0\t]+$/gm)) marks.push(Decoration.mark({ class: "ws-trailing" }).range(m.index, m.index + m[0].length))
   for (const m of text.matchAll(/\n/g)) marks.push(endOfLine.range(m.index))
+  if (search) for (const h of searchHits(text, search, searchExact)) marks.push(Decoration.mark({ class: "search-hit" }).range(h.from, h.to))
   return {
     decorations: Decoration.set(marks, true),
     atomic: Decoration.set(locked.map((t) => Decoration.mark({}).range(t.from, t.to))),
@@ -161,8 +189,9 @@ const layout = EditorView.theme({
 // source : the fr text ; invariants it lacks are flagged, the ones it has are locked in an editor (null :
 // nothing flagged nor locked, e.g. the fr source itself) ; refs : $t() key => { title (tooltip), url (opened by Mod-click) }.
 // className : extra classes of the editor element (CodeMirror rewrites its class attribute, classList.add doesn't last).
-export function createI18nView({ parent, text, source = null, refs = {}, editable = false, lang, dir = "ltr", className = "", onChange, onSubmit }) {
-  const options = { source, refs, editable }
+// search : the list's searched text, its matches highlighted (searchExact : case and accents included).
+export function createI18nView({ parent, text, source = null, refs = {}, editable = false, lang, dir = "ltr", className = "", search = "", searchExact = false, onChange, onSubmit }) {
+  const options = { source, refs, editable, search, searchExact }
   const field = StateField.define({
     create: (state) => analyse(state.doc.toString(), options),
     update: (value, tr) => (tr.docChanged ? analyse(tr.state.doc.toString(), options) : value),

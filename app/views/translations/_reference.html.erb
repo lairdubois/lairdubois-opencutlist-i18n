@@ -28,7 +28,7 @@
       <% if en_main && en.outdated? %>
         <div class="flex flex-col items-start gap-1">
           <span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_outdated") %></span>
-          <p class="whitespace-pre-wrap text-xs text-stone-800"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= unit.source_text %></p>
+          <p class="whitespace-pre-wrap text-xs text-stone-800"><span class="font-medium"><%= Language::SOURCE_CODE.upcase %> · <%= t(".source") %></span> · <%= highlight_search(unit.source_text) %></p>
         </div>
       <% elsif en_missing %>
         <p class="hidden in-[.ref-en]:block"><span class="rounded bg-red-100 px-1.5 text-xs text-red-800">⚠ <%= t(".en_missing") %></span></p>

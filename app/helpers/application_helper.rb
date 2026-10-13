@@ -7,6 +7,14 @@ module ApplicationHelper
     "approved" => "bg-emerald-500"
   }.freeze
 
+  # Languages page cards, by progress : some outdated, some left to translate, all translated, all approved
+  LANGUAGE_CARDS = {
+    outdated: "border-orange-300 bg-orange-50 hover:border-orange-500",
+    translating: "border-stone-200 bg-white hover:border-stone-400",
+    translated: "border-sky-300 bg-sky-50 hover:border-sky-500",
+    approved: "border-emerald-300 bg-emerald-50 hover:border-emerald-500"
+  }.freeze
+
   # Header sections, by the controllers their pages belong to
   NAV_SECTIONS = {
     keys: %w[units comments branches],

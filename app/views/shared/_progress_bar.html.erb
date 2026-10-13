@@ -2,6 +2,6 @@
 <div class="<%= css %> overflow-hidden rounded bg-stone-200">
   <div class="flex h-full">
     <span class="bg-emerald-600" style="width: <%= stats[:total].zero? ? 0 : 100.0 * stats[:approved] / stats[:total] %>%"></span>
-    <span class="bg-emerald-300" style="width: <%= stats[:total].zero? ? 0 : 100.0 * (stats[:translated] - stats[:approved]) / stats[:total] %>%"></span>
+    <span class="bg-sky-400" style="width: <%= stats[:total].zero? ? 0 : 100.0 * (stats[:translated] - stats[:approved]) / stats[:total] %>%"></span>
   </div>
 </div>

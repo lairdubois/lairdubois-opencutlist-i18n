@@ -8,6 +8,8 @@ import { createI18nView, replaceText, insertText, focusEnd, focusSibling, missin
 // through the `review` button, hidden while the text is blank (a blank save removes the translation) ;
 // both then move the focus to the page's next editor.
 // `autofocus` : focused on load, the cursor at the end.
+// Inside a list's data-search-text wrapper (translator's list), the searched text is highlighted
+// (data-search-exact : case and accents included).
 // On any other element : a read-only view of the `text` value, invariants missing from `source` (if
 // given) flagged.
 export default class extends Controller {
@@ -30,6 +32,14 @@ export default class extends Controller {
     }
   }
 
+  get search() {
+    return this.element.closest("[data-search-text]")?.dataset.searchText || ""
+  }
+
+  get searchExact() {
+    return this.element.closest("[data-search-text]")?.dataset.searchExact === "true"
+  }
+
   connectReadOnly() {
     this.element.textContent = ""
     this.view = createI18nView({
@@ -38,6 +48,8 @@ export default class extends Controller {
       source: this.hasSourceValue ? this.sourceValue : null,
       refs: this.refsValue,
       dir: this.element.dir || "ltr",
+      search: this.search,
+      searchExact: this.searchExact,
     })
   }
 
@@ -49,6 +61,8 @@ export default class extends Controller {
       source: this.hasSourceValue ? this.sourceValue : null,
       refs: this.refsValue,
       editable: true,
+      search: this.search,
+      searchExact: this.searchExact,
       lang: field.lang,
       dir: field.dir,
       // Takes the textarea's place (and classes) in the row's grid

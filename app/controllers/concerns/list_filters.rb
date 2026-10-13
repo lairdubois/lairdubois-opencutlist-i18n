@@ -1,5 +1,6 @@
 # Search bar params shared by the translator's list and the keys list :
-#   q          text search, in the texts only
+#   q          text search, in the texts only, trimmed, case and accents aside ; between double quotes ("Word ") the
+#              exact text inside them : spaces, case and accents included
 #   status[]   translation statuses, combined with OR (none = every status)
 #   questions  "1" : with an open question, combined with AND
 #   warnings   "1" : with a TranslationChecks warning, combined with AND
@@ -47,6 +48,19 @@ module ListFilters
     # ?at=120 : a single key, alone in the list
     def single_index?
       self[:at].is_a?(String) && !self[:at].include?("-")
+    end
+
+    # The searched text (q) : trimmed, or the text between its double quotes as is ("word " keeps the space)
+    def text
+      q = self[:q].to_s.strip
+      q = q[1...-1] if exact?
+      q.presence
+    end
+
+    # Between double quotes : the exact text, case and accents included (else both aside, SqliteFold)
+    def exact?
+      q = self[:q].to_s.strip
+      q.length > 2 && q.start_with?('"') && q.end_with?('"')
     end
 
     def statuses
@@ -99,7 +113,7 @@ module ListFilters
     end
 
     def searched?
-      [:q, *FIELDS].any? { |name| self[name].present? }
+      text.present? || FIELDS.any? { |name| self[name].present? }
     end
 
     def any?
@@ -130,7 +144,7 @@ module ListFilters
   end
 
   included do
-    helper_method :list_params, :statuses, :questions?, :warnings?, :notranslate?, :list_notranslate, :list_days, :list_sort, :list_sort_dir
+    helper_method :list_params, :list_text, :list_exact?, :statuses, :questions?, :warnings?, :notranslate?, :list_notranslate, :list_days, :list_sort, :list_sort_dir
     before_action :exclusive_index
   end
 
@@ -141,6 +155,14 @@ module ListFilters
   end
 
   delegate :single_index?, :statuses, :questions?, :warnings?, :notranslate?, :filtered?, :searched?, :index_range, to: :list_query, private: true
+
+  def list_text
+    list_query.text
+  end
+
+  def list_exact?
+    list_query.exact?
+  end
 
   def list_days
     list_query.days

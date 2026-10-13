@@ -34,6 +34,8 @@
   .tok-em { font-style: italic; }
   .tok-link { text-decoration: underline var(--color-stone-300); text-underline-offset: 2px; }
   .tok-url { color: var(--color-stone-400); }
+  /* The list's searched text (i18n_text.js, SearchHelper) : the ring stays visible over an invariant's background */
+  .search-hit { background: var(--color-yellow-200); box-shadow: 0 0 0 1px var(--color-yellow-400); border-radius: 0.15rem; color: inherit; }
 
   /* Whitespace : the character keeps its width, a mark is drawn over it when html.show-ws.
      overflow: hidden : the mark's line box (the editor's line-height) is taller than the span's box (the font's content

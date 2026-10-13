@@ -50,12 +50,14 @@ export default class extends Controller {
     this.element.requestSubmit()
   }
 
-  // Moves the keywords of the text search to their field chip. Returns the change's origin : "at" when
-  // an index was typed (a single one is exclusive), "q" otherwise
+  // Moves the keywords of the text search to their field chip, a quoted text ("word ") aside. Returns the
+  // change's origin : "at" when an index was typed (a single one is exclusive), "q" otherwise
   extract(input) {
     let origin = "q"
-    const words = input.value.trim().split(/\s+/)
+    const words = input.value.match(/"[^"]*"?|\S+/g) || []
     const rest = words.filter((word) => {
+      if (word.startsWith('"')) return true
+
       const [name, match] = Object.entries(this.constructor.KEYWORDS).map(([n, re]) => [n, word.match(re)]).find(([, m]) => m) || []
       if (!match || !this.fill(name, match[1])) return true
 

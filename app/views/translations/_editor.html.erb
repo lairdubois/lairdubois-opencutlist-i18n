@@ -7,7 +7,7 @@
   <%# Copied as is into every language (Unit::COPIED_SOURCE) : read-only, what the export writes %>
   <% if unit.copied %>
     <div class="flex min-w-0 flex-col border-y border-stone-200 bg-stone-50 md:border-l">
-      <p class="flex-1 px-3 py-2 font-mono text-sm whitespace-pre-wrap text-stone-500" dir="ltr"><%= unit.source_text %></p>
+      <p class="flex-1 px-3 py-2 font-mono text-sm whitespace-pre-wrap text-stone-500" dir="ltr"><%= highlight_search(unit.source_text) %></p>
       <%# Under a dashed line, as the editor's warnings, in a neutral tone (an information) %>
       <div class="flex flex-col gap-1 border-t border-dashed border-stone-200 px-3 py-1.5">
         <p class="flex items-start gap-1 text-xs text-stone-500">
