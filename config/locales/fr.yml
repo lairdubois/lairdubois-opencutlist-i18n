@@ -506,8 +506,8 @@ fr:
       access_app: "GitHub App (commits et PR au nom du bot)"
       access_token: "token OCL_GITHUB_TOKEN"
       access_none: "aucun (repo local, branche seulement)"
-      publish: "Publier"
-      publish_confirm: "Publier maintenant ?"
+      preview: "Prévisualiser"
+      preview_hint: "Rien n'est poussé à cette étape : la publication se lance depuis l'aperçu."
       disabled_html: "Publication désactivée : aucun accès GitHub configuré (compte GitHub connecté, <code>OCL_GITHUB_APP_ID</code> + <code>OCL_GITHUB_APP_PRIVATE_KEY</code>, ou <code>OCL_GITHUB_TOKEN</code>)."
       history: "Historique"
       pull_request: "pull request"
@@ -519,10 +519,18 @@ fr:
       warnings: "À vérifier à la main (%{count})"
       files: "Fichiers modifiés (%{count})"
       renames: "Clés renommées (%{count})"
+    preview:
+      title: "Aperçu de la publication"
+      intro_html: "Changements qui seront commités sur <code>%{branch}</code> depuis <code>%{base}</code>. Rien n'est encore poussé."
+      deleted: "Clés supprimées (%{count})"
+      truncated: "… %{count} lignes de plus non affichées"
+      publish: "Publier"
+      cancel: "Annuler"
+      failed: "Aperçu impossible : %{error}"
     create:
-      needs_sync: "Le fr.yml du repo a changé depuis la dernière synchronisation : synchronise d'abord."
-      unchanged: "Rien à publier : le repo est déjà à jour."
       failed: "Publication impossible : %{error}"
+    needs_sync: "Le fr.yml du repo a changé depuis la dernière synchronisation : synchronise d'abord."
+    unchanged: "Rien à publier : le repo est déjà à jour."
 
   github_accounts:
     not_configured: "Connexion GitHub non configurée."
@@ -541,6 +549,7 @@ fr:
     no_access: "aucun accès GitHub configuré (GitHub App ou OCL_GITHUB_TOKEN)"
     invalid_branch: "nom de branche invalide : %{branch}"
     missing_fr: "%{path} introuvable dans la branche"
+    stale: "les changements ne sont plus ceux de l'aperçu (le repo ou les traductions ont bougé entre-temps) : relance l'aperçu"
   publisher:
     warnings:
       leftover: "Usage restant de l'ancienne branche `%{prefix}` (dynamique ?) : `%{ref}`"

@@ -22,8 +22,9 @@
                             elsif @auth.configured? then t(".access_token")
                             else t(".access_none") end %>.
   </p>
-  <%= button_to t(".publish"), publications_path, class: "mb-8 rounded bg-stone-800 px-4 py-2 text-white",
-                form: { data: { turbo: false }, onsubmit: "return confirm(#{t('.publish_confirm').to_json})" } %>
+  <%= button_to t(".preview"), preview_publications_path, class: "mb-1 rounded bg-stone-800 px-4 py-2 text-white",
+                form: { data: { turbo: false } } %>
+  <p class="mb-8 text-xs text-stone-500"><%= t(".preview_hint") %></p>
 <% else %>
   <p class="mb-8 rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
     <%= t(".disabled_html") %>

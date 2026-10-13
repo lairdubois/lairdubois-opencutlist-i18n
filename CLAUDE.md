@@ -59,7 +59,9 @@ Weblate was evaluated and rejected.
 - Rename detection : same fr text, disambiguated by key similarity (trailing segments ×100 + leading) ; ambiguous
   pairs are skipped.
 - `Publisher` refuses while the repo fr.yml has unsynced changes ; rewrites quoted key literals in js / twig / ruby and
-  warns on leftover dynamic uses. `OclRepo` = shallow checkout in `storage/ocl_repo`, force-pushed i18n branch.
+  warns on leftover dynamic uses. Previewed first (`Publisher#preview`, `OclRepo#preview` : same staging, `git diff --cached`,
+  no commit) ; publishing posts the patch's digest and `OclRepo::Stale` refuses it when the changes moved since.
+  `OclRepo` = shallow checkout in `storage/ocl_repo`, force-pushed i18n branch.
   `GithubAuth` : the publishing admin's GitHub App user access token when connected (`GithubOauth`, encrypted on
   `User`, refreshed under a row lock), else App installation tokens (`<app>[bot]`), else `OCL_GITHUB_TOKEN` ; passed
   via `http.extraHeader` only, credential helpers and prompts disabled, no push without credentials.

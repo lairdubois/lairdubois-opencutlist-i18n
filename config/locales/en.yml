@@ -506,8 +506,8 @@ en:
       access_app: "GitHub App (commits and PR as the bot)"
       access_token: "OCL_GITHUB_TOKEN token"
       access_none: "none (local repo, branch only)"
-      publish: "Publish"
-      publish_confirm: "Publish now?"
+      preview: "Preview"
+      preview_hint: "Nothing is pushed at this step: publishing starts from the preview."
       disabled_html: "Publishing disabled: no GitHub access configured (connected GitHub account, <code>OCL_GITHUB_APP_ID</code> + <code>OCL_GITHUB_APP_PRIVATE_KEY</code>, or <code>OCL_GITHUB_TOKEN</code>)."
       history: "History"
       pull_request: "pull request"
@@ -519,10 +519,18 @@ en:
       warnings: "To check by hand (%{count})"
       files: "Changed files (%{count})"
       renames: "Renamed keys (%{count})"
+    preview:
+      title: "Publication preview"
+      intro_html: "Changes that will be committed on <code>%{branch}</code> from <code>%{base}</code>. Nothing is pushed yet."
+      deleted: "Deleted keys (%{count})"
+      truncated: "… %{count} more lines not shown"
+      publish: "Publish"
+      cancel: "Cancel"
+      failed: "Can't preview: %{error}"
     create:
-      needs_sync: "The repo's fr.yml changed since the last sync: sync first."
-      unchanged: "Nothing to publish: the repo is already up to date."
       failed: "Can't publish: %{error}"
+    needs_sync: "The repo's fr.yml changed since the last sync: sync first."
+    unchanged: "Nothing to publish: the repo is already up to date."
 
   github_accounts:
     not_configured: "GitHub connection is not configured."
@@ -541,6 +549,7 @@ en:
     no_access: "no GitHub access configured (GitHub App or OCL_GITHUB_TOKEN)"
     invalid_branch: "invalid branch name: %{branch}"
     missing_fr: "%{path} not found in the branch"
+    stale: "the changes are no longer those of the preview (the repo or the translations moved in the meantime): preview again"
   publisher:
     warnings:
       leftover: "Remaining use of the old branch `%{prefix}` (dynamic?): `%{ref}`"

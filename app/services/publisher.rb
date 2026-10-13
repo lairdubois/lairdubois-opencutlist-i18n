@@ -1,8 +1,8 @@
 # Publishes the translations to the OCL repo as a pull request :
 # the 18 i18n-src files, plus the code references of keys renamed in the tool
 class Publisher
-  Result = Struct.new(:status, :plan, :sha, :pr_url, :renames, :warnings, :files, keyword_init: true)
-  # status : :needs_sync (the repo's fr.yml has unsynced changes), :unchanged, :published
+  Result = Struct.new(:status, :plan, :sha, :pr_url, :renames, :deleted, :warnings, :files, :staged, keyword_init: true)
+  # status : :needs_sync (the repo's fr.yml has unsynced changes), :unchanged, :preview, :published
 
   def initialize(user, auth: GithubAuth.new(user: user), repo: OclRepo.new(auth: auth), pulls: GithubPulls.new(auth: auth))
     @user = user
@@ -10,18 +10,34 @@ class Publisher
     @pulls = pulls
   end
 
-  def call
+  # What call would publish, for the admin to check first
+  def preview
+    @repo.fetch!
+    plan = SourceSync.new(@repo.fr_text, author: @user).plan
+    return Result.new(status: :needs_sync, plan: plan) unless plan.empty?
+
+    renames, deleted = pending_key_changes
+    staged = @repo.preview(files: export_files, renames: renames)
+    return Result.new(status: :unchanged) unless staged
+
+    warnings = leftover_warnings(staged.leftovers) + deleted_reference_warnings(deleted)
+    Result.new(status: :preview, renames: renames, deleted: deleted, warnings: warnings.map { |w| warning_text(*w) },
+               files: staged.files, staged: staged)
+  end
+
+  # digest : the previewed changes' (OclRepo::Staged#digest), raises OclRepo::Stale when they changed since
+  def call(digest: nil)
     @repo.fetch!
     plan = SourceSync.new(@repo.fr_text, author: @user).plan
     return Result.new(status: :needs_sync, plan: plan) unless plan.empty?
 
     renames, deleted = pending_key_changes
     deleted_warnings = deleted_reference_warnings(deleted)
-    files = YamlExport.new.files.transform_keys { |name| File.join(OclRepo::I18N_SRC, name) }
-    published = @repo.publish!(files: files, renames: renames, message: commit_message(renames, deleted))
+    files = export_files
+    published = @repo.publish!(files: files, renames: renames, message: commit_message(renames, deleted), digest: digest)
     return Result.new(status: :unchanged) unless published
 
-    warnings = published.leftovers.map { |prefix, ref| [:leftover, { prefix: prefix, ref: ref }] } + deleted_warnings
+    warnings = leftover_warnings(published.leftovers) + deleted_warnings
     pr_url = @pulls.open_or_update(title: "Updated translations", body: pr_body(renames, deleted, warnings, published.files)) if @pulls.enabled?
     Publication.create!(branch: Rails.configuration.x.ocl.i18n_branch, commit_sha: published.sha, pr_url: pr_url,
                         fr_hash: Baseline.hash_text(files.fetch(File.join(OclRepo::I18N_SRC, "fr.yml"))), user: @user)
@@ -44,6 +60,14 @@ class Publisher
       end
     end
     [renames, deleted]
+  end
+
+  def export_files
+    YamlExport.new.files.transform_keys { |name| File.join(OclRepo::I18N_SRC, name) }
+  end
+
+  def leftover_warnings(leftovers)
+    leftovers.map { |prefix, ref| [:leftover, { prefix: prefix, ref: ref }] }
   end
 
   # Warnings are [kind, params] pairs, rendered in the admin's locale for the UI and in English for the PR

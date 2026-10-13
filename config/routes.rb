@@ -50,7 +50,9 @@ Rails.application.routes.draw do
   post "sync/apply", to: "syncs#apply", as: :sync_apply
 
   post "export", to: "exports#create", as: :export
-  resources :publications, only: [:index, :create]
+  resources :publications, only: [:index, :create] do
+    post :preview, on: :collection
+  end
   post "github/connect", to: "github_accounts#connect", as: :connect_github
   get "github/callback", to: "github_accounts#callback", as: :github_callback
   delete "github/connect", to: "github_accounts#disconnect", as: :disconnect_github

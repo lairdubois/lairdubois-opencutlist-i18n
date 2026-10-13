@@ -10,6 +10,7 @@ class OclRepo
                 ":(exclude)src/ladb_opencutlist/ruby/lib"].freeze
 
   Error = Class.new(StandardError)
+  Stale = Class.new(Error)
   BRANCH_FORMAT = %r{\A(?!-)(?!.*\.\.)[A-Za-z0-9._/-]+\z}
 
   # The branch synced with and published to : chosen on the sync page, OCL_BASE_BRANCH until then
@@ -64,14 +65,49 @@ class OclRepo
 
   Published = Struct.new(:sha, :files, :leftovers, keyword_init: true)
 
+  # The i18n branch's changes as publish! would commit them. digest identifies the patch, so that what an admin
+  # previewed is what gets published
+  Staged = Struct.new(:files, :leftovers, :patch, keyword_init: true) do
+    def digest
+      Digest::SHA256.hexdigest(patch)
+    end
+  end
+
+  # Dry run of publish! : nothing is committed nor pushed. Returns nil when nothing differs.
+  def preview(files:, renames:)
+    stage(files, renames)
+  ensure
+    clean_up
+  end
+
   # Recreates the i18n branch from the base branch with the given files and key renames, and pushes it.
   # leftovers : uses of a renamed key's old branch still in the code after the rewrite,
   # typically dynamic ones ('tab.cutlist.tooltip.' + name). Returns nil when nothing differs.
-  def publish!(files:, renames:, message:)
+  # Raises Stale when the changes are no longer those of the previewed digest.
+  def publish!(files:, renames:, message:, digest: nil)
     raise Error, I18n.t("ocl_repo.no_access") unless can_push?
 
+    staged = stage(files, renames) or return nil
+    raise Stale, I18n.t("ocl_repo.stale") if digest && staged.digest != digest
+
     branch = @config.i18n_branch
-    git("checkout", "-q", "-B", branch, "origin/#{base_branch}")
+    name, email = @auth.committer
+    git("-c", "user.name=#{name}", "-c", "user.email=#{email}", "commit", "-q", "-m", message)
+    git(*auth, "push", "-q", "--force", "origin", "#{branch}:refs/heads/#{branch}")
+    Published.new(sha: git("rev-parse", "HEAD").strip, files: staged.files, leftovers: staged.leftovers)
+  ensure
+    clean_up
+  end
+
+  def base_branch
+    self.class.base_branch(@config)
+  end
+
+  private
+
+  # Checks the i18n branch out from the base branch, writes the files, rewrites the renamed keys and stages it all
+  def stage(files, renames)
+    git("checkout", "-q", "-B", @config.i18n_branch, "origin/#{base_branch}")
     files.each { |path, content| File.write(File.join(@dir, path), content) }
     rewrite_code(renames)
     git("add", "-A")
@@ -81,19 +117,15 @@ class OclRepo
     leftovers = old_branches(renames).flat_map do |prefix|
       git_grep("-n", "-F", "-e", "'#{prefix}.", "-e", "\"#{prefix}.").lines.map { |l| [prefix, l.strip] }
     end
-    name, email = @auth.committer
-    git("-c", "user.name=#{name}", "-c", "user.email=#{email}", "commit", "-q", "-m", message)
-    git(*auth, "push", "-q", "--force", "origin", "#{branch}:refs/heads/#{branch}")
-    Published.new(sha: git("rev-parse", "HEAD").strip, files: changed, leftovers: leftovers)
-  ensure
+    patch = git("-c", "core.quotePath=false", "diff", "--cached", "--no-color", "--no-ext-diff", "--no-renames")
+    Staged.new(files: changed, leftovers: leftovers, patch: patch)
+  end
+
+  # Back to the base branch, uncommitted changes dropped : the checkout's fr.yml is read by the sync
+  def clean_up
+    git("reset", "-q", "--hard") rescue nil
     git("checkout", "-q", base_branch) rescue nil
   end
-
-  def base_branch
-    self.class.base_branch(@config)
-  end
-
-  private
 
   # Branches a rename moved keys out of, when no key of the tool stays in them
   def old_branches(renames)
