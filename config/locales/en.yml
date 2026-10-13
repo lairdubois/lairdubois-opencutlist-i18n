@@ -395,9 +395,9 @@ en:
       placeholder: "Search a name, an e-mail…"
       shortcuts: |
         ⌘/Ctrl + F: go to the search (twice: the browser's find)
-        Enter: search (name, e-mail, GitHub or Transifex login)
+        Enter: search (name, e-mail)
         Esc: leave the field
-        Shift + Esc: clear everything, text, filters and sort
+        Esc + Esc: clear everything, text, filters and sort
       count:
         one: "%{count} user"
         other: "%{count} users"

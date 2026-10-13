@@ -395,9 +395,9 @@ fr:
       placeholder: "Rechercher un nom, un e-mail…"
       shortcuts: |
         ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
-        Entrée : rechercher (nom, e-mail, login GitHub ou Transifex)
+        Entrée : rechercher (nom, e-mail)
         Échap : quitter le champ
-        Maj + Échap : tout effacer, texte, filtres et tri
+        Échap + Échap : tout effacer, texte, filtres et tri
       count:
         one: "%{count} utilisateur"
         other: "%{count} utilisateurs"
