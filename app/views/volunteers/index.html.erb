@@ -1,0 +1,48 @@
+<% content_for :title, "#{t(".title")} · OpenCutList Localize" %>
+<div class="mb-4 flex items-baseline gap-4">
+  <h1 class="text-lg font-semibold"><%= t(".title") %></h1>
+  <%= link_to t("layouts.application.users"), users_path, class: "text-sm text-stone-600 underline" %>
+</div>
+<p class="mb-4 text-sm text-stone-600"><%= t(".hint") %></p>
+<div class="mb-8 flex flex-col gap-3">
+  <% @pending.each do |r| %>
+    <% user = @users[r.email] %>
+    <% language = @languages[r.language_code] %>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded border border-stone-200 bg-white px-4 py-3 text-sm">
+      <span class="font-medium"><%= r.name %></span>
+      <%= mail_to r.email, class: "text-stone-600 underline" %>
+      <span>
+        <%= r.language_name %> <span class="text-stone-500">(<%= r.language_code %>)</span>
+        <% unless language %><span class="rounded bg-sky-100 px-1.5 text-xs text-sky-800"><%= t(".new_language") %></span><% end %>
+      </span>
+      <% if user %>
+        <%= link_to t(".existing_user", name: user.name), edit_user_path(user), class: "rounded bg-amber-100 px-1.5 text-xs text-amber-800 underline" %>
+      <% end %>
+      <span class="text-xs text-stone-500" title="<%= l r.created_at %>"><%= t("help_requests.index.ago", time: time_ago_in_words(r.created_at)) %></span>
+      <span class="ml-auto flex gap-2">
+        <%= button_to t(".reject"), reject_volunteer_path(r), method: :patch,
+                      class: "rounded px-2 py-0.5 text-stone-600 hover:bg-stone-100" %>
+        <%= button_to t(".accept"), accept_volunteer_path(r), method: :patch,
+                      form: { data: { turbo_confirm: t(language ? ".accept_confirm" : ".accept_confirm_new", name: r.name, language: r.language_name) } },
+                      class: "rounded bg-stone-800 px-2 py-0.5 text-white" %>
+      </span>
+    </div>
+  <% end %>
+  <% if @pending.empty? %><p class="text-sm text-stone-500"><%= t(".empty") %></p><% end %>
+</div>
+<% if @handled.any? %>
+  <h2 class="mb-2 font-semibold"><%= t(".handled") %></h2>
+  <div class="rounded border border-stone-200 bg-white text-sm">
+    <% @handled.each do |r| %>
+      <div class="flex flex-wrap items-center gap-x-4 border-b border-stone-100 px-4 py-2 text-stone-600 last:border-0">
+        <span class="<%= r.accepted? ? 'text-emerald-700' : 'text-stone-400' %>"><%= t(".statuses.#{r.status}") %></span>
+        <% if r.user %><%= link_to r.name, edit_user_path(r.user), class: "underline" %><% else %><span><%= r.name %></span><% end %>
+        <span><%= r.email %></span>
+        <span><%= r.language_name %> (<%= r.language_code %>)</span>
+        <span class="ml-auto text-xs text-stone-500" title="<%= l r.handled_at %>">
+          <%= t(".handled_by", name: r.handled_by&.name || "?", time: time_ago_in_words(r.handled_at)) %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,6 @@
+<%= t(".offered", name: @volunteer_request.name, email: @volunteer_request.email) %>
+
+<%= t(".language") %> <%= @volunteer_request.language_name %> (<%= @volunteer_request.language_code %>)<% unless @volunteer_request.language %> — <%= t(".new_language") %><% end %>
+
+<%= t(".reply") %>
+<%= t(".list") %> <%= volunteers_url %>

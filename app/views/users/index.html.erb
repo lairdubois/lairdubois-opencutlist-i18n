@@ -4,6 +4,11 @@
   <div class="mb-2 flex flex-wrap items-start gap-3">
     <%= render "search_bar", list: @list, languages: @languages %>
     <%# The border matches the search bar's : same height as its first row %>
+    <% volunteers = VolunteerRequest.pending.count %>
+    <%= link_to volunteers_path, class: "flex items-center gap-1.5 rounded border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100" do %>
+      <%= t(".volunteers") %>
+      <% if volunteers.positive? %><span class="rounded-full bg-sky-600 px-1.5 text-xs leading-4 font-medium text-white tabular-nums"><%= volunteers %></span><% end %>
+    <% end %>
     <%= link_to t(".new"), new_user_path, class: "rounded border border-stone-800 bg-stone-800 px-3 py-1.5 text-sm text-white" %>
   </div>
 </div>

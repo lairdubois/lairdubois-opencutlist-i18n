@@ -89,6 +89,13 @@ Weblate was evaluated and rejected.
   the admins. `HelpRequest` is stored first (`page` = the app path the link was clicked on, `HelpRequest.safe_page`,
   its `/translate/:lang` language), then mailed to the enabled admins (`HelpMailer`, `reply_to` the sender) when
   e-mails are on ; listed and resolved on `/help/requests`, open ones counted on the admins' header badge.
+- Volunteers (`/volunteers/new`, linked from the login page, logged out only) : name, e-mail, a language among the
+  targets or `config/iso_languages.yml` (ISO 639-1, own names, `rtl`) → `VolunteerRequest` (pending), nothing else
+  created. Anti-spam : honeypot `website`, signed rendering time (`FormToken`, ≥ 3 s, ≤ 1 day), `rate_limit` 3/h per
+  IP, closed language list, name without URL, one pending per e-mail + language, `PENDING_MAX` ; a dropped one gets
+  the same thanks. Admins (`/volunteers`, badge on the Users link) accept (`accept!` : language created if new, user
+  found or created, translator membership) then invite from the user's page, or reject. A stored one is mailed to the
+  enabled admins (`VolunteerMailer`, `reply_to` the unverified address) when e-mails are on ; nothing to the applicant.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).

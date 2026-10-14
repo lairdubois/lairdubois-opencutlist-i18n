@@ -30,7 +30,8 @@
           <% if current_user.admin? %>
             <%= nav_link :sync, new_sync_path %>
             <%= nav_link :import, new_import_path %>
-            <%= nav_link :users, users_path %>
+            <% volunteers = VolunteerRequest.pending.count %>
+            <%= nav_link :users, users_path, badge: volunteers, title: (t(".volunteers_pending", count: volunteers) if volunteers.positive?) %>
             <%= nav_link :migration, migration_path %>
             <%= nav_link :publish, publications_path %>
           <% end %>

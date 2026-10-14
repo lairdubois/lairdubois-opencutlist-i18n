@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_110000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -179,6 +179,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
     t.index ["transifex_username"], name: "index_users_on_transifex_username", unique: true
   end
 
+  create_table "volunteer_requests", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "language_code", null: false
+    t.string "locale"
+    t.integer "status", default: 0, null: false
+    t.integer "user_id"
+    t.integer "handled_by_id"
+    t.datetime "handled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["handled_by_id"], name: "index_volunteer_requests_on_handled_by_id"
+    t.index ["status"], name: "index_volunteer_requests_on_status"
+    t.index ["user_id"], name: "index_volunteer_requests_on_user_id"
+  end
+
   add_foreign_key "comments", "languages"
   add_foreign_key "comments", "units"
   add_foreign_key "comments", "users"
@@ -196,4 +212,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
   add_foreign_key "suggestions", "units"
   add_foreign_key "translations", "languages"
   add_foreign_key "translations", "units"
+  add_foreign_key "volunteer_requests", "users"
+  add_foreign_key "volunteer_requests", "users", column: "handled_by_id"
 end

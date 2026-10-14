@@ -20,6 +20,14 @@ Rails.application.routes.draw do
     patch :resolve, on: :member
   end
 
+  # Anyone without an account offers to translate a language (from the login page) ; admins accept or reject
+  resources :volunteers, only: [:index, :new, :create] do
+    member do
+      patch :accept
+      patch :reject
+    end
+  end
+
   # Admins
   resources :units, only: [:index, :show] do
     get :duplicates, on: :collection

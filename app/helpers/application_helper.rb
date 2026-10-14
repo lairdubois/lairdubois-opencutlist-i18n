@@ -21,7 +21,7 @@ module ApplicationHelper
     translate: %w[languages translations reference_languages],
     sync: %w[syncs],
     import: %w[imports],
-    users: %w[users],
+    users: %w[users volunteers],
     migration: %w[migrations],
     publish: %w[publications github_accounts],
     help: %w[help help_requests]

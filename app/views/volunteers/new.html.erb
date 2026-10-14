@@ -1,0 +1,42 @@
+<% content_for :title, "#{t(".title")} · OpenCutList Localize" %>
+<% languages = Language.targets.to_a %>
+<% new_codes = VolunteerRequest::LANGUAGES.keys - languages.map(&:code) - [Language::SOURCE_CODE] %>
+<div class="mx-auto mt-16 max-w-sm rounded border border-stone-200 bg-white p-6 text-sm">
+  <h1 class="mb-1 text-lg font-semibold"><%= t(".title") %></h1>
+  <p class="mb-4 text-stone-600"><%= t(".intro") %></p>
+  <%= form_with model: @volunteer_request, url: volunteers_path, class: "flex flex-col gap-3" do |f| %>
+    <% if @volunteer_request.errors.any? %>
+      <ul class="rounded border border-red-200 bg-red-50 px-3 py-2 text-red-800">
+        <% @volunteer_request.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
+      </ul>
+    <% end %>
+    <%# Spam : signed rendering time (too fast = a bot) and a honeypot field, hidden from people %>
+    <%= hidden_field_tag :form_token, VolunteerRequest::FormToken.generate %>
+    <div class="hidden" aria-hidden="true">
+      <%= label_tag :website, "Website" %>
+      <%= text_field_tag :website, nil, tabindex: -1, autocomplete: "off" %>
+    </div>
+    <label class="flex flex-col gap-1">
+      <span class="font-medium"><%= VolunteerRequest.human_attribute_name(:name) %></span>
+      <%= f.text_field :name, required: true, maxlength: 80, autofocus: true, autocomplete: "name",
+                       class: "rounded border border-stone-300 px-3 py-2" %>
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="font-medium"><%= VolunteerRequest.human_attribute_name(:email) %></span>
+      <%= f.email_field :email, required: true, maxlength: 254, autocomplete: "email", placeholder: t("sessions.new.email_placeholder"),
+                        class: "rounded border border-stone-300 px-3 py-2" %>
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="font-medium"><%= VolunteerRequest.human_attribute_name(:language_code) %></span>
+      <%= f.select :language_code,
+                   grouped_options_for_select({ t(".existing_languages") => languages.map { |l| ["#{l.name} (#{l.code})", l.code] },
+                                                t(".new_languages") => new_codes.map { |c| ["#{VolunteerRequest::LANGUAGES[c]["name"]} (#{c})", c] }
+                                                                                .sort_by { |label, _| label.downcase } },
+                                              @volunteer_request.language_code),
+                   { include_blank: true }, required: true, class: "rounded border border-stone-300 px-3 py-2" %>
+    </label>
+    <p class="text-xs text-stone-500"><%= t(".hint") %></p>
+    <%= f.submit t(".submit"), class: "rounded bg-stone-800 px-3 py-2 text-white" %>
+  <% end %>
+  <p class="mt-4 text-xs"><%= link_to t(".back"), new_session_path, class: "text-stone-600 underline" %></p>
+</div>

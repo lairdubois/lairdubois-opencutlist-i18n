@@ -1,0 +1,76 @@
+# ISO 639-1 codes offered to the volunteers (VolunteerRequest), by their own name. rtl : right-to-left scripts
+af: { name: "Afrikaans" }
+am: { name: "አማርኛ" }
+ar: { name: "العربية", rtl: true }
+az: { name: "Azərbaycan dili" }
+be: { name: "Беларуская" }
+bg: { name: "Български" }
+bn: { name: "বাংলা" }
+bs: { name: "Bosanski" }
+ca: { name: "Català" }
+cs: { name: "Čeština" }
+cy: { name: "Cymraeg" }
+da: { name: "Dansk" }
+de: { name: "Deutsch" }
+el: { name: "Ελληνικά" }
+en: { name: "English" }
+eo: { name: "Esperanto" }
+es: { name: "Español" }
+et: { name: "Eesti" }
+eu: { name: "Euskara" }
+fa: { name: "فارسی", rtl: true }
+fi: { name: "Suomi" }
+ga: { name: "Gaeilge" }
+gl: { name: "Galego" }
+gu: { name: "ગુજરાતી" }
+he: { name: "עברית", rtl: true }
+hi: { name: "हिन्दी" }
+hr: { name: "Hrvatski" }
+hu: { name: "Magyar" }
+hy: { name: "Հայերեն" }
+id: { name: "Bahasa Indonesia" }
+is: { name: "Íslenska" }
+it: { name: "Italiano" }
+ja: { name: "日本語" }
+ka: { name: "ქართული" }
+kk: { name: "Қазақ тілі" }
+km: { name: "ខ្មែរ" }
+kn: { name: "ಕನ್ನಡ" }
+ko: { name: "한국어" }
+lb: { name: "Lëtzebuergesch" }
+lo: { name: "ລາວ" }
+lt: { name: "Lietuvių" }
+lv: { name: "Latviešu" }
+mk: { name: "Македонски" }
+ml: { name: "മലയാളം" }
+mn: { name: "Монгол" }
+mr: { name: "मराठी" }
+ms: { name: "Bahasa Melayu" }
+mt: { name: "Malti" }
+my: { name: "မြန်မာ" }
+nb: { name: "Norsk bokmål" }
+ne: { name: "नेपाली" }
+nl: { name: "Nederlands" }
+nn: { name: "Norsk nynorsk" }
+pa: { name: "ਪੰਜਾਬੀ" }
+pl: { name: "Polski" }
+pt: { name: "Português" }
+ro: { name: "Română" }
+ru: { name: "Русский" }
+si: { name: "සිංහල" }
+sk: { name: "Slovenčina" }
+sl: { name: "Slovenščina" }
+sq: { name: "Shqip" }
+sr: { name: "Српски" }
+sv: { name: "Svenska" }
+sw: { name: "Kiswahili" }
+ta: { name: "தமிழ்" }
+te: { name: "తెలుగు" }
+th: { name: "ไทย" }
+tl: { name: "Tagalog" }
+tr: { name: "Türkçe" }
+uk: { name: "Українська" }
+ur: { name: "اردو", rtl: true }
+uz: { name: "Oʻzbekcha" }
+vi: { name: "Tiếng Việt" }
+zh: { name: "中文" }

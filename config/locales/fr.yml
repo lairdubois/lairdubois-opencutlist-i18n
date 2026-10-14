@@ -124,6 +124,10 @@ fr:
 
   activerecord:
     attributes:
+      volunteer_request:
+        name: "Nom"
+        email: "E-mail"
+        language_code: "Langue"
       user:
         name: "Nom"
         email: "E-mail"
@@ -155,6 +159,9 @@ fr:
       help_open:
         one: "%{count} demande d'aide ouverte"
         other: "%{count} demandes d'aide ouvertes"
+      volunteers_pending:
+        one: "%{count} candidature de traducteur en attente"
+        other: "%{count} candidatures de traducteur en attente"
 
   help:
     show:
@@ -184,10 +191,42 @@ fr:
       sent: "Message transmis aux administrateurs."
       empty: "Le message est vide."
 
+  volunteers:
+    new:
+      title: "Traduire OpenCutList"
+      intro: "Propose-toi pour traduire OpenCutList dans ta langue, qu'elle soit déjà en cours ou nouvelle."
+      existing_languages: "Langues en cours"
+      new_languages: "Nouvelle langue"
+      hint: "Un administrateur examinera ta demande et te contactera à cette adresse."
+      submit: "Envoyer ma candidature"
+      back: "Retour à la connexion"
+    create:
+      thanks: "Merci ! Ta candidature a été transmise, un administrateur te contactera par e-mail."
+    index:
+      title: "Candidatures de traducteurs"
+      hint: "Accepter crée l'utilisateur (ou complète un compte existant), son accès à la langue et, si besoin, la langue elle-même. Reste ensuite à l'inviter depuis sa page."
+      new_language: "nouvelle langue"
+      existing_user: "compte existant : %{name}"
+      accept: "Accepter"
+      reject: "Refuser"
+      accept_confirm: "Donner à %{name} l'accès à %{language} ?"
+      accept_confirm_new: "Créer la langue %{language} et y donner accès à %{name} ?"
+      empty: "Aucune candidature en attente."
+      handled: "Traitées récemment"
+      handled_by: "par %{name}, il y a %{time}"
+      statuses:
+        accepted: "acceptée"
+        rejected: "refusée"
+    accept:
+      accepted: "%{name} a accès à %{language}."
+
   sessions:
     rate_limited: "Trop de demandes, réessaie plus tard."
     invalid_link: "Lien invalide ou expiré."
     new:
+      or: "ou"
+      volunteer: "pour traduire OpenCutList dans ta langue"
+      volunteer_link: "Proposer mon aide"
       title: "Connexion"
       email_placeholder: "ton@adresse.org"
       submit: "Recevoir un lien de connexion"
@@ -389,6 +428,7 @@ fr:
 
   users:
     index:
+      volunteers: "Candidatures"
       new: "Ajouter un utilisateur"
       legend: "✓ = relecteur pour la langue"
       contributions:
@@ -734,3 +774,12 @@ fr:
       language: "Langue :"
       reply: "Répondre à cet e-mail répond à l'utilisateur."
       list: "Toutes les demandes :"
+
+  volunteer_mailer:
+    requested:
+      subject: "Candidature de traducteur : %{name} (%{language})"
+      offered: "%{name} (%{email}) se propose pour traduire OpenCutList."
+      language: "Langue :"
+      new_language: "nouvelle langue"
+      reply: "Répondre à cet e-mail répond au candidat (adresse non vérifiée)."
+      list: "Accepter ou refuser :"

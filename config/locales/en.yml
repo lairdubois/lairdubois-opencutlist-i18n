@@ -124,6 +124,10 @@ en:
 
   activerecord:
     attributes:
+      volunteer_request:
+        name: "Name"
+        email: "E-mail"
+        language_code: "Language"
       user:
         name: "Name"
         email: "E-mail"
@@ -155,6 +159,9 @@ en:
       help_open:
         one: "%{count} open help request"
         other: "%{count} open help requests"
+      volunteers_pending:
+        one: "%{count} pending translator application"
+        other: "%{count} pending translator applications"
 
   help:
     show:
@@ -184,10 +191,42 @@ en:
       sent: "Message sent to the admins."
       empty: "The message is empty."
 
+  volunteers:
+    new:
+      title: "Translate OpenCutList"
+      intro: "Offer to translate OpenCutList into your language, whether it is already in progress or a new one."
+      existing_languages: "Languages in progress"
+      new_languages: "New language"
+      hint: "An admin will review your request and contact you at this address."
+      submit: "Send my application"
+      back: "Back to log in"
+    create:
+      thanks: "Thank you! Your application has been sent, an admin will contact you by e-mail."
+    index:
+      title: "Translator applications"
+      hint: "Accepting creates the user (or completes an existing account), their access to the language and, if needed, the language itself. Then invite them from their page."
+      new_language: "new language"
+      existing_user: "existing account: %{name}"
+      accept: "Accept"
+      reject: "Reject"
+      accept_confirm: "Give %{name} access to %{language}?"
+      accept_confirm_new: "Create the language %{language} and give %{name} access to it?"
+      empty: "No pending application."
+      handled: "Recently handled"
+      handled_by: "by %{name}, %{time} ago"
+      statuses:
+        accepted: "accepted"
+        rejected: "rejected"
+    accept:
+      accepted: "%{name} has access to %{language}."
+
   sessions:
     rate_limited: "Too many requests, try again later."
     invalid_link: "Invalid or expired link."
     new:
+      or: "or"
+      volunteer: "to translate OpenCutList into your language"
+      volunteer_link: "Offer my help"
       title: "Log in"
       email_placeholder: "you@example.org"
       submit: "Send me a login link"
@@ -389,6 +428,7 @@ en:
 
   users:
     index:
+      volunteers: "Applications"
       new: "Add a user"
       legend: "✓ = reviewer for the language"
       contributions:
@@ -734,3 +774,12 @@ en:
       language: "Language:"
       reply: "Replying to this e-mail answers the user."
       list: "All requests:"
+
+  volunteer_mailer:
+    requested:
+      subject: "Translator application: %{name} (%{language})"
+      offered: "%{name} (%{email}) offers to translate OpenCutList."
+      language: "Language:"
+      new_language: "new language"
+      reply: "Replying to this e-mail answers the applicant (unverified address)."
+      list: "Accept or reject:"

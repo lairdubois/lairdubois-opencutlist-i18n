@@ -7,4 +7,11 @@
   <% if flash[:dev_login_url] %>
     <p class="mt-4 break-all text-xs text-stone-500">Dev : <%= link_to flash[:dev_login_url], flash[:dev_login_url], class: "underline", data: { turbo_prefetch: false } %></p>
   <% end %>
+  <%# The other way in, for people without an account : offering to translate (volunteers#new) %>
+  <div class="my-4 flex items-center gap-3 text-xs text-stone-400 before:h-px before:flex-1 before:bg-stone-200 after:h-px after:flex-1 after:bg-stone-200">
+    <%= t(".or") %>
+  </div>
+  <%= link_to t(".volunteer_link"), new_volunteer_path,
+              class: "block rounded border border-stone-800 px-3 py-2 text-center text-stone-800 hover:bg-stone-100" %>
+  <p class="mt-2 text-center text-xs text-stone-500"><%= t(".volunteer") %></p>
 </div>
