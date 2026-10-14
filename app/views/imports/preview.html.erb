@@ -1,0 +1,41 @@
+<h1 class="mb-4 text-lg font-semibold"><%= t(".title", language: @language.name) %>
+  <span class="font-mono text-base font-normal text-stone-500">· <%= @filename %></span></h1>
+<p class="mb-4 text-sm text-stone-600">
+  <%= t(".same", count: @plan.same.size) %>
+  <% @plan.skipped.each do |reason, count| %> · <%= t(".skipped.#{reason}", count: count) %><% end %>
+</p>
+<% if @plan.no_translate.any? %>
+  <details class="mb-4 text-sm">
+    <summary class="cursor-pointer text-stone-600"><%= t(".no_translate", count: @plan.no_translate.size) %></summary>
+    <div class="mt-2 rounded border border-stone-200 bg-white">
+      <% @plan.no_translate.each do |row| %><%= render "row", row: row, checked: nil %><% end %>
+    </div>
+  </details>
+<% end %>
+<% if @plan.unmatched.any? %>
+  <details class="mb-4 text-sm">
+    <summary class="cursor-pointer text-stone-600"><%= t(".unmatched", count: @plan.unmatched.size) %></summary>
+    <% @plan.unmatched.each do |key| %><p class="font-mono text-xs"><%= key %></p><% end %>
+  </details>
+<% end %>
+
+<% if @plan.added.empty? && @plan.changed.empty? %>
+  <p class="mb-4 text-stone-600"><%= t(".nothing") %></p>
+  <%= link_to t(".back"), new_import_path, class: "text-sm underline" %>
+<% else %>
+  <%= form_with url: import_apply_path do %>
+    <%= hidden_field_tag :token, @token %>
+    <%= hidden_field_tag :language, @language.code %>
+    <%= render "group", rows: @plan.added, checked: true, title: t(".added", count: @plan.added.size), hint: t(".added_hint") %>
+    <%= render "group", rows: @plan.changed, checked: false, title: t(".changed", count: @plan.changed.size), hint: t(".changed_hint") %>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <%= label_tag :user_id, t(".author"), class: "text-stone-600" %>
+      <%= select_tag :user_id, options_from_collection_for_select(@authors, :id, :name, current_user.id),
+                     class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
+      <%= submit_tag t(".apply"), class: "rounded bg-stone-800 px-4 py-1.5 text-white",
+                     data: { turbo_confirm: t(".apply_confirm") } %>
+      <%= link_to t(".cancel"), new_import_path, class: "text-stone-600 underline" %>
+    </div>
+    <p class="mt-1 text-xs text-stone-500"><%= t(".author_hint") %></p>
+  <% end %>
+<% end %>

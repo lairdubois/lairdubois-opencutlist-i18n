@@ -65,9 +65,9 @@ class TransifexImport
 
   def analyze_language(language, data, included)
     keys = included.select { |i| i["type"] == "resource_strings" }.to_h { |i| [i["id"], normalize_key(i.dig("attributes", "key"))] }
-    units = units_by_repo_key
+    units = (@units_by_repo_key ||= Baseline.units_by_repo_key)
     ours = language.translations.index_by(&:unit_id)
-    edited_here = Revision.where(language: language, kind: %w[translate review]).where.not(user_id: nil).distinct.pluck(:unit_id).to_set
+    edited_here = Revision.where(language: language, kind: %w[import translate review]).where.not(user_id: nil).distinct.pluck(:unit_id).to_set
 
     report = Report.new(language: language, found: 0, matched: 0, updates: [], reviews: [], conflicts: [], unmatched: [], translators: Hash.new(0))
     data.each do |t|
@@ -91,16 +91,6 @@ class TransifexImport
       end
     end
     report
-  end
-
-  # Transifex knows the keys as they are in the repo : go through the baseline,
-  # so that keys renamed in the tool since still find their unit
-  def units_by_repo_key
-    @units_by_repo_key ||= begin
-      active = Unit.active.index_by(&:id)
-      by_baseline = Baseline.current.entries.filter_map { |e| [e["key"], active[e["unit_id"]]] if active[e["unit_id"]] }.to_h
-      Unit.active.index_by(&:key).merge(by_baseline)
-    end
   end
 
   # Some Transifex YAML parsers prefix keys with the root language

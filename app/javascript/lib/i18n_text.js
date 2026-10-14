@@ -28,6 +28,16 @@ function invariants(text) {
   return found.sort((a, b) => a.from - b.from)
 }
 
+// Symbols hard to type (→, −, °, ×…) : non-ASCII Unicode symbols, and the dagger (punctuation). Not invariants :
+// highlighted, and offered as chips when the translation has fewer than the source. Quotes (« ») aren't symbols.
+const SYMBOL = /(?![\x00-\x7f])[\p{S}†‡]/gu
+
+function symbols(text, skip = invariants(text)) {
+  return [...text.matchAll(SYMBOL)]
+    .map((m) => ({ from: m.index, to: m.index + m[0].length, text: m[0] }))
+    .filter((t) => !skip.some((s) => t.from < s.to && t.to > s.from))
+}
+
 // Markdown markers, highlighted only : translators may move them
 function markup(text, skip) {
   const out = []
@@ -116,6 +126,7 @@ function analyse(text, { source, refs, editable, search, searchExact }) {
     if (ref?.url) links.push({ from: t.from, to: t.to, url: ref.url })
     if (editable && expected && known) locked.push(t)
   }
+  for (const t of symbols(text, tokens)) marks.push(Decoration.mark({ class: "tok-symbol" }).range(t.from, t.to))
   for (const m of markup(text, tokens)) marks.push(Decoration.mark({ class: m.cls }).range(m.from, m.to))
   for (const m of text.matchAll(/[ \u00a0\t]/g)) {
     const cls = m[0] === " " ? "ws-space" : m[0] === "\t" ? "ws-tab" : "ws-nbsp"
@@ -132,20 +143,24 @@ function analyse(text, { source, refs, editable, search, searchExact }) {
   }
 }
 
-// Source invariants the translation has fewer of than the source, first spelling of each
-export function missingInvariants(source, text) {
+// Source tokens the translation has fewer of than the source, first spelling of each
+function missing(sourceTokens, textTokens, key) {
   const count = new Map()
-  for (const t of invariants(text)) count.set(normalize(t.text), (count.get(normalize(t.text)) || 0) + 1)
+  for (const t of textTokens) count.set(key(t.text), (count.get(key(t.text)) || 0) + 1)
   const spelling = new Map()
-  const missing = new Set()
-  for (const t of invariants(source)) {
-    const key = normalize(t.text)
-    if (!spelling.has(key)) spelling.set(key, t.text)
-    if (count.get(key) > 0) count.set(key, count.get(key) - 1)
-    else missing.add(key)
+  const lacking = new Set()
+  for (const t of sourceTokens) {
+    const k = key(t.text)
+    if (!spelling.has(k)) spelling.set(k, t.text)
+    if (count.get(k) > 0) count.set(k, count.get(k) - 1)
+    else lacking.add(k)
   }
-  return [...missing].map((key) => spelling.get(key))
+  return [...lacking].map((k) => spelling.get(k))
 }
+
+export const missingInvariants = (source, text) => missing(invariants(source), invariants(text), normalize)
+
+export const missingSymbols = (source, text) => missing(symbols(source), symbols(text), (t) => t)
 
 // Edits starting or ending strictly inside a locked token are refused ; removing it whole is fine
 const protectInvariants = (field) => EditorState.transactionFilter.of((tr) => {

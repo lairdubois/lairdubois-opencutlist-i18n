@@ -29,6 +29,8 @@
   .tok-tag, .tok-entity { color: var(--color-stone-500); background: var(--color-stone-100); border-radius: 0.2rem; }
   /* An invariant the fr source doesn't have : editable, flagged */
   .tok-unknown { color: var(--color-red-700); background: var(--color-red-50); text-decoration: wavy underline var(--color-red-400); }
+  /* A symbol hard to type (→, −, °…) : free to edit, offered as a chip when missing */
+  .tok-symbol { color: var(--color-sky-800); background: var(--color-sky-50); border-radius: 0.2rem; }
   .tok-mark { color: var(--color-amber-600); }
   .tok-strong { color: var(--color-stone-950); font-weight: 600; }
   .tok-em { font-style: italic; }
@@ -57,6 +59,8 @@
     color: var(--color-violet-800); background: var(--color-violet-50); border: 1px dashed var(--color-violet-300);
   }
   .tok-chip:hover { background: var(--color-violet-100); }
+  .tok-chip-symbol { color: var(--color-sky-800); background: var(--color-sky-50); border-color: var(--color-sky-300); }
+  .tok-chip-symbol:hover { background: var(--color-sky-100); }
 }
 
 /* Page toolbar (search, filters…) : stays on screen under the sticky site header (3.5rem nav + 1px border).

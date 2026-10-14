@@ -42,6 +42,8 @@ en:
     no_language_access: "You don't have access to this language."
 
   shared:
+    file_input:
+      choose: "Choose a file…"
     copy_button:
       label: "Copy to clipboard"
       copied: "Copied to clipboard"
@@ -141,6 +143,7 @@ en:
       translate: "Translate"
       keys: "Keys"
       sync: "Sync FR"
+      import: "Import"
       users: "Users"
       migration: "Migration"
       publish: "Publish"
@@ -473,6 +476,73 @@ en:
     destroy:
       self: "You can't delete yourself."
       destroyed: "%{name} deleted (their history stays attributed by name)."
+
+  imports:
+    new:
+      title: "Import translations from a file"
+      intro: "A language's yml (same format as the repo's fr.yml): each key is matched with its unit, even when it was renamed here since. Nothing is written before you confirm, row by row. Keys missing from fr, blank values, values equal to the fr text or on keys out of translation are left out."
+      language: "Language"
+      from_filename: "from the file name"
+      analyze: "Analyze"
+    preview:
+      too_big: "File too big (2 MB at most)."
+      not_utf8: "The file isn't UTF-8."
+      no_language: "No language found from the file name: pick it."
+      invalid_yaml: "Invalid YAML: %{error}"
+      empty: "No key in this file."
+      title: "Import into %{language}"
+      same:
+        zero: "No value identical to the current one"
+        one: "%{count} value identical to the current one"
+        other: "%{count} values identical to the current ones"
+      skipped:
+        blank:
+          one: "%{count} blank"
+          other: "%{count} blank"
+        copied:
+          one: "%{count} on a copied key"
+          other: "%{count} on copied keys"
+        source:
+          one: "%{count} identical to fr"
+          other: "%{count} identical to fr"
+      no_translate:
+        one: "%{count} value on a key out of translation (@no-translate), not imported"
+        other: "%{count} values on keys out of translation (@no-translate), not imported"
+      unmatched:
+        one: "%{count} key missing from fr, left out"
+        other: "%{count} keys missing from fr, left out"
+      nothing: "Nothing to import."
+      back: "Back"
+      added:
+        zero: "No new translation"
+        one: "%{count} new translation"
+        other: "%{count} new translations"
+      added_hint: "keys not translated here yet"
+      changed:
+        zero: "No different translation"
+        one: "%{count} different translation"
+        other: "%{count} different translations"
+      changed_hint: "replace the one here (an approved one goes back to translated)"
+      author: "Credit to"
+      author_hint: "The checked values are saved as translated, up to date with the current fr text, in this person's history."
+      apply: "Import the selection"
+      apply_confirm: "Import the checked values?"
+      cancel: "Cancel"
+    apply:
+      expired: "The analyzed file is gone: analyze it again."
+      applied:
+        zero: "No value imported into %{language}."
+        one: "%{count} value imported into %{language}."
+        other: "%{count} values imported into %{language}."
+      stale:
+        one: "%{count} row skipped: the translation changed since the analysis."
+        other: "%{count} rows skipped: the translations changed since the analysis."
+    group:
+      all: "Check all"
+      checked_html: "%{checked} / %{total} checked"
+    row:
+      approved: "approved"
+      outdated: "outdated"
 
   syncs:
     new:

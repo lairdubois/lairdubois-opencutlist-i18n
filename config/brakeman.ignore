@@ -27,6 +27,13 @@
       "file": "app/controllers/syncs_controller.rb",
       "line": 33,
       "note": "upload_path keeps [0-9a-f] only : no path traversal ; admins only"
+    },
+    {
+      "fingerprint": "982119074d133db3762add5ecb936811e7d8eed4bbc90eb8af480144018a1864",
+      "warning_type": "File Access",
+      "file": "app/controllers/imports_controller.rb",
+      "line": 39,
+      "note": "upload_path keeps [0-9a-f] only : no path traversal ; admins only"
     }
   ],
   "brakeman_version": "8.1.0"

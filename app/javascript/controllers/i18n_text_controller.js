@@ -1,11 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
-import { createI18nView, replaceText, insertText, focusEnd, focusSibling, missingInvariants } from "lib/i18n_text"
+import { createI18nView, replaceText, insertText, focusEnd, focusSibling, missingInvariants, missingSymbols } from "lib/i18n_text"
 
 // Shows an OCL string in CodeMirror : invariants highlighted, whitespace revealed on demand.
 // On a form with a `field` textarea : an editor, the textarea kept hidden and in sync. With a `source`
 // value (translator's editor), the source's {{ variables }}, $t() and tags are locked and the missing ones
-// offered as chips ; without (fr source editor), nothing is locked. Mod-Enter submits, Shift-Mod-Enter
-// through the `review` button, hidden while the text is blank (a blank save removes the translation) ;
+// offered as chips, as are its missing symbols (→, −, °…) ; without (fr source editor), nothing is locked.
+// Mod-Enter submits, Shift-Mod-Enter through the `review` button, hidden while the text is blank (a blank save removes the translation) ;
 // both then move the focus to the page's next editor.
 // `autofocus` : focused on load, the cursor at the end.
 // Inside a list's data-search-text wrapper (translator's list), the searched text is highlighted
@@ -97,15 +97,20 @@ export default class extends Controller {
 
   renderChips() {
     if (!this.hasChipsTarget || !this.hasSourceValue) return
-    const missing = missingInvariants(this.sourceValue, this.view.state.doc.toString())
-    this.chipsTarget.replaceChildren(...missing.map((token) => {
+    const text = this.view.state.doc.toString()
+    const chip = (token, className) => {
       const button = document.createElement("button")
       button.type = "button"
-      button.className = "tok-chip"
+      button.className = className
       button.textContent = token
       button.addEventListener("click", () => insertText(this.view, token))
       return button
-    }))
-    this.chipsTarget.hidden = missing.length === 0
+    }
+    const chips = [
+      ...missingInvariants(this.sourceValue, text).map((token) => chip(token, "tok-chip")),
+      ...missingSymbols(this.sourceValue, text).map((token) => chip(token, "tok-chip tok-chip-symbol")),
+    ]
+    this.chipsTarget.replaceChildren(...chips)
+    this.chipsTarget.hidden = chips.length === 0
   }
 }

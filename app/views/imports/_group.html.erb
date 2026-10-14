@@ -1,0 +1,12 @@
+<%# A folding group of rows, its "all" checkbox in the summary %>
+<details class="group mb-4 rounded border border-stone-200 bg-white" <%= "open" if rows.any? %> data-controller="check-all">
+  <summary class="flex cursor-pointer list-none items-center gap-3 border-stone-200 px-4 py-2 group-open:border-b">
+    <span class="text-stone-400 transition-transform group-open:rotate-90" aria-hidden="true">▸</span>
+    <input type="checkbox" class="shrink-0" data-check-all-target="all" data-action="check-all#toggle" <%= "disabled" if rows.empty? %>
+           title="<%= t(".all") %>" aria-label="<%= t(".all") %>">
+    <span class="font-semibold"><%= title %></span>
+    <span class="text-sm text-stone-500">: <%= hint %></span>
+    <span class="ml-auto text-xs text-stone-500 tabular-nums"><%= t(".checked_html", checked: tag.span(checked ? rows.size : 0, data: { check_all_target: "count" }), total: rows.size) %></span>
+  </summary>
+  <% rows.each do |row| %><%= render "row", row: row, checked: checked %><% end %>
+</details>

@@ -33,6 +33,16 @@ class TranslationOperations
     translation
   end
 
+  # A text brought by a language's yml (TranslationFileImport), the user being its translator : translated (a
+  # reviewed one too), taken as written against the current fr text
+  def import(unit, language, text)
+    translation = unit.translations.find_or_initialize_by(language: language)
+    old_text = translation.text
+    translation.update!(text: text, source_hash: unit.source_hash, status: :translated)
+    record(unit, language, "import", old_text, text)
+    translation
+  end
+
   private
 
   def record(unit, language, kind, old_value, new_value)

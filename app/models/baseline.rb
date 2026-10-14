@@ -30,6 +30,14 @@ class Baseline < ApplicationRecord
     create!(fr_hash: hash_text(fr_text), entries: entries, branch_notes: reader.branch_notes, source: source)
   end
 
+  # Active units by key, a repo key going to the unit the current baseline ties it to (renamed in the tool since
+  # or not), else by current key : for files keyed as the repo is (Transifex, a language's yml)
+  def self.units_by_repo_key
+    active = Unit.active.index_by(&:id)
+    by_baseline = (current&.entries || []).filter_map { |e| [e["key"], active[e["unit_id"]]] if active[e["unit_id"]] }.to_h
+    active.values.index_by(&:key).merge(by_baseline)
+  end
+
   def by_key
     @by_key ||= entries.index_by { |e| e["key"] }
   end

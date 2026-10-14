@@ -42,6 +42,8 @@ fr:
     no_language_access: "Tu n'as pas accès à cette langue."
 
   shared:
+    file_input:
+      choose: "Choisir un fichier…"
     copy_button:
       label: "Copier dans le presse-papier"
       copied: "Copié dans le presse-papier"
@@ -141,6 +143,7 @@ fr:
       translate: "Traduire"
       keys: "Clés"
       sync: "Synchroniser FR"
+      import: "Importer"
       users: "Utilisateurs"
       migration: "Migration"
       publish: "Publier"
@@ -473,6 +476,73 @@ fr:
     destroy:
       self: "Tu ne peux pas te supprimer toi-même."
       destroyed: "%{name} supprimé(e) (son historique reste attribué par nom)."
+
+  imports:
+    new:
+      title: "Importer les traductions d'un fichier"
+      intro: "Le yml d'une langue (même format que le fr.yml du repo) : chaque clé est rapprochée de son unité, y compris quand elle a été renommée ici depuis. Rien n'est écrit avant ta validation, ligne par ligne. Les clés absentes du fr, les valeurs vides, identiques au fr ou sur des clés hors traduction sont écartées."
+      language: "Langue"
+      from_filename: "d'après le nom du fichier"
+      analyze: "Analyser"
+    preview:
+      too_big: "Fichier trop gros (2 Mo au plus)."
+      not_utf8: "Le fichier n'est pas en UTF-8."
+      no_language: "Langue introuvable d'après le nom du fichier : choisis-la."
+      invalid_yaml: "YAML invalide : %{error}"
+      empty: "Aucune clé dans ce fichier."
+      title: "Importer en %{language}"
+      same:
+        zero: "Aucune valeur identique à l'existant"
+        one: "%{count} valeur identique à l'existant"
+        other: "%{count} valeurs identiques à l'existant"
+      skipped:
+        blank:
+          one: "%{count} vide"
+          other: "%{count} vides"
+        copied:
+          one: "%{count} sur une clé copiée"
+          other: "%{count} sur des clés copiées"
+        source:
+          one: "%{count} identique au fr"
+          other: "%{count} identiques au fr"
+      no_translate:
+        one: "%{count} valeur sur une clé hors traduction (@no-translate), non importée"
+        other: "%{count} valeurs sur des clés hors traduction (@no-translate), non importées"
+      unmatched:
+        one: "%{count} clé absente du fr, écartée"
+        other: "%{count} clés absentes du fr, écartées"
+      nothing: "Rien à importer."
+      back: "Retour"
+      added:
+        zero: "Aucune nouvelle traduction"
+        one: "%{count} nouvelle traduction"
+        other: "%{count} nouvelles traductions"
+      added_hint: "clés pas encore traduites ici"
+      changed:
+        zero: "Aucune traduction différente"
+        one: "%{count} traduction différente"
+        other: "%{count} traductions différentes"
+      changed_hint: "remplacer celle d'ici (une approuvée repasse en traduite)"
+      author: "Attribuer à"
+      author_hint: "Les valeurs cochées sont enregistrées comme traduites, à jour du fr actuel, dans l'historique de cette personne."
+      apply: "Importer la sélection"
+      apply_confirm: "Importer les valeurs cochées ?"
+      cancel: "Annuler"
+    apply:
+      expired: "Le fichier analysé n'est plus là : relance l'analyse."
+      applied:
+        zero: "Aucune valeur importée en %{language}."
+        one: "%{count} valeur importée en %{language}."
+        other: "%{count} valeurs importées en %{language}."
+      stale:
+        one: "%{count} ligne sautée : la traduction a changé depuis l'analyse."
+        other: "%{count} lignes sautées : les traductions ont changé depuis l'analyse."
+    group:
+      all: "Tout cocher"
+      checked_html: "%{checked} / %{total} cochées"
+    row:
+      approved: "approuvée"
+      outdated: "obsolète"
 
   syncs:
     new:

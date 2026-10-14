@@ -48,6 +48,9 @@ Rails.application.routes.draw do
   post "sync/repo", to: "syncs#repo", as: :sync_repo
   post "sync", to: "syncs#preview", as: :sync_preview
   post "sync/apply", to: "syncs#apply", as: :sync_apply
+  get "import", to: "imports#new", as: :new_import
+  post "import", to: "imports#preview", as: :import_preview
+  post "import/apply", to: "imports#apply", as: :import_apply
 
   post "export", to: "exports#create", as: :export
   resources :publications, only: [:index, :create] do

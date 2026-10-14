@@ -1,0 +1,22 @@
+<%# One text of the file : its checkbox (value = the stamp of the translation it was compared with ; none when
+    checked is nil, read-only), the key, the fr source, then the text (added) or the change from the tool's text
+    (changed), with its warnings %>
+<% translation = row.translation %>
+<% warnings = row.unit.translatable ? TranslationChecks.call(row.unit.source_text, row.text) : [] %>
+<label class="flex gap-3 border-b border-stone-100 px-4 py-2 text-sm last:border-0 hover:bg-stone-50">
+  <% unless checked.nil? %>
+    <%= check_box_tag "rows[#{row.unit.id}]", row.stamp, checked, id: nil, class: "mt-1 shrink-0",
+                      data: { check_all_target: "row", action: "check-all#refresh" } %>
+  <% end %>
+  <span class="min-w-0 flex-1">
+    <span class="flex flex-wrap items-center gap-2">
+      <%= link_to row.unit.key, unit_path(row.unit), target: "_blank", class: "font-mono text-xs text-stone-500 hover:underline" %>
+      <% unless row.unit.translatable %><span class="rounded bg-stone-200 px-1 font-mono text-xs text-stone-600" title="<%= t("units.node.notranslate_hint") %>">@no-translate</span><% end %>
+      <% if translation&.approved? %><span class="rounded bg-emerald-100 px-1 text-xs text-emerald-800"><%= t(".approved") %></span><% end %>
+      <% if translation&.outdated? %><span class="rounded bg-orange-100 px-1 text-xs text-orange-800"><%= t(".outdated") %></span><% end %>
+    </span>
+    <span class="block font-mono text-xs whitespace-pre-wrap text-stone-400"><%= row.unit.source_text %></span>
+    <span class="block font-mono whitespace-pre-wrap"><%= translation ? word_diff_tag(WordDiff.call(translation.text, row.text)) : row.text %></span>
+    <% warnings.each do |w| %><span class="block text-xs text-amber-700">⚠ <%= w %></span><% end %>
+  </span>
+</label>

@@ -1,0 +1,9 @@
+<%# A required file input hidden inside a button-like label showing the chosen file's name only (file_input_controller).
+    data : the input's own data attributes, merged (action : more actions after file-input#show) %>
+<% data = local_assigns.fetch(:data, {}) %>
+<label class="flex max-w-xs cursor-pointer rounded border border-stone-300 bg-white px-3 py-1.5 hover:border-stone-400
+              has-focus-visible:ring-2 has-focus-visible:ring-sky-500" data-controller="file-input">
+  <%= file_field_tag name, accept: accept, required: true, class: "sr-only",
+                     data: data.merge(file_input_target: "input", action: ["file-input#show", data[:action]].compact.join(" ")) %>
+  <span class="truncate" data-file-input-target="name"><%= t(".choose") %></span>
+</label>

@@ -92,6 +92,11 @@ Weblate was evaluated and rejected.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).
+- Import of a language's yml (`/import`, admins, `ImportsController` + `TranslationFileImport`) : keys through
+  `Baseline.units_by_repo_key` (shared with `TransifexImport`), language picked or from the file name ; blank, copied
+  and fr-equal values only counted, `@no-translate` ones listed read-only (`Plan#no_translate`, never written).
+  Preview groups added (checked) / changed (`WordDiff`, unchecked), file kept in `tmp/imports/<token>.yml` ; picks `rows[unit_id] = Row#stamp` skip translations changed since.
+  Written by `TranslationOperations#import` : `translated`, current `source_hash`, `import` revision of the chosen user.
 
 ## Translator's page and editor
 
@@ -99,7 +104,8 @@ Weblate was evaluated and rejected.
   source editor : nothing locked ; translations read-only, checked against the source). `Unit.refs` feeds the
   `$t()` tooltips ; Mod-click on one opens its key in a new tab, through the page's `ref_url` helper (`refs_json`) :
   `at` filter of the translator's list (none for a translator when out of their work) or, on the key page, of the keys list. Invariants (`{{ var }}`, `$t()`, HTML tags, entities) of the fr source are locked (atomic ranges +
-  transaction filter), unknown ones editable in red, missing ones offered as chips. The hidden textarea stays the form
+  transaction filter), unknown ones editable in red, missing ones offered as chips. Symbols hard to type (non-ASCII `\p{S}` + `†‡`, e.g.
+  `→ − °`) aren't invariants : highlighted (`tok-symbol`), offered as sky chips when fewer than in the source. The hidden textarea stays the form
   field, kept in sync ; suggestion buttons fill it and fire `input`. `¶` toggles `html.show-ws`, the key button
   `html.hide-keys` (key on hover only), both via `html_toggle_controller` (localStorage). Markdown is highlighted
   only (markers, link text, url ; urls may hold one level of parentheses, e.g. `wiki/STL_(file_format)`).

@@ -12,7 +12,7 @@
 <details class="text-sm">
   <summary class="cursor-pointer text-stone-600"><%= t(".upload") %></summary>
   <%= form_with url: sync_preview_path, multipart: true, class: "mt-2 flex gap-2", data: { turbo: false } do %>
-    <%= file_field_tag :fr_file, accept: ".yml", required: true, class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
+    <%= render "shared/file_input", name: :fr_file, accept: ".yml" %>
     <%= submit_tag t(".analyze"), class: "rounded border border-stone-300 bg-white px-3 py-1.5" %>
   <% end %>
 </details>

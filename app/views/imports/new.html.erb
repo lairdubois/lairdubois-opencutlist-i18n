@@ -1,0 +1,12 @@
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 max-w-3xl text-sm text-stone-600"><%= t(".intro") %></p>
+<%= form_with url: import_preview_path, multipart: true, class: "flex flex-wrap items-center gap-2 text-sm",
+                                                         data: { turbo: false, controller: "language-from-filename" } do %>
+  <%= render "shared/file_input", name: :file, accept: ".yml,.yaml",
+             data: { language_from_filename_target: "file", action: "language-from-filename#pick" } %>
+  <%= label_tag :language, t(".language"), class: "text-stone-600" %>
+  <%= select_tag :language, options_from_collection_for_select(@languages, :code, ->(l) { "#{l.name} (#{l.code})" }),
+                 include_blank: t(".from_filename"), class: "rounded border border-stone-300 bg-white px-3 py-1.5",
+                 data: { language_from_filename_target: "select" } %>
+  <%= submit_tag t(".analyze"), class: "rounded bg-stone-800 px-3 py-1.5 text-white" %>
+<% end %>

@@ -20,6 +20,7 @@ module ApplicationHelper
     keys: %w[units comments branches],
     translate: %w[languages translations reference_languages],
     sync: %w[syncs],
+    import: %w[imports],
     users: %w[users],
     migration: %w[migrations],
     publish: %w[publications github_accounts],
