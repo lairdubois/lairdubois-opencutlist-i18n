@@ -5,23 +5,25 @@
 #             disabled
 #   language  a language code : a membership in it, combined with AND
 #   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
+#   seen      ACTIVITIES : a request (User#last_seen_at, consultation included) in the last n days, or "never"
 #   sort      SORTS (name by default), dir "asc" or "desc" (the sort's own direction by default)
 class UserList
   ROLES = %w[admin reviewer translator none disabled].freeze
   ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
   # Each sort, with its default direction
-  SORTS = { "name" => "asc", "activity" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
+  SORTS = { "name" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
 
   # A user's revisions : how many, the last one's date
   Stat = Data.define(:count, :last_at)
 
-  attr_reader :q, :roles, :language, :days
+  attr_reader :q, :roles, :language, :days, :seen
 
   def initialize(params)
     @q = params[:q].to_s.strip.presence
     @roles = ROLES & Array(params[:role])
     @language = params[:language].presence && Language.targets.find_by(code: params[:language])
     @days = params[:days] if ACTIVITIES.include?(params[:days])
+    @seen = params[:seen] if ACTIVITIES.include?(params[:seen])
     @sort = params[:sort] if SORTS.key?(params[:sort])
     @dir = params[:dir] if %w[asc desc].include?(params[:dir])
   end
@@ -36,11 +38,11 @@ class UserList
   end
 
   def any_chip?
-    roles.any? || language || days || sort
+    roles.any? || language || days || seen || sort
   end
 
   def filtered?
-    roles.any? || language || days
+    roles.any? || language || days || seen
   end
 
   def users
@@ -52,8 +54,9 @@ class UserList
     @counts ||= {
       **ROLES.to_h { |role| [role, all.count { |user| match?(user, roles: [role]) }] },
       **ACTIVITIES.to_h { |days| ["days_#{days}", all.count { |user| match?(user, days: days) }] },
+      **ACTIVITIES.to_h { |seen| ["seen_#{seen}", all.count { |user| match?(user, seen: seen) }] },
       **Language.targets.to_h { |l| [l.code, all.count { |user| match?(user, language: l) }] },
-      searched: all.count { |user| match?(user, roles: [], language: nil, days: nil) }
+      searched: all.count { |user| match?(user, roles: [], language: nil, days: nil, seen: nil) }
     }
   end
 
@@ -78,16 +81,21 @@ class UserList
     @all ||= User.includes(memberships: :language).to_a
   end
 
-  def match?(user, roles: @roles, language: @language, days: @days)
+  def match?(user, roles: @roles, language: @language, days: @days, seen: @seen)
     return false if @q && [user.name, user.email, user.github_login, user.transifex_username].compact.none? { |t| SqliteFold.fold(t).include?(folded_q) }
     return false if language && user.memberships.none? { |m| m.language_id == language.id }
     return false if roles.any? && roles.none? { |role| role?(user, role, language) }
+    return false unless within?(user.last_seen_at, seen)
 
-    stat = stats[user.id]
-    case days
+    within?(stats[user.id]&.last_at, days)
+  end
+
+  # time in the period (ACTIVITIES), or none for "never" ; any without one
+  def within?(time, period)
+    case period
     when nil then true
-    when "never" then stat.nil?
-    else stat.present? && stat.last_at >= days.to_i.days.ago
+    when "never" then time.nil?
+    else time.present? && time >= period.to_i.days.ago
     end
   end
 
@@ -115,6 +123,7 @@ class UserList
     key = ->(user) {
       case sort
       when "activity" then stats[user.id]&.last_at
+      when "seen" then user.last_seen_at
       when "contributions" then stats[user.id]&.count
       when "created" then user.created_at
       end

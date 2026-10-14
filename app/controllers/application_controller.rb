@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
 
   around_action :switch_locale
   before_action :require_login
+  before_action :record_last_seen
   helper_method :current_user
 
   private
@@ -23,6 +24,12 @@ class ApplicationController < ActionController::Base
 
   def require_login
     redirect_to new_session_path unless current_user
+  end
+
+  # Any request of a logged in user, consultation included, written at most every User::SEEN_PRECISION
+  def record_last_seen
+    user = current_user
+    user.update_column(:last_seen_at, Time.current) if user && (user.last_seen_at.nil? || user.last_seen_at < User::SEEN_PRECISION.ago)
   end
 
   def require_admin

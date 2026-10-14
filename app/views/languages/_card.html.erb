@@ -1,6 +1,11 @@
 <%# A language's card on the home page. Locals : language, stats, state (LanguagesController#state), editable
-    (else greyed out, not linked) %>
-<%= content_tag editable ? :a : :div, href: (translate_path(language.code) if editable),
+    (else greyed out, not linked). The link filters the list on the work its state calls for %>
+<% statuses = case state
+              when :outdated, :translating
+                [("not_translated" if stats[:translated] < stats[:total]), ("outdated" if stats[:outdated] > 0)].compact
+              when :translated then ["not_approved"]
+              end %>
+<%= content_tag editable ? :a : :div, href: (translate_path(language.code, status: statuses.presence) if editable),
                 title: (t("languages.index.not_editable") unless editable),
                 class: ["block rounded border p-4", editable ? ApplicationHelper::LANGUAGE_CARDS[state] : "cursor-default border-stone-200 bg-stone-50 opacity-50 grayscale"] do %>
   <div class="mb-2 flex items-baseline justify-between">

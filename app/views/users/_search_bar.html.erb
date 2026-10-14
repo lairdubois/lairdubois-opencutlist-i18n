@@ -1,5 +1,5 @@
 <%# The users page's search bar, styled and driven as shared/_search_bar (search_bar_controller) : a text search
-    (name, e-mail, logins), a "Filters" menu (language : a list chip ; roles, OR-ed ; activity, one at a time) and a
+    (name, e-mail, logins), a "Filters" menu (language : a list chip ; roles, OR-ed ; activity and last visit, one at a time each) and a
     "Sort" menu (the picked one gets a chip, its arrow reversing it). Every change reloads the list (UserList). Locals : list, languages %>
 <% search = "shared.search_bar" %>
 <% group = "flex items-center gap-1 rounded bg-stone-300 p-0.5 pl-2 text-xs text-stone-900" %>
@@ -110,6 +110,16 @@
           </span>
         </span>
       <% end %>
+      <% if list.seen %>
+        <span class="<%= group %>">
+          <%= t(".seen") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".activities.#{list.seen}") %>
+            <%= hidden_field_tag :seen, list.seen, id: nil %>
+            <%= remove %>
+          </span>
+        </span>
+      <% end %>
       <%# The sort : not a filter (its own colors), its arrow reverses it %>
       <% if list.sort %>
         <span class="<%= group.sub('bg-stone-300', 'bg-sky-200').sub('text-stone-900', 'text-sky-950') %>">
@@ -148,6 +158,12 @@
     <% UserList::ACTIVITIES.each do |days| %>
       <%= render "shared/search_bar_toggle", item: item, name: "days", value: days, on: list.days == days, count: list.counts["days_#{days}"],
                                              label: t(".activities.#{days}").upcase_first, dot: nil, radio: true %>
+    <% end %>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".seen_header") %></p>
+    <% UserList::ACTIVITIES.each do |seen| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "seen", value: seen, on: list.seen == seen, count: list.counts["seen_#{seen}"],
+                                             label: t(".activities.#{seen}").upcase_first, dot: nil, radio: true %>
     <% end %>
   </div>
 <% end %>

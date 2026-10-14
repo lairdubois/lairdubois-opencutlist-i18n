@@ -396,6 +396,8 @@ fr:
         other: "%{formatted} contributions"
       ago: "il y a %{time}"
       no_contribution: "aucune contribution"
+      seen: "vu il y a %{time}"
+      never_seen: "jamais vu"
       filtered: "Aucun utilisateur avec ces filtres."
       show_unfiltered:
         one: "Voir l'utilisateur sans filtre →"
@@ -422,6 +424,8 @@ fr:
         disabled: "Désactivés"
       activity: "Actifs"
       activity_header: "Activité"
+      seen: "Vus"
+      seen_header: "Dernière visite"
       activities:
         "1": "dans les dernières 24 heures"
         "7": "dans les 7 derniers jours"
@@ -431,9 +435,14 @@ fr:
       sorts:
         name: "nom"
         activity: "dernière activité"
+        seen: "dernière visite"
         contributions: "nombre de contributions"
         created: "date d'invitation"
     form:
+      invitations: "Invitations envoyées"
+      no_invitation: "Aucune invitation envoyée."
+      invited_ago: "Invité(e) il y a %{time}"
+      deleted_inviter: "utilisateur supprimé"
       history: "Historique"
       history_count:
         one: "%{count} entrée"

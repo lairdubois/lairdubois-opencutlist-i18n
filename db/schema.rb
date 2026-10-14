@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -53,6 +53,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_090000) do
     t.index ["language_id"], name: "index_help_requests_on_language_id"
     t.index ["resolved_at"], name: "index_help_requests_on_resolved_at"
     t.index ["user_id"], name: "index_help_requests_on_user_id"
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "inviter_id"
+    t.string "email", null: false
+    t.datetime "created_at", null: false
+    t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
+    t.index ["user_id"], name: "index_invitations_on_user_id"
   end
 
   create_table "languages", force: :cascade do |t|
@@ -164,6 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_090000) do
     t.string "locale"
     t.string "reference_language", default: "fr", null: false
     t.datetime "disabled_at"
+    t.datetime "last_seen_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["github_id"], name: "index_users_on_github_id", unique: true
     t.index ["transifex_username"], name: "index_users_on_transifex_username", unique: true
@@ -174,6 +184,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_090000) do
   add_foreign_key "comments", "users"
   add_foreign_key "help_requests", "languages"
   add_foreign_key "help_requests", "users"
+  add_foreign_key "invitations", "users"
+  add_foreign_key "invitations", "users", column: "inviter_id", on_delete: :nullify
   add_foreign_key "memberships", "languages"
   add_foreign_key "memberships", "users"
   add_foreign_key "publications", "users"

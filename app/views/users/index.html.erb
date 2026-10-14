@@ -30,6 +30,13 @@
             <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
           <% end %>
         </span>
+        <span class="w-40 text-right text-xs text-stone-400 tabular-nums">
+          <% if user.last_seen_at %>
+            <time datetime="<%= user.last_seen_at.iso8601 %>" title="<%= l(user.last_seen_at, format: :long) %>"><%= t(".seen", time: time_ago_in_words(user.last_seen_at)) %></time>
+          <% else %>
+            <%= t(".never_seen") %>
+          <% end %>
+        </span>
         <span class="w-56 text-right text-xs text-stone-400 tabular-nums">
           <% if stat %>
             <%= t(".contributions", count: stat.count, formatted: number_with_delimiter(stat.count)) %> ·

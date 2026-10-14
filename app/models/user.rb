@@ -1,10 +1,15 @@
 class User < ApplicationRecord
   # Main reference in the translator's editor : the fr source, or the en translation for non-French speakers
   REFERENCE_LANGUAGES = %w[fr en].freeze
+  # last_seen_at (any request, ApplicationController#record_last_seen) is written at most this often. Through
+  # update_column : updated_at, which the login tokens hang on, stays put
+  SEEN_PRECISION = 30.minutes
 
   has_many :memberships, dependent: :destroy
   has_many :languages, through: :memberships
   has_many :revisions, dependent: :nullify
+  has_many :invitations, -> { order(created_at: :desc, id: :desc) }, dependent: :destroy
+  has_many :sent_invitations, class_name: "Invitation", foreign_key: :inviter_id, dependent: :nullify
 
   normalizes :email, with: ->(e) { e.strip.downcase }
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }

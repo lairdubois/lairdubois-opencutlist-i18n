@@ -148,9 +148,13 @@ each entry's count under the other filters.
   start, `_` for a space, left in `q` unless exactly one matches) words of `q` move to their chip.
 - Users page : its own `users/_search_bar` (same look, same `search_bar_controller`) over `UserList` (in memory) :
   `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language, `disabled` too),
-  `days` (activity, or `never`), sorts name / activity / contributions / created.
+  `days` (activity, or `never`), `seen` (same periods over `User#last_seen_at` : any request, consultation included,
+  written by `ApplicationController#record_last_seen` at most every `User::SEEN_PRECISION` through `update_column`, so
+  the login tokens' `updated_at` stays put), sorts name / activity / seen / contributions / created.
 - Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request
   (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
+- Invitations sent : `Invitation(user, inviter, email)`, written by `InvitationMailer`'s `after_deliver` only when
+  `perform_deliveries` (e-mails off = no trace), listed under the "resend" button of the user's page.
 - Sort (translator's list only, `sorts:` local) : `sort` = `index` (default) / `updated` (last revision in the language
   or fr source one, `TranslationsController::SOURCE_KINDS`, never revised last), `dir`. Not a filter : its own menu,
   a sky chip whose arrow reverses it (removed by "remove all" / Esc twice), kept by a single `at`.
