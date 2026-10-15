@@ -66,6 +66,15 @@ then click Save to save it without leaving the page.
   <dt><code>"Word "</code></dt><dd>exact text between quotes: spaces, case and accents included</dd>
 </dl>
 
+<% if current_user.editable_languages.exists? %>
+<h2>Testing in OpenCutList</h2>
+<p>
+  For advanced translators who build OpenCutList from its sources: the <%= link_to "Export", exports_path %> page
+  downloads your language's yml file, to put in <code>src/ladb_opencutlist/yaml/i18n-src/</code>. Others don't need
+  it: the team brings the translations in automatically.
+</p>
+<% end %>
+
 <h2>Asking a Question</h2>
 <p>
   Unsure what a text means? The <strong>comments</strong> button under each translation lets you ask a question about

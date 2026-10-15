@@ -151,6 +151,7 @@ en:
       keys: "Keys"
       sync: "Sync FR"
       import: "Import"
+      export: "Export"
       pretranslations: "Pre-translation"
       admin: "Admin"
       users: "Users"
@@ -506,11 +507,16 @@ en:
         other: "%{count} keys moved from %{from} to %{to}."
 
   exports:
-    create:
-      no_dir: "OCL_I18N_EXPORT_DIR is not set."
-      written:
-        one: "%{count} file written to %{dir}."
-        other: "%{count} files written to %{dir}."
+    index:
+      title: "Export translations"
+      audience: "Only for advanced translators who want to test their translations straight from the OpenCutList sources: others don't need to export, the files are generated automatically by the team."
+      intro: "A language's yml, as a publication writes it into the repo: the translated keys (to review or not yet approved included), the copied keys with their fr source, in the fr.yml's order and with its comments. Untranslated keys are left out: OpenCutList then falls back to English."
+      none: "No language is assigned to you yet. Ask an administrator."
+      source: "source language"
+      translated: "%{count} / %{total} translated"
+      download: "Download"
+    show:
+      not_allowed: "Language not found or not assigned to you."
 
   users:
     index:

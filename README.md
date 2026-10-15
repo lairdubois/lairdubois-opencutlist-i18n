@@ -33,7 +33,6 @@ Production (Debian 12, NGINX, systemd) : see `deploy/README.md`.
 | `OCL_MAIL_ENABLED` | `1` to actually send e-mails (login links, invitations, comment notifications) ; off by default |
 | `ANTHROPIC_API_KEY` | Enables Claude pre-translation suggestions |
 | `OCL_API_TOKEN` | Bearer token of `/api/*` (suggestions and consistency reviews by Claude Code) ; the API answers 404 while empty |
-| `OCL_I18N_EXPORT_DIR` | Optional : local directory for the plain YAML export |
 | `TRANSIFEX_TOKEN`, `TRANSIFEX_RESOURCE` | Migration only : API token and resource slug of the fr.yml resource |
 | `TRANSIFEX_ORGANIZATION`, `TRANSIFEX_PROJECT` | Default `opencutlist` / `opencutlist` |
 | `TRANSIFEX_LANGUAGE_MAP` | OCL code = Transifex code when they differ, e.g. `zh=zh_CN,pt=pt_PT` |

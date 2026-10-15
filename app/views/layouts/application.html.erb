@@ -27,6 +27,9 @@
             <%= nav_link :keys, units_path %>
           <% end %>
           <%= nav_link :translate, translate_root_path %>
+          <% if current_user.editable_languages.exists? %>
+            <%= nav_link :export, exports_path %>
+          <% end %>
           <% if current_user.admin? %>
             <%# The admin sections in a dropdown (native popover, like the user menu) : the button is underlined
                 when the current page is one of them, and carries the pending volunteers' badge %>

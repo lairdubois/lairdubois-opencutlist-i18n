@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   get "translate/:lang/issues", to: "issues#index", as: :issues
   patch "issues/:id/close", to: "issues#close", as: :close_issue
   get "translate/:lang/:unit_id/issues", to: "issues#unit", as: :translate_unit_issues
+  # A language's yml, downloaded by its translators (and admins, fr included)
+  get "export", to: "exports#index", as: :exports
+  get "export/:lang", to: "exports#show", as: :export
 
   # Everyone : the guide and the form to the admins (who list and resolve the requests)
   get "help", to: "help#show", as: :help
@@ -65,7 +68,6 @@ Rails.application.routes.draw do
   post "import/apply", to: "imports#apply", as: :import_apply
 
   get "pretranslations", to: "pretranslations#index", as: :pretranslations
-  post "export", to: "exports#create", as: :export
   resources :publications, only: [:index, :create] do
     post :preview, on: :collection
   end

@@ -5,7 +5,7 @@
   <%= render "shared/file_input", name: :file, accept: ".yml,.yaml",
              data: { language_from_filename_target: "file", action: "language-from-filename#pick" } %>
   <%= label_tag :language, t(".language"), class: "text-stone-600" %>
-  <%= select_tag :language, options_from_collection_for_select(@languages, :code, ->(l) { "#{l.name} (#{l.code})" }),
+  <%= select_tag :language, options_from_collection_for_select(@languages, :code, ->(l) { "#{l.name} (#{l.code.upcase})" }),
                  include_blank: t(".from_filename"), class: "rounded border border-stone-300 bg-white px-3 py-1.5",
                  data: { language_from_filename_target: "select" } %>
   <%= submit_tag t(".analyze"), class: "rounded bg-stone-800 px-3 py-1.5 text-white" %>

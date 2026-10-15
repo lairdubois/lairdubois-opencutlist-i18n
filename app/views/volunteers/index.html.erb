@@ -12,7 +12,7 @@
       <span class="font-medium"><%= r.name %></span>
       <%= mail_to r.email, class: "text-stone-600 underline" %>
       <span>
-        <%= r.language_name %> <span class="text-stone-500">(<%= r.language_code %>)</span>
+        <%= r.language_name %> <span class="text-stone-500">(<%= r.language_code.upcase %>)</span>
         <% unless language %><span class="rounded bg-sky-100 px-1.5 text-xs text-sky-800"><%= t(".new_language") %></span><% end %>
       </span>
       <% if user %>
@@ -38,7 +38,7 @@
         <span class="<%= r.accepted? ? 'text-emerald-700' : 'text-stone-400' %>"><%= t(".statuses.#{r.status}") %></span>
         <% if r.user %><%= link_to r.name, edit_user_path(r.user), class: "underline" %><% else %><span><%= r.name %></span><% end %>
         <span><%= r.email %></span>
-        <span><%= r.language_name %> (<%= r.language_code %>)</span>
+        <span><%= r.language_name %> (<%= r.language_code.upcase %>)</span>
         <span class="ml-auto text-xs text-stone-500" title="<%= l r.handled_at %>">
           <%= t(".handled_by", name: r.handled_by&.name || "?", time: time_ago_in_words(r.handled_at)) %>
         </span>

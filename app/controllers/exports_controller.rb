@@ -1,11 +1,20 @@
-# Writes the i18n-src YAML files into OCL_I18N_EXPORT_DIR (the OCL repo's yaml/i18n-src for now)
+# Downloads a language's yml, as a publication would write it : the languages the user can translate, fr too for admins
 class ExportsController < ApplicationController
-  before_action :require_admin
-  def create
-    dir = ENV["OCL_I18N_EXPORT_DIR"]
-    return redirect_to(units_path, alert: t(".no_dir")) if dir.blank?
+  def index
+    @languages = exportable.to_a
+    @stats = Language.stats(@languages.reject(&:source?))
+  end
 
-    paths = YamlExport.new.write(dir)
-    redirect_to units_path, notice: t(".written", count: paths.size, dir: dir)
+  def show
+    language = exportable.find_by(code: params[:lang])
+    return redirect_to exports_path, alert: t(".not_allowed") unless language
+
+    send_data YamlExport.new.file(language), filename: "#{language.code}.yml", type: "application/yaml; charset=utf-8"
+  end
+
+  private
+
+  def exportable
+    current_user.admin? ? Language.all : current_user.editable_languages
   end
 end

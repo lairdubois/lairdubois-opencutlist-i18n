@@ -29,8 +29,8 @@
     <label class="flex flex-col gap-1">
       <span class="font-medium"><%= VolunteerRequest.human_attribute_name(:language_code) %></span>
       <%= f.select :language_code,
-                   grouped_options_for_select({ t(".existing_languages") => languages.map { |l| ["#{l.name} (#{l.code})", l.code] },
-                                                t(".new_languages") => new_codes.map { |c| ["#{VolunteerRequest::LANGUAGES[c]["name"]} (#{c})", c] }
+                   grouped_options_for_select({ t(".existing_languages") => languages.map { |l| ["#{l.name} (#{l.code.upcase})", l.code] },
+                                                t(".new_languages") => new_codes.map { |c| ["#{VolunteerRequest::LANGUAGES[c]["name"]} (#{c.upcase})", c] }
                                                                                 .sort_by { |label, _| label.downcase } },
                                               @volunteer_request.language_code),
                    { include_blank: true }, required: true, class: "rounded border border-stone-300 px-3 py-2" %>

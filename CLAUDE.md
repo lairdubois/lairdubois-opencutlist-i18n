@@ -146,6 +146,8 @@ Weblate was evaluated and rejected.
   and fr-equal values only counted, `@no-translate` ones listed read-only (`Plan#no_translate`, never written).
   Preview groups added (checked) / changed (`WordDiff`, unchecked), file kept in `tmp/imports/<token>.yml` ; picks `rows[unit_id] = Row#stamp` skip translations changed since.
   Written by `TranslationOperations#import` : `translated`, current `source_hash`, `import` revision of the chosen user.
+- Export (`/export`, header link for anyone with an editable language ; `ExportsController`) : downloads a language's yml
+  as `Publisher` writes it (`YamlExport#file`) ; translators their languages, admins all, fr included.
 
 ## Translator's page and editor
 
@@ -177,6 +179,8 @@ Weblate was evaluated and rejected.
   below it with the `.toolbar` component (`application.css`, `top: calc(3.5rem + 1px)`) : keep both in sync. It
   swallows main's `py-6` (or the repo-changed banner's `mb-4`) and spans the window through an outset border-image
   (background + bottom line).
+- Language codes are shown uppercase (`language.code.upcase` : `DE`), everywhere ; only file names (`de.yml`), URLs,
+  params, ids and `lang` attributes keep them lowercase.
 - Flash messages are toasts (layout, `toast_controller`), centered at the bottom of the window : a notice leaves after 5 s, an alert
   stays until closed ; `data-turbo-temporary` keeps them out of Turbo's cache.
 

@@ -70,6 +70,15 @@
   <dt><code>"Mot "</code></dt><dd>texte exact entre guillemets : espaces, majuscules et accents compris</dd>
 </dl>
 
+<% if current_user.editable_languages.exists? %>
+<h2>Tester dans OpenCutList</h2>
+<p>
+  Pour les traducteurs avancés qui compilent OpenCutList depuis ses sources : la page <%= link_to "Exporter", exports_path %>
+  télécharge le fichier yml de ta langue, à placer dans <code>src/ladb_opencutlist/yaml/i18n-src/</code>. Les autres
+  n'en ont pas besoin : l'équipe intègre les traductions automatiquement.
+</p>
+<% end %>
+
 <h2>Poser une question</h2>
 <p>
   Un doute sur le sens d'un texte ? Le bouton <strong>commentaires</strong> sous chaque traduction permet de poser une

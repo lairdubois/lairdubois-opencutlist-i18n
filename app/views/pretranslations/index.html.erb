@@ -30,8 +30,10 @@
         <% covered = r[:pending] - r[:todo] %>
         <tr>
           <td class="px-3 py-2">
-            <%= link_to language.name, translate_path(language.code, status: %w[not_translated outdated]), class: "hover:underline" %>
-            <span class="ml-1 font-mono text-xs text-stone-400"><%= language.code %></span>
+            <span class="flex items-baseline gap-2">
+              <span class="w-6 shrink-0 font-mono text-xs text-stone-400"><%= language.code.upcase %></span>
+              <%= link_to language.name, translate_path(language.code, status: %w[not_translated outdated]), class: "hover:underline" %>
+            </span>
           </td>
           <td class="px-3 py-2 text-right" title="<%= t(".split", not_translated: r[:not_translated], outdated: r[:pending] - r[:not_translated]) %>"><%= r[:pending] %></td>
           <td class="px-3 py-2">

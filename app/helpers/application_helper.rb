@@ -26,6 +26,7 @@ module ApplicationHelper
     translate: %w[languages translations reference_languages issues],
     sync: %w[syncs],
     import: %w[imports],
+    export: %w[exports],
     pretranslations: %w[pretranslations],
     users: %w[users volunteers],
     migration: %w[migrations],

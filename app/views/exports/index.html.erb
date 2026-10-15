@@ -1,0 +1,29 @@
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 max-w-3xl rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900"><%= t(".audience") %></p>
+<p class="mb-4 max-w-3xl text-sm text-stone-600"><%= t(".intro") %></p>
+<% if @languages.empty? %>
+  <p class="text-stone-600"><%= t(".none") %></p>
+<% else %>
+  <ul class="max-w-3xl divide-y divide-stone-200 rounded border border-stone-200 bg-white text-sm">
+    <% @languages.each do |language| %>
+      <% stats = @stats[language] %>
+      <li class="flex items-center gap-4 px-4 py-2.5">
+        <span class="flex w-48 shrink-0 items-baseline gap-2">
+          <span class="w-6 shrink-0 font-mono text-xs text-stone-400"><%= language.code.upcase %></span>
+          <span class="truncate font-medium"><%= language.name %></span>
+        </span>
+        <% if stats %>
+          <%= render "shared/progress_bar", stats: stats, css: "h-2 w-32 shrink-0" %>
+          <span class="text-stone-600 tabular-nums"><%= t(".translated", count: stats[:translated], total: stats[:total]) %></span>
+        <% else %>
+          <span class="text-stone-500"><%= t(".source") %></span>
+        <% end %>
+        <%# A plain download : not a Turbo visit, nor prefetched on hover %>
+        <%= link_to export_path(language.code), download: "#{language.code}.yml", data: { turbo: false },
+                    class: "ml-auto rounded bg-stone-800 px-3 py-1.5 text-white" do %>
+          <%= t(".download") %> <span class="font-mono text-xs text-stone-300"><%= language.code %>.yml</span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
