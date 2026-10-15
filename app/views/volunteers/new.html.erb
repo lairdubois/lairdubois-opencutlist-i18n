@@ -1,10 +1,12 @@
 <% content_for :title, "#{t(".title")} · OpenCutList Localize" %>
 <% languages = Language.targets.to_a %>
+<% stats = Language.stats(languages) %>
 <% new_codes = VolunteerRequest::LANGUAGES.keys - languages.map(&:code) - [Language::SOURCE_CODE] %>
 <div class="mx-auto mt-16 max-w-sm rounded border border-stone-200 bg-white p-6 text-sm">
   <h1 class="mb-1 text-lg font-semibold"><%= t(".title") %></h1>
   <p class="mb-4 text-stone-600"><%= t(".intro") %></p>
-  <%= form_with model: @volunteer_request, url: volunteers_path, class: "flex flex-col gap-3" do |f| %>
+  <%= form_with model: @volunteer_request, url: volunteers_path, class: "flex flex-col gap-3",
+                data: { controller: "language-picker", action: "submit->language-picker#require" } do |f| %>
     <% if @volunteer_request.errors.any? %>
       <ul class="rounded border border-red-200 bg-red-50 px-3 py-2 text-red-800">
         <% @volunteer_request.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
@@ -26,15 +28,53 @@
       <%= f.email_field :email, required: true, maxlength: 254, autocomplete: "email", placeholder: t("sessions.new.email_placeholder"),
                         class: "rounded border border-stone-300 px-3 py-2" %>
     </label>
-    <label class="flex flex-col gap-1">
-      <span class="font-medium"><%= VolunteerRequest.human_attribute_name(:language_code) %></span>
-      <%= f.select :language_code,
-                   grouped_options_for_select({ t(".existing_languages") => languages.map { |l| ["#{l.name} (#{l.code.upcase})", l.code] },
-                                                t(".new_languages") => new_codes.map { |c| ["#{VolunteerRequest::LANGUAGES[c]["name"]} (#{c.upcase})", c] }
-                                                                                .sort_by { |label, _| label.downcase } },
-                                              @volunteer_request.language_code),
-                   { include_blank: true }, required: true, class: "rounded border border-stone-300 px-3 py-2" %>
-    </label>
+    <%# A dropdown instead of a select, to show each language's progress ; the code goes in a hidden field %>
+    <% picked = @volunteer_request.language_code %>
+    <% picked_name = (languages.find { |l| l.code == picked }&.name || VolunteerRequest::LANGUAGES.dig(picked, "name") if picked.present?) %>
+    <div class="flex flex-col gap-1" data-controller="popover" data-popover-align-value="left">
+      <span id="language-picker-label" class="font-medium"><%= VolunteerRequest.human_attribute_name(:language_code) %></span>
+      <%= f.hidden_field :language_code, data: { language_picker_target: "field" } %>
+      <button type="button" popovertarget="language-picker" data-popover-target="anchor" aria-haspopup="listbox"
+              aria-labelledby="language-picker-label" data-action="keydown.down->language-picker#open keydown.up->language-picker#open"
+              class="flex items-center justify-between gap-2 rounded border border-stone-300 bg-white px-3 py-2 text-left">
+        <span data-language-picker-target="label" class="<%= "text-stone-400" unless picked_name %>">
+          <%= picked_name ? "#{picked_name} (#{picked.upcase})" : t(".pick") %>
+        </span>
+        <span class="text-stone-500" aria-hidden="true">▾</span>
+      </button>
+      <div id="language-picker" popover data-popover-target="panel" data-language-picker-target="panel"
+           data-action="beforetoggle->popover#place beforetoggle->language-picker#size toggle->language-picker#opened keydown->language-picker#keydown"
+           class="m-0 max-h-[60vh] flex-col overflow-hidden rounded border border-stone-200 bg-white text-sm text-stone-700 shadow-lg open:flex">
+        <div class="border-b border-stone-200 p-1">
+          <input type="search" data-language-picker-target="search" data-action="input->language-picker#filter"
+                 placeholder="<%= t(".search_placeholder") %>" aria-label="<%= t(".search_placeholder") %>" autocomplete="off"
+                 class="w-full rounded border border-stone-300 px-2 py-1">
+        </div>
+        <div role="listbox" aria-labelledby="language-picker-label" class="overflow-y-auto p-1">
+          <% [[t(".existing_languages"), languages.map { |l| [l.code, l.name, stats[l]] }],
+              [t(".new_languages"), new_codes.map { |c| [c, VolunteerRequest::LANGUAGES[c]["name"], nil] }.sort_by { |_, name, _| name.downcase }]].each do |group, items| %>
+            <div role="group" aria-label="<%= group %>" data-language-picker-target="group">
+              <div class="px-3 pt-2 pb-1 text-xs font-medium text-stone-500"><%= group %></div>
+              <% items.each do |code, name, s| %>
+                <button type="button" role="option" aria-selected="<%= code == picked %>" data-code="<%= code %>" data-name="<%= name %>"
+                        data-action="language-picker#pick"
+                        class="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100">
+                  <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if code == picked %></span>
+                  <span class="flex-1"><%= name %></span>
+                  <span class="text-xs text-stone-400"><%= code.upcase %></span>
+                  <% if s %>
+                    <%= render "shared/progress_bar", stats: s, css: "h-1.5 w-16 shrink-0" %>
+                    <span class="w-9 text-right text-xs text-stone-500 tabular-nums"
+                          title="<%= t('languages.index.todo', count: s[:total] - s[:translated]) %>"><%= progress_percent(s[:translated], s[:total]) %></span>
+                  <% end %>
+                </button>
+              <% end %>
+            </div>
+          <% end %>
+          <p hidden data-language-picker-target="empty" class="px-3 py-2 text-stone-500"><%= t(".no_match") %></p>
+        </div>
+      </div>
+    </div>
     <p class="text-xs text-stone-500"><%= t(".hint") %></p>
     <%= f.submit t(".submit"), class: "rounded bg-stone-800 px-3 py-2 text-white" %>
   <% end %>

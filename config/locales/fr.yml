@@ -275,6 +275,9 @@ fr:
       intro: "Propose-toi pour traduire OpenCutList dans ta langue, qu'elle soit déjà en cours ou nouvelle."
       existing_languages: "Langues en cours"
       new_languages: "Nouvelle langue"
+      pick: "Choisir une langue"
+      search_placeholder: "Rechercher une langue"
+      no_match: "Aucune langue ne correspond."
       hint: "Un administrateur examinera ta demande et te contactera à cette adresse."
       submit: "Envoyer ma candidature"
       back: "Retour à la connexion"
@@ -303,7 +306,7 @@ fr:
     invalid_link: "Lien invalide ou expiré."
     new:
       or: "ou"
-      volunteer: "pour traduire OpenCutList dans ta langue"
+      volunteer: "pour traduire OpenCutList dans ma langue"
       volunteer_link: "Proposer mon aide"
       title: "Connexion"
       email_placeholder: "ton@adresse.org"

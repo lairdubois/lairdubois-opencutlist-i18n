@@ -80,14 +80,14 @@
         <% end %>
       </nav>
     </header>
-    <%# Flash messages as toasts, centered at the bottom : a notice leaves after a while, an alert stays until closed.
+    <%# Flash messages as toasts, centered under the sticky header (h-14 + 1px border) : a notice leaves after a while, an alert stays until closed.
         data-turbo-temporary : dropped before Turbo caches the page, so going back doesn't replay them %>
     <% if notice || alert %>
-      <div class="pointer-events-none fixed bottom-4 left-1/2 z-30 flex w-96 max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-col gap-2" data-turbo-temporary>
+      <div class="pointer-events-none fixed top-[calc(4rem+1px)] left-1/2 z-30 flex w-96 max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-col gap-2" data-turbo-temporary>
         <% { notice: notice, alert: alert }.compact_blank.each do |kind, message| %>
           <div role="<%= kind == :alert ? "alert" : "status" %>" data-controller="toast" data-toast-delay-value="<%= kind == :alert ? 0 : 5000 %>"
-               data-toast-hidden-class="translate-y-4 opacity-0" data-action="mouseenter->toast#pause mouseleave->toast#resume"
-               class="pointer-events-auto flex translate-y-4 items-start gap-2 rounded border px-3 py-2 text-sm opacity-0 shadow-lg transition duration-200
+               data-toast-hidden-class="-translate-y-4 opacity-0" data-action="mouseenter->toast#pause mouseleave->toast#resume"
+               class="pointer-events-auto flex -translate-y-4 items-start gap-2 rounded border px-3 py-2 text-sm opacity-0 shadow-lg transition duration-200
                       <%= kind == :alert ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800" %>">
             <p class="min-w-0 flex-1 break-words"><%= message %></p>
             <button type="button" data-action="toast#dismiss" aria-label="<%= t(".close") %>" title="<%= t(".close") %>"

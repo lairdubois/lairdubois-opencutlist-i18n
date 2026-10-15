@@ -181,7 +181,7 @@ Weblate was evaluated and rejected.
   (background + bottom line).
 - Language codes are shown uppercase (`language.code.upcase` : `DE`), everywhere ; only file names (`de.yml`), URLs,
   params, ids and `lang` attributes keep them lowercase.
-- Flash messages are toasts (layout, `toast_controller`), centered at the bottom of the window : a notice leaves after 5 s, an alert
+- Flash messages are toasts (layout, `toast_controller`), centered just below the sticky header (`top-[calc(4rem+1px)]`, keep it in step with the header height) : a notice leaves after 5 s, an alert
   stays until closed ; `data-turbo-temporary` keeps them out of Turbo's cache.
 
 ## List search (translator's list and keys list)

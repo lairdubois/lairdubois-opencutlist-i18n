@@ -275,6 +275,9 @@ en:
       intro: "Offer to translate OpenCutList into your language, whether it is already in progress or a new one."
       existing_languages: "Languages in progress"
       new_languages: "New language"
+      pick: "Pick a language"
+      search_placeholder: "Search a language"
+      no_match: "No matching language."
       hint: "An admin will review your request and contact you at this address."
       submit: "Send my application"
       back: "Back to log in"
@@ -303,7 +306,7 @@ en:
     invalid_link: "Invalid or expired link."
     new:
       or: "or"
-      volunteer: "to translate OpenCutList into your language"
+      volunteer: "to translate OpenCutList into my language"
       volunteer_link: "Offer my help"
       title: "Log in"
       email_placeholder: "you@example.org"
