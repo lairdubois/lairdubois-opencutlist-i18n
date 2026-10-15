@@ -19,7 +19,7 @@ class TranslationsController < ApplicationController
   before_action :set_unit, only: [:update, :history]
   before_action :require_admin, only: [:history]
 
-  # Asks Claude for suggestions on the untranslated or outdated strings of the current page
+  # Asks Claude for suggestions on the untranslated or outdated strings of the current page (Pretranslator skips current ones)
   def pretranslate
     ids = params.require(:unit_ids).map(&:to_i)
     PretranslateJob.perform_later(@language.id, ids)
@@ -35,7 +35,7 @@ class TranslationsController < ApplicationController
     @counts = filter_counts(searched)
     searched = filter_by_index(searched) if single_index?
     @count = single_index? ? searched.where(translatable_condition).count : @counts[:list]
-    scope = sorted(searched.where(translatable_condition).where(status_condition).where(questions_condition).where(warnings_condition).where(days_condition))
+    scope = sorted(searched.where(translatable_condition).where(status_condition).where(questions_condition).where(issues_condition).where(warnings_condition).where(days_condition))
     @page = [params[:page].to_i, 1].max
     @units = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE).to_a
     @more = @page * PER_PAGE < @count
@@ -45,6 +45,7 @@ class TranslationsController < ApplicationController
     # Infinite scroll : the next page is loaded into the lazy frame at the bottom of the list
     return render partial: "page_frame" if turbo_frame_request?
 
+    @open_issues = Issue.still_open.visible_to(current_user).where(language: @language).count
     # The language switch, with each one's progress
     languages = current_user.editable_languages.to_a
     @language_stats = Language.stats(languages) if languages.size > 1
@@ -105,13 +106,13 @@ class TranslationsController < ApplicationController
   end
 
   # SQL condition of each status, on the units LEFT JOIN translations of the edited language.
-  # They partition the units : an outdated translation is neither "not_approved" nor "approved".
-  # A copied unit has none (its translations are left out of the export).
+  # They partition the units : a translation to review (outdated, or contested by an open issue) is neither
+  # "not_approved" nor "approved". A copied unit has none (its translations are left out of the export).
   def status_conditions
-    up_to_date = "translations.source_hash = units.source_hash"
+    up_to_date = "NOT #{Translation.to_review_sql}"
     {
       "not_translated" => "translations.id IS NULL",
-      "outdated" => "translations.source_hash <> units.source_hash",
+      "outdated" => Translation.to_review_sql,
       "not_approved" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:translated]]),
       "approved" => Unit.sanitize_sql_array(["translations.status = ? AND #{up_to_date}", Translation.statuses[:approved]])
     }.transform_values { |sql| "units.copied = FALSE AND #{sql}" }
@@ -128,6 +129,14 @@ class TranslationsController < ApplicationController
 
   def questions_condition
     questions? ? open_question_condition : "1 = 1"
+  end
+
+  def open_issue_condition
+    "units.id IN (#{Issue.still_open.where(language: @language).where.not(unit_id: nil).select(:unit_id).to_sql})"
+  end
+
+  def issues_condition
+    issues? ? open_issue_condition : "1 = 1"
   end
 
   # Ids of a few hundred units at most, computed (and cached) by TranslationChecks
@@ -153,14 +162,15 @@ class TranslationsController < ApplicationController
   end
 
   # In one query : each status's matches with the other filters (shown in the filters menu),
-  # the questions', warnings', notranslate's (admins) and periods' ones, the listed units, and the search alone
+  # the questions', issues', warnings', notranslate's (admins) and periods' ones, the listed units, and the search alone
   # (for the empty list hint). All of them among the translators' keys or, notranslate, the others.
   def filter_counts(scope)
-    others = "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND (#{days_condition})"
-    conditions = STATUSES.to_h { |key| [key, "(#{status_conditions[key]}) AND (#{questions_condition}) AND (#{warnings_condition}) AND (#{days_condition})"] }
-                         .merge("questions" => "(#{status_condition}) AND #{open_question_condition} AND (#{warnings_condition}) AND (#{days_condition})",
-                                "warnings" => "(#{status_condition}) AND (#{questions_condition}) AND #{warning_condition} AND (#{days_condition})")
-                         .merge(PERIODS.to_h { |days| ["days_#{days}", "(#{status_condition}) AND (#{questions_condition}) AND (#{warnings_condition}) AND #{period_condition(days.to_i)}"] })
+    others = "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})"
+    conditions = STATUSES.to_h { |key| [key, "(#{status_conditions[key]}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})"] }
+                         .merge("questions" => "(#{status_condition}) AND #{open_question_condition} AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})",
+                                "issues" => "(#{status_condition}) AND (#{questions_condition}) AND #{open_issue_condition} AND (#{warnings_condition}) AND (#{days_condition})",
+                                "warnings" => "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND #{warning_condition} AND (#{days_condition})")
+                         .merge(PERIODS.to_h { |days| ["days_#{days}", "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND #{period_condition(days.to_i)}"] })
                          .merge(list: others, searched: "1 = 1")
                          .transform_values { |sql| "(#{sql}) AND #{translatable_condition}" }
     if current_user.admin?
@@ -248,11 +258,15 @@ class TranslationsController < ApplicationController
   def preload_language(language, units)
     ids = units.map(&:id)
     texts = units.map(&:source_text)
+    translations = Translation.where(unit_id: ids, language: language).includes(:unit).index_by(&:unit_id)
     {
-      translations: Translation.where(unit_id: ids, language: language).includes(:unit).index_by(&:unit_id),
-      machine: Suggestion.where(unit_id: ids, language: language).pluck(:unit_id, :text).to_h,
+      translations: translations,
+      # Units with an open issue of any kind : to review, no approval until closed
+      contested: Translation.preload_contested(translations, language, ids),
+      machine: Suggestion.current.where(unit_id: ids, language: language).pluck(:unit_id, :text).to_h,
       comment_counts: Comment.visible_in(language).where(unit_id: ids).group(:unit_id).count,
       open_questions: Comment.open_questions.visible_in(language).where(unit_id: ids).distinct.pluck(:unit_id).to_set,
+      issues: Issue.still_open.where(language: language, unit_id: ids).group(:unit_id).count,
       # Same fr text already translated elsewhere in this language
       suggestions: Translation.joins(:unit).merge(Unit.active).where(language: language, units: { source_text: texts })
                               .where.not(unit_id: ids).pluck("units.source_text", "translations.text")

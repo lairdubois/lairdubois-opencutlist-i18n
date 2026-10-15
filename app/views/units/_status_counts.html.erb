@@ -1,0 +1,12 @@
+<%# locals: (unit:, languages:, translations:) %>
+<%# Status counts of the key's translations, readable while folded (translations : language => translation, contested set).
+    A copied key's translations are kept but not exported : no status. Replaced when an issue is closed from a panel %>
+<span id="unit_status_counts_<%= unit.id %>" class="contents">
+  <% unless unit.copied %>
+    <% counts = languages.map { |l| (tr = translations[l]).nil? ? "not_translated" : tr.to_review? ? "outdated" : tr.approved? ? "approved" : "not_approved" }.tally %>
+    <% %w[approved not_approved outdated not_translated].each do |status| %>
+      <% next unless counts[status] %>
+      <span class="flex items-center gap-1 tabular-nums" title="<%= t("shared.search_bar.statuses.#{status}") %>"><%= status_dot(status) %><%= counts[status] %></span>
+    <% end %>
+  <% end %>
+</span>

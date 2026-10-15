@@ -28,12 +28,26 @@
           <% end %>
           <%= nav_link :translate, translate_root_path %>
           <% if current_user.admin? %>
-            <%= nav_link :sync, new_sync_path %>
-            <%= nav_link :import, new_import_path %>
+            <%# The admin sections in a dropdown (native popover, like the user menu) : the button is underlined
+                when the current page is one of them, and carries the pending volunteers' badge %>
             <% volunteers = VolunteerRequest.pending.count %>
-            <%= nav_link :users, users_path, badge: volunteers, title: (t(".volunteers_pending", count: volunteers) if volunteers.positive?) %>
-            <%= nav_link :migration, migration_path %>
-            <%= nav_link :publish, publications_path %>
+            <% volunteers_title = t(".volunteers_pending", count: volunteers) if volunteers.positive? %>
+            <% admin_active = ApplicationHelper::ADMIN_MENU.any? { |s| ApplicationHelper::NAV_SECTIONS[s].include?(controller_name) } %>
+            <div data-controller="popover" data-popover-align-value="left" class="flex h-full">
+              <button type="button" popovertarget="admin-menu" data-popover-target="anchor" title="<%= volunteers_title %>"
+                      class="flex h-full items-center gap-1.5 border-b-2 pt-0.5 <%= admin_active ? "border-stone-800 font-medium text-stone-900" : "border-transparent text-stone-600 hover:text-stone-900" %>">
+                <%= t(".admin") %> <%= nav_badge(volunteers) %> <span class="text-xs text-stone-400">▾</span>
+              </button>
+              <div id="admin-menu" popover data-popover-target="panel" data-action="beforetoggle->popover#place"
+                   class="m-0 min-w-48 rounded border border-stone-200 bg-white p-1 text-sm shadow-lg">
+                <%= admin_menu_link :sync, new_sync_path %>
+                <%= admin_menu_link :import, new_import_path %>
+                <%= admin_menu_link :pretranslations, pretranslations_path %>
+                <%= admin_menu_link :users, users_path, badge: volunteers, title: volunteers_title %>
+                <%= admin_menu_link :migration, migration_path %>
+                <%= admin_menu_link :publish, publications_path %>
+              </div>
+            </div>
           <% end %>
           <%# Help : the guide and the form to the admins, told where the user was (from) ; the admins' badge counts the open requests %>
           <% help_open = HelpRequest.unresolved.count if current_user.admin? %>

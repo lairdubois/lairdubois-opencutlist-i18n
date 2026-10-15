@@ -1,0 +1,120 @@
+# A language's issues (points raised by a consistency review), for its translators : listed in the keys' order,
+# closed (like a GitHub issue) or reopened
+class IssuesController < ApplicationController
+  STATES = %w[open closed all].freeze
+  LIMIT = 500
+
+  before_action :set_language, only: [:index, :unit]
+
+  # state (open by default) ; kind[] (OR-ed), key (contains), prefix (branch), at (index or range, the keys list's),
+  # unit, q (the issue, its key's fr and translation, its text as raised ; "…" : exact) : filters, the states' and
+  # kinds' counts under the others. A single index is exclusive (the state kept), as on the other lists. Those whose
+  # key left the work are left out for a translator
+  def index
+    @state = STATES.include?(params[:state]) ? params[:state] : "open"
+    @query = ListFilters::Query.new(params)
+    @unit = Unit.find_by(id: params[:unit]) if params[:unit].present? && !@query.single_index?
+    @kinds = @query.single_index? ? [] : Issue::KINDS & Array(params[:kind])
+    base = searched(Issue.visible_to(current_user).where(language: @language))
+    by_state = { "open" => base.still_open, "closed" => base.closed, "all" => base }
+    @counts = by_state.transform_values { |scope| (@kinds.any? ? scope.where(kind: @kinds) : scope).count }
+    scope = by_state.fetch(@state)
+    @kind_counts = scope.group(:kind).count
+    scope = scope.where(kind: @kinds) if @kinds.any?
+    # The language-wide ones first, then the keys' order
+    @issues = scope.includes(:unit, :closed_by)
+                   .reorder(Arel.sql("issues.unit_id IS NOT NULL, units.position, units.id, issues.id")).limit(LIMIT).to_a
+    unit_ids = @issues.filter_map(&:unit_id).uniq
+    @translations = Translation.where(language: @language, unit_id: unit_ids).includes(:unit).index_by(&:unit_id)
+    @indexes = Unit.tree_indexes(Unit.active.where(id: unit_ids).ids)
+  end
+
+  # A key's open issues, in its row's panel on the translator's page (lazy frame)
+  def unit
+    unit = (current_user.admin? ? Unit.active : Unit.active.translatable).find(params[:unit_id])
+    render partial: "unit", locals: unit_locals(unit, @language)
+  end
+
+  def close
+    issue = Issue.find(params[:id])
+    return head :forbidden unless current_user.can_translate?(issue.language)
+
+    issue.update!(params[:reopen] ? { closed_at: nil, closed_by: nil } : { closed_at: Time.current, closed_by: current_user })
+    return render_row(issue) if params[:row] && issue.unit
+    redirect_back_or_to issues_path(issue.language.code)
+  end
+
+  private
+
+  def unit_locals(unit, language)
+    { unit: unit, language: language, issues: unit.issues.still_open.where(language: language).order(:id).to_a,
+      translation: Translation.find_by(unit: unit, language: language), resolved: unit.issues.closed.where(language: language).count }
+  end
+
+  # Resolved from a panel (translator's row, key page) : the panel, status, issues button, approval and the key page's counts follow
+  def render_row(issue)
+    unit, language = issue.unit, issue.language
+    locals = unit_locals(unit, language)
+    translation = locals[:translation]
+    common = { unit: unit, language: language }
+    render turbo_stream: [
+      turbo_stream.replace("issues_#{unit.id}_#{language.code}", partial: "issues/unit", locals: locals),
+      turbo_stream.replace("status_#{unit.id}_#{language.code}", partial: "translations/status", locals: common.merge(translation: translation)),
+      turbo_stream.replace("issues_button_#{unit.id}_#{language.code}", partial: "translations/issues_button", locals: common.merge(count: locals[:issues].size)),
+      # The key page's language badge and header count, every language's (absent from the translator's page : ignored)
+      turbo_stream.replace("unit_status_#{unit.id}_#{language.code}", partial: "units/language_status", locals: common.merge(translation: translation)),
+      turbo_stream.replace("unit_issues_count_#{unit.id}", partial: "units/issues_count", locals: { unit: unit, count: unit.issues.still_open.count }),
+      turbo_stream.replace("unit_status_counts_#{unit.id}", partial: "units/status_counts",
+                                                            locals: { unit: unit, languages: Language.targets, translations: unit.translations_by_language }),
+      turbo_stream.replace("review_#{unit.id}_#{language.code}", partial: "translations/review_button",
+                                                                 locals: common.merge(translation: translation, contested: locals[:issues].any?))
+    ]
+  end
+
+  # Issues matching the search fields (unit, key, branch, index, text), whatever the state and kinds. The text : in the issue, the
+  # text as raised, its key, fr source and translation in the language ; exact ("quoted") with instr, else fold LIKE
+  def searched(scope)
+    scope = scope.left_joins(:unit)
+    scope = scope.where(unit: @unit) if @unit
+    if (key = @query[:key])
+      scope = scope.where("units.key LIKE ? ESCAPE '\\'", "%#{Unit.sanitize_sql_like(key)}%")
+    end
+    if (prefix = @query[:prefix])
+      scope = scope.where("units.key = :p OR units.key LIKE :like ESCAPE '\\'", p: prefix, like: "#{Unit.sanitize_sql_like(prefix)}.%")
+    end
+    scope = by_index(scope) if @query[:at]
+    return scope unless (text = @query.text)
+
+    scope = scope.joins(Issue.sanitize_sql_array(["LEFT JOIN translations ON translations.unit_id = issues.unit_id AND translations.language_id = ?", @language.id]))
+    columns = ["issues.body", "issues.text", "units.key", "units.source_text", "translations.text"]
+    if @query.exact?
+      scope.where(columns.map { |c| "instr(#{c}, :q) > 0" }.join(" OR "), q: text)
+    else
+      scope.where(columns.map { |c| "fold(#{c}) LIKE :q ESCAPE '\\'" }.join(" OR "), q: "%#{Unit.sanitize_sql_like(SqliteFold.fold(text))}%")
+    end
+  end
+
+  # Between two indexes of the keys list (active keys, in the keys' order), an open end left out : the whole
+  # language's issues and archived keys' aside
+  def by_index(scope)
+    from, to = @query.index_range
+    scope = scope.where(units: { archived_at: nil })
+    if from
+      first = unit_at_index(from)
+      scope = first ? scope.where("(units.position, units.id) >= (?, ?)", first.position, first.id) : scope.none
+    end
+    if to && (last = unit_at_index(to))
+      scope = scope.where("(units.position, units.id) <= (?, ?)", last.position, last.id)
+    end
+    scope
+  end
+
+  def unit_at_index(index)
+    Unit.active.reorder(:position, :id).offset(index - 1).first if index.positive?
+  end
+
+  def set_language
+    @language = Language.targets.find_by!(code: params[:lang])
+    redirect_to translate_root_path, alert: t("flash.no_language_access") unless current_user.can_translate?(@language)
+  end
+end

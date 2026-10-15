@@ -18,6 +18,7 @@ en:
     translated: "translated"
     approved: "approved"
     outdated: "FR changed, to review"
+    contested: "Open issue, to review"
     copied: "copied"
     copied_hint: "Nothing to translate: the fr source (a $t() or a variable alone) is copied as is into every language"
     outdated_count:
@@ -86,8 +87,10 @@ en:
         not_approved: "Not approved"
         approved: "Approved"
       questions: "Open questions"
+      issues: "Open issues"
       with: "With"
       questions_chip: "open question"
+      issues_chip: "open issue"
       warnings: "Warnings"
       warnings_chip: "warning"
       notranslates:
@@ -148,6 +151,8 @@ en:
       keys: "Keys"
       sync: "Sync FR"
       import: "Import"
+      pretranslations: "Pre-translation"
+      admin: "Admin"
       users: "Users"
       migration: "Migration"
       publish: "Publish"
@@ -176,6 +181,78 @@ en:
       page: "Sent with the page:"
       reply_hint: "The answer will be sent e-mail to %{email}."
       send: "Send"
+
+  pretranslations:
+    index:
+      issues: "Issues"
+      issues_title: "Open issues (consistency review)"
+      title: "Pre-translation"
+      intro_html: "Suggestions offered to translators under the editor (%{icon}), never translations. Only those computed on the current fr text count (a minor edit keeps it)."
+      anthropic_on_html: "%{icon} button on (ANTHROPIC_API_KEY)"
+      anthropic_off_html: "%{icon} button off (no ANTHROPIC_API_KEY)"
+      api_on_html: "Claude Code API on (OCL_API_TOKEN)"
+      api_off_html: "Claude Code API off (no OCL_API_TOKEN)"
+      language: "Language"
+      pending: "To do"
+      pending_title: "Strings not translated or outdated (major fr change)"
+      split: "%{not_translated} not translated, %{outdated} outdated"
+      coverage: "With a suggestion"
+      todo: "Without"
+      todo_title: "Strings to do without a current suggestion: what the pre-translation button or Claude Code would handle"
+      stale: "Stale"
+      stale_title: "Suggestions computed on an older fr text: hidden, replaced on the next run"
+      last: "Latest"
+      ago: "%{time} ago"
+  issues:
+    kinds:
+      terminology: "Terminology"
+      misaligned: "Misaligned"
+      meaning: "Meaning"
+      review: "To reread"
+      other: "Other"
+    index:
+      title: "Issues"
+      intro: "Raised by a consistency review of the language. Fix the translation if needed, then mark the issue resolved."
+      states:
+        open: "Open"
+        closed: "Resolved"
+        all: "All"
+      whole_language: "Whole language"
+      raised: "%{origin}, %{time} ago"
+      closed_by: "Resolved by %{name}, %{time} ago"
+      resolve: "Resolved"
+      reopen: "Reopen"
+      out_of_work:
+        archived: "deleted key"
+        no_translate: "@no-translate key"
+      out_of_work_title: "Out of the translators' work: they don't see this issue, shown to admins only."
+      not_translated: "not translated"
+      as_raised: "When raised"
+      empty: "No issues."
+      empty_filtered: "No issue with these filters."
+    search_bar:
+      placeholder: "Search issues, keys and texts…"
+      shortcuts: |
+        ⌘/Ctrl + F: go to the search (twice: the browser's find)
+        Enter: search
+        Esc: leave the field
+        Esc + Esc: clear everything, text and filters
+        Searches the issue, the key, the fr text, the translation and the text as raised
+        In the text, before Enter:
+        #120, #120-180: by key number
+        key:…: by key
+        branch:…: by branch
+        "Word ": exact text between quotes (spaces, case and accents included)
+      count:
+        one: "%{count} issue"
+        other: "%{count} issues"
+      kind: "Kind"
+      remove_all: "Remove all filters"
+    unit:
+      none: "No open issue left on this key."
+      resolved:
+        one: "See the resolved issue"
+        other: "See the %{count} resolved issues"
 
   help_requests:
     index:
@@ -260,6 +337,9 @@ en:
 
   translations:
     index:
+      issues:
+        one: "%{count} open issue"
+        other: "%{count} open issues"
       reference: "Reference:"
       show_whitespace: "Show spaces and line breaks"
       show_keys: "Always show the key names"
@@ -268,8 +348,8 @@ en:
       remove_status: "Remove the \"%{status}\" filter"
       more_filters: "More…"
       pretranslate:
-        one: "🤖 Suggest translations (%{language}) for the first string to do"
-        other: "🤖 Suggest translations (%{language}) for the first %{count} strings to do"
+        one: "Suggest translations (%{language}) for the first string to do without a suggestion"
+        other: "Suggest translations (%{language}) for the first %{count} strings to do without a suggestion"
     row:
       revised_ago: "changed %{time} ago"
       never_revised: "never changed"
@@ -280,6 +360,9 @@ en:
       en_missing: "EN missing"
       before: "before:"
     editor:
+      issues:
+        one: "%{count} issue"
+        other: "%{count} issues"
       saved: "saved"
       save: "Save"
       save_and_review: "Approve"
@@ -395,6 +478,9 @@ en:
       major: "Meaning changed: translations to review"
       translations: "Translations"
       comments: "Comments"
+      issues:
+        one: "%{count} open issue"
+        other: "%{count} open issues"
       history: "History"
       history_count:
         one: "%{count} entry"

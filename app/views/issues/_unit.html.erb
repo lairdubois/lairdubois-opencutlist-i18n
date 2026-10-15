@@ -1,0 +1,27 @@
+<%# locals: (unit:, language:, issues:, translation:, resolved:) %>
+<%# A key's open issues in one language, in its row's panel (lazy frame) ; closing one there answers with streams %>
+<%= turbo_frame_tag "issues_#{unit.id}_#{language.code}" do %>
+  <div class="flex flex-col gap-1">
+    <% issues.each do |issue| %>
+      <div class="flex items-start gap-2 py-1">
+        <%= issue_kind_chip(issue.kind, "shrink-0") %>
+        <div class="min-w-0 flex-1">
+          <p class="whitespace-pre-wrap text-stone-700"><%= issue.body %></p>
+          <%# The text as raised, when it changed since %>
+          <% if issue.text.present? && issue.text != translation&.text %>
+            <p class="mt-0.5 text-stone-500"><%= t("issues.index.as_raised") %> :
+              <span class="font-mono whitespace-pre-wrap" dir="<%= language.rtl ? "rtl" : "ltr" %>" lang="<%= language.code %>"><%= issue.text %></span></p>
+          <% end %>
+          <p class="mt-0.5 text-stone-400" title="<%= l issue.created_at %>"><%= t("issues.index.raised", origin: issue.origin || "—", time: time_ago_in_words(issue.created_at)) %></p>
+        </div>
+        <%= render "issues/close_button", issue: issue, row: true %>
+      </div>
+    <% end %>
+    <% if issues.empty? %><p class="text-stone-500"><%= t("issues.unit.none") %></p><% end %>
+    <%# The resolved ones are only on the issues page (where they can be reopened) %>
+    <% if resolved.positive? %>
+      <%= link_to t("issues.unit.resolved", count: resolved), issues_path(language.code, unit: unit.id, state: "closed"), data: { turbo_frame: "_top" },
+                  class: "self-start text-stone-500 hover:underline" %>
+    <% end %>
+  </div>
+<% end %>

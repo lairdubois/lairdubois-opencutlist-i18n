@@ -129,33 +129,41 @@
             class="group/section flex w-full items-center gap-2 px-4 py-2 text-left font-semibold hover:bg-stone-50">
       <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
       <%= t(".translations") %>
-      <%# Status counts, readable while folded. A copied key's translations are kept but not exported : no status %>
-      <% counts = @unit.copied ? {} : @languages.map { |l| (tr = @translations[l]).nil? ? "not_translated" : tr.outdated? ? "outdated" : tr.approved? ? "approved" : "not_approved" }.tally %>
       <span class="ml-auto flex items-center gap-3 text-xs font-normal text-stone-500">
+        <%= render "issues_count", unit: @unit, count: @issues.values.sum(&:size) %>
         <% if @unit.copied %><span class="rounded bg-stone-200 px-1 text-stone-600"><%= t("status.copied") %></span><% end %>
-        <% %w[approved not_approved outdated not_translated].each do |status| %>
-          <% next unless counts[status] %>
-          <span class="flex items-center gap-1 tabular-nums" title="<%= t("shared.search_bar.statuses.#{status}") %>"><%= status_dot(status) %><%= counts[status] %></span>
-        <% end %>
+        <%= render "status_counts", unit: @unit, languages: @languages, translations: @translations %>
       </span>
     </button>
   </h2>
   <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
     <% @languages.each do |language| %>
       <% t = @translations[language] %>
-      <div class="group/copy flex gap-4 border-b border-stone-100 px-4 py-2 last:border-0">
-        <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
-        <% if t %>
-          <div class="min-w-0 flex-1">
-            <div class="whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"
-                 data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= @unit.source_text %>"
-                 data-i18n-text-refs-value="<%= refs_json(@refs) %>"><%= t.text %></div>
-            <% TranslationChecks.call(@unit.source_text, t.text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+      <div class="border-b border-stone-100 px-4 py-2 last:border-0" data-controller="disclosure">
+        <div class="group/copy flex gap-4">
+          <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
+          <% if t %>
+            <div class="min-w-0 flex-1">
+              <div class="whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"
+                   data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= @unit.source_text %>"
+                   data-i18n-text-refs-value="<%= refs_json(@refs) %>"><%= t.text %></div>
+              <% TranslationChecks.call(@unit.source_text, t.text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
+            </div>
+            <%= render "shared/copy_button", text: t.text, class: "h-fit shrink-0" %>
+            <%= render "language_status", unit: @unit, language: language, translation: t %>
+          <% else %>
+            <span class="flex-1 text-sm italic text-stone-400"><%= t("status.not_translated") %></span>
+          <% end %>
+        </div>
+        <%# The language's open tickets on this key, under its text (the name column's width + gap) : an issues button unfolds
+            them, as on the translator's row (same panel, closing one there answers with streams) %>
+        <% if (issues = @issues[language.id]) %>
+          <div class="mt-1 flex pl-28">
+            <%= render "translations/issues_button", unit: @unit, language: language, count: issues.size %>
           </div>
-          <%= render "shared/copy_button", text: t.text, class: "h-fit shrink-0" %>
-          <% if t.outdated? %><span class="h-fit rounded bg-orange-100 px-1.5 text-xs text-orange-800"><%= t("status.outdated") %></span><% end %>
-        <% else %>
-          <span class="flex-1 text-sm italic text-stone-400"><%= t("status.not_translated") %></span>
+          <div data-disclosure-target="panel" data-disclosure-name="issues" hidden class="mt-1 pl-28 text-xs">
+            <%= render "issues/unit", unit: @unit, language: language, issues: issues, translation: t, resolved: @resolved_issues.fetch(language.id, 0) %>
+          </div>
         <% end %>
       </div>
     <% end %>

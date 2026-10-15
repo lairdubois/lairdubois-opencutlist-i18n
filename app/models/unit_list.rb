@@ -12,11 +12,11 @@ class UnitList
     @stats = self.class.stats
   end
 
-  # Per unit id : [translations count, outdated count, up to date not reviewed count, up to date reviewed count]
+  # Per unit id : [translations count, to review count (outdated or contested), not reviewed count, reviewed count]
   def self.stats
-    up_to_date = "translations.source_hash = units.source_hash"
+    up_to_date = "NOT #{Translation.to_review_sql}"
     Translation.joins(:unit).merge(Unit.active).group(:unit_id)
-               .pluck(:unit_id, Arel.sql("COUNT(*)"), Arel.sql("SUM(translations.source_hash <> units.source_hash)"),
+               .pluck(:unit_id, Arel.sql("COUNT(*)"), Arel.sql("SUM(#{Translation.to_review_sql})"),
                       Arel.sql("SUM(translations.status = #{Translation.statuses[:translated].to_i} AND #{up_to_date})"),
                       Arel.sql("SUM(translations.status = #{Translation.statuses[:approved].to_i} AND #{up_to_date})"))
                .to_h { |id, n, outdated, not_approved, approved| [id, [n, outdated.to_i, not_approved.to_i, approved.to_i]] }
@@ -72,15 +72,16 @@ class UnitList
     @listed ||= (query.single_index? ? filter_by_index(searched) : searched).select { |u| match?(u) }
   end
 
-  # Each status's matches with the other filters (shown in the filters menu), the questions', warnings',
+  # Each status's matches with the other filters (shown in the filters menu), the questions', issues', warnings',
   # notranslate's and periods' ones, and the search alone (for the empty list hint). A single index drops the other
   # filters when applied (ListFilters) and they drop it : the counts leave it out.
   def counts
-    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) }] }
-                         .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
-                                "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && warning_ids.include?(u.id) && notranslate_match?(u) && days_match?(u) },
+    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) }] }
+                         .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
+                                "issues" => searched.count { |u| status_match?(u) && questions_match?(u) && issue_ids.include?(u.id) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
+                                "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && issues_match?(u) && warning_ids.include?(u.id) && notranslate_match?(u) && days_match?(u) },
                                 **notranslate_counts)
-                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && warnings_match?(u) && notranslate_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
+                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
                          .merge(searched: searched.size)
   end
 
@@ -93,7 +94,7 @@ class UnitList
   private
 
   def match?(unit)
-    status_match?(unit) && questions_match?(unit) && warnings_match?(unit) && notranslate_match?(unit) && days_match?(unit)
+    status_match?(unit) && questions_match?(unit) && issues_match?(unit) && warnings_match?(unit) && notranslate_match?(unit) && days_match?(unit)
   end
 
   def notranslate_match?(unit)
@@ -102,7 +103,7 @@ class UnitList
 
   # Each notranslate value's matches with the other filters : "notranslate" (all), "notranslate_directive", "notranslate_copied"
   def notranslate_counts
-    others = searched.select { |u| !u.translatable && status_match?(u) && questions_match?(u) && warnings_match?(u) && days_match?(u) }
+    others = searched.select { |u| !u.translatable && status_match?(u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && days_match?(u) }
     { "notranslate" => others.size, "notranslate_directive" => others.count { |u| !u.copied }, "notranslate_copied" => others.count(&:copied) }
   end
 
@@ -112,6 +113,10 @@ class UnitList
 
   def questions_match?(unit)
     !query.questions? || question_ids.include?(unit.id)
+  end
+
+  def issues_match?(unit)
+    !query.issues? || issue_ids.include?(unit.id)
   end
 
   def warnings_match?(unit)
@@ -146,6 +151,11 @@ class UnitList
 
   def question_ids
     @question_ids ||= Comment.open_questions.distinct.pluck(:unit_id).to_set
+  end
+
+  # An open ticket in any language
+  def issue_ids
+    @issue_ids ||= Issue.still_open.where.not(unit_id: nil).distinct.pluck(:unit_id).to_set
   end
 
   # Changed in the last days : any revision (in any language, of the fr source, of the key or its note)

@@ -1,0 +1,99 @@
+<%# The issues page's search bar, styled and driven as shared/_search_bar (search_bar_controller) : a text search
+    (the issue, its text as raised, its key, fr source and translation ; #120, key:…, branch:… fill their chips), a
+    "Filters" menu (index, key, branch : field chips ; kinds, OR-ed). A single index is exclusive, the state aside. The state (tabs) is kept as a hidden field. Every change reloads the list (IssuesController#index) %>
+<% search = "shared.search_bar" %>
+<% group = "flex items-center gap-1 rounded bg-stone-300 p-0.5 pl-2 text-xs text-stone-900" %>
+<% sub_chip = "flex items-center gap-1.5 rounded border border-transparent bg-white py-0.5 pr-0.5 pl-2 text-stone-900" %>
+<% sub_chip_remove = "flex h-4 w-4 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-200 hover:text-stone-900" %>
+<% item = "flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100" %>
+<% remove = capture do %>
+  <button type="button" title="<%= t("#{search}.remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+<% end %>
+<%= form_with url: issues_path(@language.code), method: :get, class: "min-w-0 flex-1",
+              data: { controller: "search-bar popover", action: "formdata->search-bar#prune keydown@window->search-bar#shortcut keydown.esc@window->search-bar#escape" } do %>
+  <%= hidden_field_tag :state, (@state unless @state == "open"), id: nil %>
+  <div class="rounded border border-stone-300 bg-white focus-within:border-stone-400">
+    <div class="flex items-center gap-2 pr-1 pl-2.5">
+      <span title="<%= t(".shortcuts").strip %>" class="shrink-0 cursor-help">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-stone-400" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.08 3.08a.75.75 0 1 1-1.06 1.06l-3.08-3.08A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+        </svg>
+      </span>
+      <%= search_field_tag :q, params[:q], id: nil, placeholder: t(".placeholder"), autocomplete: "off",
+                           data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur" },
+                           class: "peer h-8 min-w-0 flex-1 appearance-none bg-transparent py-1.5 text-sm text-stone-900 outline-none [&::-webkit-search-cancel-button]:appearance-none" %>
+      <button type="button" title="<%= t("#{search}.clear") %>" data-action="search-bar#clear"
+              class="flex h-5 w-5 items-center justify-center rounded leading-none text-stone-400 peer-placeholder-shown:hidden hover:bg-stone-100 hover:text-stone-700">×</button>
+      <span class="text-xs whitespace-nowrap text-stone-500 tabular-nums"><%= t(".count", count: @counts[@state]) %></span>
+      <button type="button" popovertarget="search-filters" data-popover-target="anchor"
+              data-action="keydown.down->search-bar#openMenu keydown.up->search-bar#openMenu" class="<%= group %> h-6.5 pr-1.5 hover:bg-stone-400">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 text-stone-600" aria-hidden="true">
+          <path fill-rule="evenodd" d="M2.63 3.4A1 1 0 0 1 3.5 3h13a1 1 0 0 1 .78 1.63L12 11.24V16a1 1 0 0 1-.55.9l-2 1A1 1 0 0 1 8 17v-5.76L2.72 4.63a1 1 0 0 1-.09-1.23Z" clip-rule="evenodd" />
+        </svg>
+        <%= t("#{search}.filters") %> <span class="text-stone-600">▾</span>
+      </button>
+    </div>
+
+    <%# Chips. The field chips are always rendered : unused, they stay hidden and disabled until picked in the menu %>
+    <% fields = %w[at key prefix] %>
+    <div data-search-bar-target="chips" class="flex flex-wrap gap-1.5 border-t border-stone-200 p-1.5" <%= "hidden" unless fields.any? { |name| @query[name] } || @unit || @kinds.any? %>>
+      <% fields.each do |name| %>
+        <% applied = @query[name].present? %>
+        <span data-chip data-search-bar-target="field" data-name="<%= name %>" class="<%= group %>" <%= "data-applied" if applied %> <%= "hidden" unless applied %>>
+          <%= t("#{search}.fields.#{name}") %>
+          <span class="<%= sub_chip %> focus-within:border-stone-500">
+            <%= text_field_tag name, @query[name], id: nil, disabled: !applied, autocomplete: "off", placeholder: t("#{search}.placeholders.#{name}"),
+                               data: { action: "keydown.enter->search-bar#submit keydown.esc->search-bar#blur blur->search-bar#drop" },
+                               class: "bg-transparent text-stone-900 outline-none placeholder:text-stone-400 #{name == 'at' ? 'w-28 tabular-nums' : 'w-44 font-mono'}" %>
+            <%= remove %>
+          </span>
+        </span>
+      <% end %>
+      <%# One key (from a key's panel or page) : not editable, removable %>
+      <% if @unit %>
+        <span class="<%= group %>">
+          <%= t("#{search}.fields.key") %>
+          <span data-chip class="<%= sub_chip %> font-mono">
+            <%= @unit.key %>
+            <%= hidden_field_tag :unit, @unit.id, id: nil %>
+            <%= remove %>
+          </span>
+        </span>
+      <% end %>
+      <%# Kinds are OR-ed : one group chip, "or" between its inner chips %>
+      <% if @kinds.any? %>
+        <span class="<%= group %>">
+          <%= t(".kind") %>
+          <% @kinds.each_with_index do |kind, i| %>
+            <% if i > 0 %><span class="text-stone-600"><%= t("#{search}.or") %></span><% end %>
+            <span data-chip class="flex items-center gap-1 rounded bg-white p-0.5">
+              <%= issue_kind_chip(kind) %>
+              <%= hidden_field_tag "kind[]", kind, id: nil %>
+              <%= remove %>
+            </span>
+          <% end %>
+        </span>
+      <% end %>
+      <button type="button" title="<%= t(".remove_all") %>" data-action="search-bar#removeAll"
+              class="ml-auto flex h-6.5 w-6 items-center justify-center rounded leading-none text-stone-400 hover:bg-stone-100 hover:text-stone-700">×</button>
+    </div>
+  </div>
+
+  <%# Filters menu : native popover (light dismiss, Esc), placed under its button by popover_controller %>
+  <div id="search-filters" popover data-popover-target="panel" data-search-bar-target="menu"
+       data-action="beforetoggle->popover#place toggle->search-bar#focusMenu keydown->search-bar#menuKeydown"
+       class="m-0 min-w-64 rounded border border-stone-200 bg-white p-1 text-sm text-stone-700 shadow-lg">
+    <% fields.each do |name| %>
+      <button type="button" data-action="search-bar#add" data-search-bar-name-param="<%= name %>" class="<%= item %>">
+        <span class="flex-1"><%= t("#{search}.fields.#{name}") %></span>
+        <span class="text-xs text-stone-400"><%= t("#{search}.placeholders.#{name}") %></span>
+      </button>
+    <% end %>
+    <hr class="my-1 border-stone-200">
+    <p class="px-3 pt-1 pb-0.5 text-xs text-stone-500"><%= t(".kind") %></p>
+    <% Issue::KINDS.each do |kind| %>
+      <%= render "shared/search_bar_toggle", item: item, name: "kind[]", value: kind, on: @kinds.include?(kind), count: @kind_counts.fetch(kind, 0),
+                                             label: issue_kind_chip(kind), dot: nil %>
+    <% end %>
+  </div>
+<% end %>

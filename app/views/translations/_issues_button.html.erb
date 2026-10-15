@@ -1,0 +1,11 @@
+<%# Toggles the row's issues panel (disclosure on the row) ; replaced when one is closed there. An empty mark without any %>
+<% if count.positive? %>
+  <button type="button" id="issues_button_<%= unit.id %>_<%= language.code %>" data-disclosure-target="button" data-action="disclosure#toggle"
+          data-disclosure-panel-param="issues"
+          class="group/issues flex items-center gap-1 rounded px-1 text-xs font-medium text-amber-700 hover:bg-stone-100 aria-expanded:bg-stone-100">
+    <%= chevron_icon("group-aria-expanded/issues:rotate-90") %>
+    <%= issue_icon %> <%= t("translations.editor.issues", count: count) %>
+  </button>
+<% else %>
+  <span id="issues_button_<%= unit.id %>_<%= language.code %>" hidden></span>
+<% end %>

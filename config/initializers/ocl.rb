@@ -12,6 +12,7 @@ Rails.configuration.x.ocl = ActiveSupport::OrderedOptions.new.tap do |c|
   c.api_url = ENV.fetch("OCL_GITHUB_API_URL", "https://api.github.com")
   c.web_url = ENV.fetch("OCL_GITHUB_WEB_URL", "https://github.com") # OAuth endpoints
   c.webhook_secret = ENV["OCL_GITHUB_WEBHOOK_SECRET"]
+  c.api_token = ENV["OCL_API_TOKEN"] # bearer token of /api/suggestions (Claude Code) ; the API is off while empty
   c.checkout_dir = ENV.fetch("OCL_CHECKOUT_DIR", Rails.root.join("storage", "ocl_repo").to_s)
 end
 

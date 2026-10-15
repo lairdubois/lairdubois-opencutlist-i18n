@@ -15,6 +15,7 @@ class Unit < ApplicationRecord
   has_many :revisions, dependent: :destroy
   has_many :comments, dependent: :destroy
   has_many :suggestions, dependent: :destroy
+  has_many :issues, dependent: :destroy
 
   validates :key, presence: true, format: { with: KEY_FORMAT }
   validates :key, uniqueness: { conditions: -> { where(archived_at: nil) } }, unless: :archived?
@@ -31,6 +32,12 @@ class Unit < ApplicationRecord
   # A $t(key) of a source : the key's fr text (tooltip in the text views), its index in the flattened tree
   # and whether translators work on it (Mod-click opens it, ApplicationHelper#refs_json)
   Ref = Data.define(:text, :index, :translatable)
+
+  # Its translations by language, each marked contested or not (an open issue of any kind)
+  def translations_by_language
+    contested = issues.contesting.distinct.pluck(:language_id).to_set
+    translations.includes(:language).index_by(&:language).each { |language, t| t.contested = contested.include?(language.id) }
+  end
 
   # unit id => { key => Ref } of the $t(key) in each source
   def self.refs(units)

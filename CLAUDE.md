@@ -97,6 +97,48 @@ Weblate was evaluated and rejected.
   found or created, translator membership) then invite from the user's page, or reject. A stored one is mailed to the
   enabled admins (`VolunteerMailer`, `reply_to` the unverified address) when e-mails are on ; nothing to the applicant.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
+  A suggestion keeps the `source_hash` it was computed on : `Suggestion.current` (hash = the unit's) are the only
+  ones shown and are never recomputed (the button and `Pretranslator#call` skip them ; nil = older rows, stale).
+  Like translations, a minor fr edit moves their hash along (a major one leaves them stale) ; key renames leave them
+  alone (a fr text rewritten by `rewrite_references` makes its suggestion stale). `Suggestion.store!` writes one
+  (replaces the previous, refuses a blank text or a moved `source_hash`).
+- Suggestions by Claude Code (`Api::SuggestionsController`, bearer `OCL_API_TOKEN`, 404 while unset) :
+  `GET /api/suggestions/:language/todo?limit=` (≤ 200) = `Pretranslator#todo` (translatable, not translated or
+  outdated, no current suggestion, keys' order) + `total`, `rules` (the `SYSTEM` prompt), `examples`, `strings`
+  (`id`, `key`, `fr`, `en`, `note`, `source_hash`) ; `POST /api/suggestions/:language` `{ suggestions: [{ id, source_hash, text }] }`
+  stores them (`origin: "claude-code"`), skipping units no longer to do (`pending`, so a current suggestion is replaced :
+  corrections). Never translations.
+  `GET /api/suggestions/:language/search?q=&limit=` (≤ 200, default 30) : the language's translations whose fr or text
+  holds `q` (`fold`, case and accents aside), reviewed and up to date first, copies of the fr last (`key`, `fr`, `text`, `status`, `outdated`, `same_as_fr`) :
+  check the vocabulary in use there before translating, not in the local database.
+  To run it : the base URL and token in `.env` (`OCL_API_URL`, `OCL_API_TOKEN`, never printed), translate each batch
+  following `rules` and `examples`, keep every invariant of the fr. All of `/api/*` shares `Api::BaseController`
+  (bearer, target language).
+- Consistency reviews by Claude Code ("vérifie la cohérence de <langue>") : `GET /api/translations/:language?offset=&limit=`
+  (≤ 500, default 200) pages every translator's key in the keys' order (`id`, `key`, `fr`, `en`, `note`, `text`, `status`,
+  `outdated`, current `suggestion`) ; the points found are `Issue`s (`kind` : terminology / misaligned (a text
+  translating another key) / meaning / review (a suggestion to reread) / other, `body` written in English (read by every language's translators), unit nil = the whole
+  language, `text` = the translation, else the suggestion, when raised). `GET /api/issues/:language?state=open|closed|all`
+  lists them (check before raising one again), `POST /api/issues/:language` `{ issues: [{ key (or id), kind, body, text }] }`
+  raises them (one already raised, open or resolved, is skipped with `reason` already open / resolved and its `id` : same key, kind and `text`, whatever the wording, so a rerun on unchanged translations raises nothing ; whole language or no text : same kind and body), one on a non-translatable key with `reason` not translatable, signed `origin: "OpenCutBot"` (the robot's name shown as their author). Never edits translations : the translators
+  handle them on `/translate/:lang/issues` (`IssuesController`, anyone who can translate the language : state tabs and
+  `issues/_search_bar` (same `search_bar_controller`) : `q` over the body, text as raised, key, fr and translation (`ListFilters::Query`,
+  highlighted), `kind[]` OR-ed, `at` / `key` / `prefix` chips and their `q` keywords (a single `at` exclusive, the state kept),
+  `unit` (from a panel) ; counts under the other filters, "Résolu" (like closing a GitHub issue, no confirmation, `issues/_close_button`) sets `closed_at` + `closed_by`, reopen), those whose key left the work (archived, not translatable) hidden from translators, page and toolbar count
+  (`Issue.visible_to` / `in_work`, nothing closed : they come back with the key), tagged for admins (`Issue#out_of_work`), linked from the translator's toolbar (open count),
+  each row with open ones (an issues button (Remix Icon issues-line, `issue_icon`) unfolding them in a lazy panel, `issues#unit`, closable there : `row=1` answers with
+  streams for the panel, status, button and approval), the pre-translation page (a column) and the key page (open count on the Translations
+  header, each language's open ones under its text, in the same button + panel : `issues/_unit`). Shown as "Tickets" in fr, "Issues" in en. Also where the doubts of a suggestions
+  batch go (`review`).
+  An open one on a key (`Issue.contesting`, any kind) makes its translation **to review**, computed, never
+  written (`Translation#contested?` / `#to_review?`, `Translation.to_review_sql`, `Issue.contested_sql`) : the "outdated"
+  status filter, colour and counts (`Language.stats`, `UnitList.stats`) cover it, labelled "Ticket ouvert, à revoir", and it
+  is never counted approved ; closing the issue gives the stored status back. No approval meanwhile (`TranslationOperations#save`,
+  no approve button : `translations/_review_button`, given back by the streams when resolved from a panel).
+- Pre-translation page (`/pretranslations`, admins, header link) : per target language, `Pretranslator#pending`
+  (not translated or outdated), covered by a current suggestion (one column per `origin`), `#todo` (without one),
+  stale suggestions, latest ; every column sorts (`sort` / `dir`, counts descending first) ; badges for `ANTHROPIC_API_KEY` / `OCL_API_TOKEN`. The language links to its
+  translator's list filtered on not translated + outdated.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).
 - Import of a language's yml (`/import`, admins, `ImportsController` + `TranslationFileImport`) : keys through
@@ -128,6 +170,9 @@ Weblate was evaluated and rejected.
 - Reference choice (fr source / en translation) : rows render both (`translations/_reference`) when en exists, the
   `ref-en` class on the `reference` controller's wrapper shows one ; switched in place (scroll, loaded pages, unsaved
   edits kept), saved by a json PATCH. The `q` search on en follows the choice at the next search.
+- Header : Keys and Translate as links, the other admin sections (`ApplicationHelper::ADMIN_MENU`) in the
+  "Administration" dropdown (native popover, `admin_menu_link`), underlined when the page is one of them, carrying
+  the pending volunteers' badge.
 - The site header is sticky (`h-14` + 1px border) ; page toolbars (translator's list, keys list, duplicates) stick
   below it with the `.toolbar` component (`application.css`, `top: calc(3.5rem + 1px)`) : keep both in sync. It
   swallows main's `py-6` (or the repo-changed banner's `mb-4`) and spans the window through an outset border-image
@@ -142,7 +187,7 @@ each entry's count under the other filters.
 - `q` searches the texts only, case and accents aside (`"…"` : exact, spaces, case and accents included,
   `Query#exact?`), matches highlighted (`SearchHelper#highlight_search`, `data-search-text` / `-exact` for the
   `i18n-text` views) ; `status[]` (not_translated / outdated / not_approved / approved, a partition) is OR-ed ;
-  `questions=1`, `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
+  `questions=1`, `issues=1` (an open ticket : in the language, in any on the keys list), `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
   max `updated_at` + the rules file's digest. `days` = `ListFilters::PERIODS`, one at a time, a revision since then
   (same kinds as the sort on the translator's list, any on the keys list).
 - Chips : `key`, `prefix`, `at` with their own input ; `user` (id, hidden field) with a popover of names : users having

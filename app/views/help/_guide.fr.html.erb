@@ -7,7 +7,7 @@
 
 <h2>Statuts</h2>
 <dl>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>À revoir</strong></dt><dd>Le texte français a changé depuis ta traduction. Vérifie-la, corrige-la si besoin, puis enregistre, même sans rien changer, pour la valider à nouveau.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>À revoir</strong></dt><dd>Le texte français a changé depuis ta traduction. Vérifie-la, corrige-la si besoin, puis enregistre, même sans rien changer, pour la valider à nouveau. Ou bien un ticket ouvert la conteste, quel que soit son type : corrige-la si besoin, puis marque le ticket résolu. Elle ne peut pas être approuvée avant.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Non traduite</strong></dt><dd>Rien n'a encore été écrit dans ta langue.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Non approuvée</strong></dt><dd>Traduite, pas encore relue.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approuvée</strong></dt><dd>Validée par un relecteur de la langue.</dd>
@@ -29,7 +29,7 @@
     Traduis le texte du lien, garde l'url.
   </li>
   <li>
-    Les <strong>propositions</strong> sous l'éditeur (🤖 traduction automatique, « Même texte ailleurs ») le remplissent d'un
+    Les <strong>propositions</strong> sous l'éditeur (<%= robot_icon("text-violet-500") %> traduction automatique, « Même texte ailleurs ») le remplissent d'un
     clic : relis avant d'enregistrer.
   </li>
   <li>

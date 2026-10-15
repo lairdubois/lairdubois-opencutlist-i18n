@@ -4,8 +4,9 @@ import { Controller } from "@hotwired/stimulus"
 // Field chips (key, branch, user, index ; language on the users page) are rendered hidden and disabled until picked
 // in the filters menu ; a list chip (user, language) holds a list (a popover) filling a hidden field, submitted as soon
 // as an entry is picked ;
-// a status, the questions / warnings flag or the period is a hidden input inside its chip, so removing the chip drops it.
-// A single index (no "-") is exclusive : applying it drops every other filter, any other change drops it.
+// a status, the questions / issues / warnings flag or the period is a hidden input inside its chip, so removing the chip drops it.
+// A single index (no "-") is exclusive : applying it drops every other filter (FILTERS : the issues page's kinds and
+// key too), any other change drops it.
 // A range mixes with the rest.
 // In the text search, keywords fill the field chips : #120 (or #120-180…), key:…, branch:…, user:… (a name,
 // or the start of one : left in the text when no name matches)
@@ -13,7 +14,7 @@ import { Controller } from "@hotwired/stimulus"
 // its arrow reversing it.
 export default class extends Controller {
   static targets = ["chips", "field", "menu"]
-  static FILTERS = ["q", "status[]", "questions", "warnings", "notranslate", "days", "key", "prefix", "user", "at"]
+  static FILTERS = ["q", "status[]", "questions", "issues", "warnings", "notranslate", "days", "key", "prefix", "user", "at", "kind[]", "unit"]
   static KEYWORDS = { at: /^#(\d+(?:-\d*)?|-\d+)$/, key: /^(?:key|cl[eé]):(.+)$/i, prefix: /^(?:branch|branche):(.+)$/i, user: /^(?:user|utilisateur):(.+)$/i }
   static REFOCUS = "search-bar:refocus"
 
@@ -236,7 +237,7 @@ export default class extends Controller {
     this.submit()
   }
 
-  // Checks or unchecks a status / the questions or warnings flag
+  // Checks or unchecks a status / the questions, issues or warnings flag
   toggle({ params: { name, value } }) {
     const input = [...this.element.querySelectorAll("input[type=hidden]")].find((i) => i.name === name && i.value === String(value))
     if (input) {

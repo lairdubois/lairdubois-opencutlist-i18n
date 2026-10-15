@@ -37,6 +37,14 @@
         <span class="text-stone-400"><%= t("loading") %></span>
       <% end %>
     </div>
+    <%# The key's open issues in the language : shown by default, folded by the editor's issues button, lazy frame loads once on screen %>
+    <% if @data[:issues][unit.id] %>
+      <div data-disclosure-target="panel" data-disclosure-name="issues" class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
+        <%= turbo_frame_tag "issues_#{unit.id}_#{@language.code}", src: translate_unit_issues_path(@language.code, unit), loading: :lazy do %>
+          <span class="text-stone-400"><%= t("loading") %></span>
+        <% end %>
+      </div>
+    <% end %>
     <% if current_user.admin? %>
       <div data-disclosure-target="panel" data-disclosure-name="history" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
         <%= render "history_frame", unit: unit, language: @language %>

@@ -7,7 +7,7 @@ then click Save to save it without leaving the page.
 
 <h2>Statuses</h2>
 <dl>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since your translation. Check it, fix it if needed, then save, even unchanged, to validate it again.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since your translation. Check it, fix it if needed, then save, even unchanged, to validate it again. Or an open issue questions it, whatever its kind: fix it if needed, then mark the issue resolved. It can't be approved before.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Not translated</strong></dt><dd>Nothing written in your language yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Not approved</strong></dt><dd>Translated, but not approved yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approved</strong></dt><dd>Approved by a reviewer of the language.</dd>
@@ -28,7 +28,7 @@ then click Save to save it without leaving the page.
     text, keep its url (or adapt it if there is a language version that matches your language).
   </li>
   <li>
-    <strong>Proposals</strong> under the editor (🤖 machine translation, "Same text elsewhere") can be filled with one click.
+    <strong>Proposals</strong> under the editor (<%= robot_icon("text-violet-500") %> machine translation, "Same text elsewhere") can be filled with one click.
     Read it again before saving.
   </li>
   <li>

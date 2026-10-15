@@ -1,0 +1,60 @@
+<% content_for :title, "#{t(".title")} · OpenCutList Localize" %>
+<h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
+<p class="mb-4 text-sm text-stone-600"><%= t(".intro_html", icon: robot_icon("text-violet-500")) %></p>
+<div class="mb-4 flex flex-wrap gap-2 text-xs">
+  <% { anthropic: Pretranslator.enabled?, api: Rails.configuration.x.ocl.api_token.present? }.each do |source, on| %>
+    <span class="rounded border px-2 py-0.5 <%= on ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-stone-200 bg-stone-50 text-stone-500" %>">
+      <%= t(".#{source}_#{on ? "on" : "off"}_html", icon: robot_icon) %>
+    </span>
+  <% end %>
+</div>
+
+<div class="overflow-x-auto rounded border border-stone-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="border-b border-stone-200 bg-stone-50 text-left text-xs text-stone-500">
+      <tr>
+        <th class="px-3 py-2 font-medium" aria-sort="<%= pretranslations_aria_sort("language") %>"><%= pretranslations_sort_link("language", t(".language")) %></th>
+        <th class="px-3 py-2 text-right font-medium" title="<%= t(".pending_title") %>" aria-sort="<%= pretranslations_aria_sort("pending") %>"><%= pretranslations_sort_link("pending", t(".pending")) %></th>
+        <th class="w-48 px-3 py-2 font-medium" aria-sort="<%= pretranslations_aria_sort("coverage") %>"><%= pretranslations_sort_link("coverage", t(".coverage")) %></th>
+        <% @origins.each do |origin| %>
+          <th class="px-3 py-2 text-right font-medium font-mono" aria-sort="<%= pretranslations_aria_sort("origin:#{origin}") %>"><%= pretranslations_sort_link("origin:#{origin}", origin) %></th>
+        <% end %>
+        <th class="px-3 py-2 text-right font-medium" title="<%= t(".todo_title") %>" aria-sort="<%= pretranslations_aria_sort("todo") %>"><%= pretranslations_sort_link("todo", t(".todo")) %></th>
+        <th class="px-3 py-2 text-right font-medium" title="<%= t(".stale_title") %>" aria-sort="<%= pretranslations_aria_sort("stale") %>"><%= pretranslations_sort_link("stale", t(".stale")) %></th>
+        <th class="px-3 py-2 font-medium" aria-sort="<%= pretranslations_aria_sort("last") %>"><%= pretranslations_sort_link("last", t(".last")) %></th>
+        <th class="px-3 py-2 text-right font-medium" title="<%= t(".issues_title") %>" aria-sort="<%= pretranslations_aria_sort("issues") %>"><%= pretranslations_sort_link("issues", t(".issues")) %></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-stone-100 tabular-nums">
+      <% @rows.each do |language, r| %>
+        <% covered = r[:pending] - r[:todo] %>
+        <tr>
+          <td class="px-3 py-2">
+            <%= link_to language.name, translate_path(language.code, status: %w[not_translated outdated]), class: "hover:underline" %>
+            <span class="ml-1 font-mono text-xs text-stone-400"><%= language.code %></span>
+          </td>
+          <td class="px-3 py-2 text-right" title="<%= t(".split", not_translated: r[:not_translated], outdated: r[:pending] - r[:not_translated]) %>"><%= r[:pending] %></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="h-2 flex-1 overflow-hidden rounded bg-stone-200">
+                <div class="h-full bg-violet-400" style="width: <%= r[:pending].zero? ? 0 : 100.0 * covered / r[:pending] %>%"></div>
+              </div>
+              <span class="w-10 text-right text-xs text-stone-500"><%= progress_percent(covered, r[:pending]) %></span>
+            </div>
+          </td>
+          <% @origins.each do |origin| %>
+            <td class="px-3 py-2 text-right <%= "text-stone-300" unless r[:origins][origin] %>"><%= r[:origins].fetch(origin, 0) %></td>
+          <% end %>
+          <td class="px-3 py-2 text-right <%= r[:todo].zero? ? "text-stone-300" : "font-medium" %>"><%= r[:todo] %></td>
+          <td class="px-3 py-2 text-right <%= "text-stone-300" if r[:stale].zero? %>"><%= r[:stale] %></td>
+          <td class="px-3 py-2 text-xs text-stone-500">
+            <% if r[:last_at] %><span title="<%= l r[:last_at] %>"><%= t(".ago", time: time_ago_in_words(r[:last_at])) %></span><% else %>—<% end %>
+          </td>
+          <td class="px-3 py-2 text-right">
+            <%= link_to r[:issues], issues_path(language.code), class: r[:issues].zero? ? "text-stone-300 hover:underline" : "font-medium text-amber-700 hover:underline" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

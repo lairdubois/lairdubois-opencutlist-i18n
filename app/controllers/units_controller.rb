@@ -53,10 +53,12 @@ class UnitsController < ApplicationController
       return redirect_to(@unit)
     end
 
-    @translations = @unit.translations.includes(:language).index_by(&:language)
+    @translations = @unit.translations_by_language
     @languages = Language.targets
     @refs = Unit.refs([@unit])[@unit.id]
     @history_count = @unit.revisions.count
+    @issues = @unit.issues.still_open.order(:id).group_by(&:language_id)
+    @resolved_issues = @unit.issues.closed.group(:language_id).count
     @notranslate_source = Unit.directive_source(@unit.key, @unit.note, BranchNote.to_map) unless @unit.translatable || @unit.copied
     return if @unit.archived_at # out of the tree
 

@@ -19,7 +19,8 @@ class TranslationOperations
       return unit.translations.build(language: language)
     end
 
-    reviewed &&= @user.can_review?(language)
+    # Contested by an open issue : no approval until it is closed
+    reviewed &&= @user.can_review?(language) && !translation.contested?
     unchanged = old_text == text && !translation.outdated?
     status = if reviewed then :approved
     elsif unchanged then translation.status

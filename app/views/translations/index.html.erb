@@ -11,11 +11,45 @@
                                      sorts: ListFilters::SORTS.keys %>
   </div>
 
-  <% todo = @units.reject(&:copied).select { |u| (t = @data[:translations][u.id]).nil? || t.outdated? } %>
+  <%# Open issues and pre-translation on the left, status shortcuts on the right, under the search bar (the language's header keeps the unsaved
+      edits' count). Strings to do without a suggestion computed on their current fr text %>
+  <% todo = @units.reject(&:copied).select { |u| ((t = @data[:translations][u.id]).nil? || t.outdated?) && !@data[:machine].key?(u.id) } %>
   <div class="flex flex-wrap items-center gap-2 text-sm has-[>:not([hidden])]:mb-2">
+    <%# Points raised by a consistency review, still to handle %>
+    <% if @open_issues.positive? %>
+      <%= link_to issues_path(@language.code), class: "flex items-center gap-1.5 rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100" do %>
+        <%= issue_icon("text-amber-600") %> <%= t(".issues", count: @open_issues) %>
+      <% end %>
+    <% end %>
     <% if Pretranslator.enabled? && todo.any? %>
-      <%= button_to t(".pretranslate", language: @language.name, count: todo.size), pretranslate_path(@language.code),
-                    params: { unit_ids: todo.map(&:id) }, class: "rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" %>
+      <%= button_to pretranslate_path(@language.code), params: { unit_ids: todo.map(&:id) },
+                    class: "flex items-center gap-1.5 rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" do %>
+        <%= robot_icon %> <%= t(".pretranslate", language: @language.name, count: todo.size) %>
+      <% end %>
+    <% end %>
+    <%# Shortcuts to the outdated and not translated keys, the other filters kept (their counts are the menu's) ;
+        pressed when it is the only status, a click then drops it. A single index is exclusive : left out either way.
+        Hidden without matches, unless pressed (to drop it). "More…" opens the search bar's filters menu, under its button,
+        shown along with one of them at least %>
+    <% shortcuts = %w[outdated not_translated].select { |status| @counts[status].positive? || statuses == [status] } %>
+    <% if shortcuts.any? %>
+      <div class="ml-auto flex items-center gap-2">
+        <% shortcuts.each do |status| %>
+          <% on = statuses == [status] %>
+          <% status_params = list_params.except(:status).merge(on ? {} : { status: [status] }) %>
+          <% status_params = status_params.except(:at) unless status_params[:at].to_s.include?("-") %>
+          <% label = t("shared.search_bar.statuses.#{status}") %>
+          <%= link_to translate_path(@language.code, status_params), aria: { pressed: on },
+                      title: t(on ? ".remove_status" : ".only_status", status: label),
+                      class: "flex items-center gap-1.5 rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100 aria-pressed:border-stone-800 aria-pressed:bg-stone-800 aria-pressed:text-white" do %>
+            <%= status_dot(status) %>
+            <%= label %>
+            <span class="tabular-nums opacity-70"><%= number_with_delimiter(@counts[status]) %></span>
+          <% end %>
+        <% end %>
+        <button type="button" popovertarget="search-filters"
+                class="rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100"><%= t(".more_filters") %></button>
+      </div>
     <% end %>
   </div>
 
@@ -69,30 +103,6 @@
         <% else %>
           <h2 class="text-lg font-semibold"><%= @language.name %></h2>
         <% end %>
-        <%# Shortcuts to the outdated and not translated keys, the other filters kept (their counts are the menu's) ;
-            pressed when it is the only status, a click then drops it. A single index is exclusive : left out either way.
-            Hidden without matches, unless pressed (to drop it). "More…" opens the search bar's filters menu, under its button,
-            shown along with one of them at least %>
-        <% shortcuts = %w[outdated not_translated].select { |status| @counts[status].positive? || statuses == [status] } %>
-        <% if shortcuts.any? %>
-          <div class="flex shrink-0 items-center gap-1">
-            <% shortcuts.each do |status| %>
-              <% on = statuses == [status] %>
-              <% status_params = list_params.except(:status).merge(on ? {} : { status: [status] }) %>
-              <% status_params = status_params.except(:at) unless status_params[:at].to_s.include?("-") %>
-              <% label = t("shared.search_bar.statuses.#{status}") %>
-              <%= link_to translate_path(@language.code, status_params), aria: { pressed: on },
-                          title: t(on ? ".remove_status" : ".only_status", status: label),
-                          class: "flex items-center gap-1.5 rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-100 aria-pressed:border-stone-800 aria-pressed:bg-stone-800 aria-pressed:text-white" do %>
-                <%= status_dot(status) %>
-                <%= label %>
-                <span class="tabular-nums opacity-70"><%= number_with_delimiter(@counts[status]) %></span>
-              <% end %>
-            <% end %>
-            <button type="button" popovertarget="search-filters"
-                    class="rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:bg-stone-100"><%= t(".more_filters") %></button>
-          </div>
-        <% end %>
         <button type="button" hidden data-unsaved-guard-target="count" data-action="unsaved-guard#reveal"
                 class="rounded bg-sky-50 px-2 py-0.5 text-sm text-sky-800 hover:bg-sky-100"></button>
       </div>
@@ -119,5 +129,5 @@
 </div>
 <% if @units.empty? %>
   <%= render "shared/empty_list", counts: @counts,
-             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions, :warnings)) %>
+             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions, :issues, :warnings)) %>
 <% end %>

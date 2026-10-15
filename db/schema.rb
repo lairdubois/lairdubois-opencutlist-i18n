@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -62,6 +62,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_110000) do
     t.datetime "created_at", null: false
     t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
     t.index ["user_id"], name: "index_invitations_on_user_id"
+  end
+
+  create_table "issues", force: :cascade do |t|
+    t.integer "language_id", null: false
+    t.integer "unit_id"
+    t.string "kind", null: false
+    t.text "body", null: false
+    t.text "text"
+    t.string "origin"
+    t.datetime "closed_at"
+    t.integer "closed_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["closed_by_id"], name: "index_issues_on_closed_by_id"
+    t.index ["language_id", "closed_at"], name: "index_issues_on_language_id_and_closed_at"
+    t.index ["language_id"], name: "index_issues_on_language_id"
+    t.index ["unit_id"], name: "index_issues_on_unit_id"
   end
 
   create_table "languages", force: :cascade do |t|
@@ -126,6 +143,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_110000) do
     t.string "origin", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "source_hash"
     t.index ["language_id"], name: "index_suggestions_on_language_id"
     t.index ["unit_id"], name: "index_suggestions_on_unit_id"
   end
@@ -202,6 +220,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_110000) do
   add_foreign_key "help_requests", "users"
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "users", column: "inviter_id", on_delete: :nullify
+  add_foreign_key "issues", "languages"
+  add_foreign_key "issues", "units"
+  add_foreign_key "issues", "users", column: "closed_by_id"
   add_foreign_key "memberships", "languages"
   add_foreign_key "memberships", "users"
   add_foreign_key "publications", "users"

@@ -67,7 +67,7 @@
 
     <%# Chips. Field chips are all rendered : an unused one stays hidden and disabled until picked in the menu %>
     <% sorted = sorts.include?(list_sort) %>
-    <% any_chip = ListFilters::FIELDS.any? { |name| params[name].present? } || statuses.any? || questions? || warnings? || notranslate? || list_days || sorted %>
+    <% any_chip = ListFilters::FIELDS.any? { |name| params[name].present? } || statuses.any? || questions? || issues? || warnings? || notranslate? || list_days || sorted %>
     <div data-search-bar-target="chips" class="flex flex-wrap gap-1.5 border-t border-stone-200 p-1.5" <%= "hidden" unless any_chip %>>
       <% ListFilters::FIELDS.each do |name| %>
         <% applied = params[name].present? %>
@@ -127,6 +127,16 @@
           <span data-chip class="<%= sub_chip %>">
             <%= t(".questions_chip") %>
             <%= hidden_field_tag :questions, "1", id: nil %>
+            <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
+          </span>
+        </span>
+      <% end %>
+      <% if issues? %>
+        <span class="<%= group %>">
+          <%= t(".with") %>
+          <span data-chip class="<%= sub_chip %>">
+            <%= t(".issues_chip") %>
+            <%= hidden_field_tag :issues, "1", id: nil %>
             <button type="button" title="<%= t(".remove") %>" data-action="search-bar#remove" class="<%= sub_chip_remove %>">×</button>
           </span>
         </span>
@@ -202,6 +212,8 @@
     <hr class="my-1 border-stone-200">
     <%= render "shared/search_bar_toggle", item: item, name: "questions", value: "1", on: questions?, count: counts["questions"],
                                            label: t(".questions"), dot: nil %>
+    <%= render "shared/search_bar_toggle", item: item, name: "issues", value: "1", on: issues?, count: counts["issues"],
+                                           label: t(".issues"), dot: nil %>
     <%= render "shared/search_bar_toggle", item: item, name: "warnings", value: "1", on: warnings?, count: counts["warnings"],
                                            label: t(".warnings"), dot: nil %>
     <%# All the keys out of the translators' work, or one kind of them : one at a time %>

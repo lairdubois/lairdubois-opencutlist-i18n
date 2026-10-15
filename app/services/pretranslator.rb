@@ -33,6 +33,9 @@ class Pretranslator
     - Keep line breaks : the translation has the same number of lines as the source.
     - Use the woodworking vocabulary a craftsman of the target language would use, and stay consistent with the existing translations given as examples.
     - Short UI labels stay short.
+    - OpenCutList's own terms are distinct from SketchUp's : a "badge" (fr) is an OpenCutList keyword, several per part ;
+      a "balise" (fr, formerly "calque") is a SketchUp tag (formerly layer), one per entity. Never give them the same word :
+      the tag takes the name SketchUp uses in the target language, the badge another one.
     Answer with one translation per requested id.
   PROMPT
 
@@ -45,9 +48,38 @@ class Pretranslator
     @client = client
   end
 
-  # Creates or replaces a suggestion for each unit ; returns the number of suggestions written
+  # Creates or replaces a suggestion for each unit without a current one ; returns the number of suggestions written
   def call(units)
-    units.each_slice(BATCH_SIZE).sum { |batch| translate_batch(batch) }
+    done = Suggestion.current.where(unit_id: units.map(&:id), language: @language).pluck(:unit_id).to_set
+    units.reject { |u| done.include?(u.id) }.each_slice(BATCH_SIZE).sum { |batch| translate_batch(batch) }
+  end
+
+  # The translators' units of this language not translated, or outdated (major fr change)
+  def pending
+    translations = Translation.where(language: @language).where("translations.unit_id = units.id AND translations.source_hash = units.source_hash")
+    Unit.active.translatable.where.not(translations.arel.exists)
+  end
+
+  # The pending ones without a current suggestion
+  def todo
+    current = Suggestion.where(language: @language).where("suggestions.unit_id = units.id AND suggestions.source_hash = units.source_hash")
+    pending.where.not(current.arel.exists)
+  end
+
+  # What the model is given for each unit, the fr hash included (Suggestion.store! refuses a moved one)
+  def strings(units)
+    en = Language.find_by(code: "en")
+    references = en && @language != en ? Translation.where(unit: units, language: en).pluck(:unit_id, :text).to_h : {}
+    units.map { |u| { id: u.id, key: u.key, fr: u.source_text, en: references[u.id], note: u.note, source_hash: u.source_hash }.compact }
+  end
+
+  # Reviewed (else any) translations of this language from the same branches, short ones first
+  def examples(units)
+    branches = units.map { |u| u.key.split(".").first(2).join(".") }.uniq
+    scope = Translation.joins(:unit).merge(Unit.active).where(language: @language).where.not(unit_id: units.map(&:id))
+    scope = scope.where(branches.map { "units.key LIKE ? ESCAPE '\\'" }.join(" OR "), *branches.map { |b| "#{Unit.sanitize_sql_like(b)}.%" })
+    scope.reorder("translations.status DESC", Arel.sql("LENGTH(units.source_text)")).limit(40)
+         .pluck("units.source_text", "translations.text").map { |fr, t| { fr: fr, translation: t } }
   end
 
   private
@@ -68,17 +100,12 @@ class Pretranslator
     by_id = units.index_by(&:id)
     JSON.parse(text).fetch("translations").count do |t|
       unit = by_id[t["id"]]
-      next false unless unit && t["text"].present?
-
-      Suggestion.where(unit: unit, language: @language).delete_all
-      Suggestion.create!(unit: unit, language: @language, text: t["text"], origin: MODEL.to_s)
+      unit && Suggestion.store!(unit, @language, t["text"], origin: MODEL.to_s, source_hash: unit.source_hash)
     end
   end
 
   def prompt(units)
-    en = Language.find_by(code: "en")
-    references = en ? Translation.where(unit: units, language: en).pluck(:unit_id, :text).to_h : {}
-    strings = units.map { |u| { id: u.id, key: u.key, fr: u.source_text, en: references[u.id], note: u.note }.compact }
+    strings = strings(units).map { |s| s.except(:source_hash) }
 
     <<~PROMPT
       Target language : #{@language.name} (#{@language.code})
@@ -89,14 +116,5 @@ class Pretranslator
       Strings to translate :
       #{strings.to_json}
     PROMPT
-  end
-
-  # Reviewed (else any) translations of this language from the same branches, short ones first
-  def examples(units)
-    branches = units.map { |u| u.key.split(".").first(2).join(".") }.uniq
-    scope = Translation.joins(:unit).merge(Unit.active).where(language: @language).where.not(unit_id: units.map(&:id))
-    scope = scope.where(branches.map { "units.key LIKE ? ESCAPE '\\'" }.join(" OR "), *branches.map { |b| "#{Unit.sanitize_sql_like(b)}.%" })
-    scope.reorder("translations.status DESC", Arel.sql("LENGTH(units.source_text)")).limit(40)
-         .pluck("units.source_text", "translations.text").map { |fr, t| { fr: fr, translation: t } }
   end
 end

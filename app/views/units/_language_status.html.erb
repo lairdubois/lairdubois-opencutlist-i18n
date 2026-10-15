@@ -1,0 +1,6 @@
+<%# A language's "to review" badge beside its text (none otherwise) : replaced when an issue is closed from its panel %>
+<span id="unit_status_<%= unit.id %>_<%= language.code %>" class="contents">
+  <% if translation && !unit.copied && translation.to_review? %>
+    <span class="h-fit rounded bg-orange-100 px-1.5 text-xs text-orange-800"><%= to_review_label(translation) %></span>
+  <% end %>
+</span>

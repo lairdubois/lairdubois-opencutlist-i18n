@@ -45,7 +45,10 @@ class UnitOperations
     old_text = unit.source_text
     old_hash = unit.source_hash
     unit.update!(source_text: text)
-    unit.translations.where(source_hash: old_hash).update_all(source_hash: unit.source_hash) unless major
+    unless major
+      unit.translations.where(source_hash: old_hash).update_all(source_hash: unit.source_hash)
+      unit.suggestions.where(source_hash: old_hash).update_all(source_hash: unit.source_hash)
+    end
     unit.revisions.create!(kind: major ? "source_major" : "source_minor", old_value: old_text, new_value: text, author: @author, user: @user)
     # A $t() alone is copied instead of translated (Unit::COPIED_SOURCE)
     Unit.refresh_translatable!(unit.key)

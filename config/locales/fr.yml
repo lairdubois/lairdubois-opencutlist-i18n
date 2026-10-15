@@ -18,6 +18,7 @@ fr:
     translated: "traduit"
     approved: "approuvé"
     outdated: "FR modifié, à revoir"
+    contested: "Ticket ouvert, à revoir"
     copied: "recopiée"
     copied_hint: "Rien à traduire : la source fr (un $t() ou une variable seule) est recopiée telle quelle dans chaque langue"
     outdated_count:
@@ -86,8 +87,10 @@ fr:
         not_approved: "Non approuvées"
         approved: "Approuvées"
       questions: "Questions ouvertes"
+      issues: "Tickets ouverts"
       with: "Avec"
       questions_chip: "question ouverte"
+      issues_chip: "ticket ouvert"
       warnings: "Avertissements"
       warnings_chip: "avertissement"
       notranslates:
@@ -148,6 +151,8 @@ fr:
       keys: "Clés"
       sync: "Synchroniser FR"
       import: "Importer"
+      pretranslations: "Pré-traduction"
+      admin: "Administration"
       users: "Utilisateurs"
       migration: "Migration"
       publish: "Publier"
@@ -176,6 +181,78 @@ fr:
       page: "Envoyé avec la page :"
       reply_hint: "La réponse arrivera par e-mail à %{email}."
       send: "Envoyer"
+
+  pretranslations:
+    index:
+      issues: "Tickets"
+      issues_title: "Tickets ouverts (vérification de cohérence)"
+      title: "Pré-traduction"
+      intro_html: "Suggestions proposées aux traducteurs sous l'éditeur (%{icon}), jamais des traductions. Seules comptent celles calculées sur le texte fr actuel (une modification mineure le garde)."
+      anthropic_on_html: "Bouton %{icon} actif (ANTHROPIC_API_KEY)"
+      anthropic_off_html: "Bouton %{icon} inactif (ANTHROPIC_API_KEY absent)"
+      api_on_html: "API Claude Code active (OCL_API_TOKEN)"
+      api_off_html: "API Claude Code inactive (OCL_API_TOKEN absent)"
+      language: "Langue"
+      pending: "À faire"
+      pending_title: "Chaînes non traduites ou obsolètes (fr modifié en majeur)"
+      split: "%{not_translated} non traduites, %{outdated} obsolètes"
+      coverage: "Avec suggestion"
+      todo: "Sans suggestion"
+      todo_title: "Chaînes à faire sans suggestion à jour : ce que le bouton de pré-traduction ou Claude Code traiteraient"
+      stale: "Périmées"
+      stale_title: "Suggestions calculées sur un ancien texte fr : masquées, remplacées au prochain passage"
+      last: "Dernière"
+      ago: "il y a %{time}"
+  issues:
+    kinds:
+      terminology: "Terminologie"
+      misaligned: "Décalage"
+      meaning: "Sens"
+      review: "À relire"
+      other: "Autre"
+    index:
+      title: "Tickets"
+      intro: "Relevés par une vérification de cohérence de la langue. Corrige la traduction si besoin, puis marque le ticket résolu."
+      states:
+        open: "Ouverts"
+        closed: "Résolus"
+        all: "Tous"
+      whole_language: "Toute la langue"
+      raised: "%{origin}, il y a %{time}"
+      closed_by: "Résolu par %{name}, il y a %{time}"
+      resolve: "Résolu"
+      reopen: "Rouvrir"
+      out_of_work:
+        archived: "clé supprimée"
+        no_translate: "clé @no-translate"
+      out_of_work_title: "Hors du travail des traducteurs : ils ne voient pas ce ticket, visible des admins seulement."
+      not_translated: "non traduite"
+      as_raised: "Au signalement"
+      empty: "Aucun ticket."
+      empty_filtered: "Aucun ticket avec ces filtres."
+    search_bar:
+      placeholder: "Rechercher dans les tickets, clés et textes…"
+      shortcuts: |
+        ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
+        Entrée : rechercher
+        Échap : quitter le champ
+        Échap + Échap : tout effacer, texte et filtres
+        Cherche dans le ticket, la clé, le texte fr, la traduction et le texte au signalement
+        Dans le texte, avant Entrée :
+        #120, #120-180 : par numéro de clé
+        key:… : par clé
+        branch:… : par branche
+        "Mot " : texte exact entre guillemets (espaces, majuscules et accents compris)
+      count:
+        one: "%{count} ticket"
+        other: "%{count} tickets"
+      kind: "Type"
+      remove_all: "Retirer tous les filtres"
+    unit:
+      none: "Plus aucun ticket ouvert sur cette clé."
+      resolved:
+        one: "Voir le ticket résolu"
+        other: "Voir les %{count} tickets résolus"
 
   help_requests:
     index:
@@ -260,6 +337,9 @@ fr:
 
   translations:
     index:
+      issues:
+        one: "%{count} ticket ouvert"
+        other: "%{count} tickets ouverts"
       reference: "Référence :"
       show_whitespace: "Afficher les espaces et retours à la ligne"
       show_keys: "Toujours afficher les noms des clés"
@@ -268,8 +348,8 @@ fr:
       remove_status: "Retirer le filtre « %{status} »"
       more_filters: "Plus…"
       pretranslate:
-        one: "🤖 Proposer des traductions (%{language}) pour la première chaîne à faire"
-        other: "🤖 Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire"
+        one: "Proposer des traductions (%{language}) pour la première chaîne à faire sans proposition"
+        other: "Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire sans proposition"
     row:
       revised_ago: "modifiée il y a %{time}"
       never_revised: "jamais modifiée"
@@ -280,6 +360,9 @@ fr:
       en_missing: "EN manquant"
       before: "avant :"
     editor:
+      issues:
+        one: "%{count} ticket"
+        other: "%{count} tickets"
       saved: "enregistré"
       save: "Enregistrer"
       save_and_review: "Approuver"
@@ -395,6 +478,9 @@ fr:
       major: "Changement de sens : traductions à revoir"
       translations: "Traductions"
       comments: "Commentaires"
+      issues:
+        one: "%{count} ticket ouvert"
+        other: "%{count} tickets ouverts"
       history: "Historique"
       history_count:
         one: "%{count} entrée"

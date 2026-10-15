@@ -39,7 +39,7 @@
                         i18n_text_autofocus_value: local_assigns[:autofocus] } do %>
     <%# The box : the editor, then the proposals under it, so they grow the row (the source box beside follows).
         Its background, the translation's status (or unsaved), runs under both %>
-    <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.outdated? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
+    <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.to_review? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
       <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
                         data: { i18n_text_target: "field" },
                         class: "block w-full flex-1 resize-none overflow-hidden px-3 py-2 font-mono text-sm bg-transparent" %>
@@ -53,33 +53,43 @@
             <% warnings.each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
           </div>
         <% end %>
+        <%# Two columns : the label on the left, the proposals beside it, wrapping in their own column %>
         <% if machine %>
-          <p class="text-xs text-stone-500">🤖 <%= t(".machine") %>
-            <button type="button" class="ml-1 whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
+          <div class="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-2 text-xs text-stone-500">
+            <span class="whitespace-nowrap"><%= robot_icon %> <%= t(".machine") %></span>
+            <button type="button" class="justify-self-start whitespace-pre-wrap rounded bg-violet-50 px-1.5 text-left text-violet-900 hover:bg-violet-100"
                     onclick="<%= fill %>" data-text="<%= machine %>"><%= machine %></button>
-          </p>
+          </div>
         <% end %>
         <% if suggestions.present? %>
-          <p class="text-xs text-stone-500"><%= t(".same_text") %>
-            <% suggestions.each do |s| %>
-              <button type="button" class="ml-1 rounded bg-sky-50 px-1.5 text-sky-800 hover:bg-sky-100"
-                      onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
-            <% end %>
-          </p>
+          <div class="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-2 text-xs text-stone-500">
+            <span class="whitespace-nowrap"><%= t(".same_text") %></span>
+            <div class="flex flex-wrap gap-1">
+              <% suggestions.each do |s| %>
+                <button type="button" class="whitespace-pre-wrap rounded bg-sky-50 px-1.5 text-left text-sky-800 hover:bg-sky-100"
+                        onclick="<%= fill %>" data-text="<%= s %>"><%= s %></button>
+              <% end %>
+            </div>
+          </div>
         <% end %>
       </div>
     </div>
     <div class="flex flex-col gap-1 px-3 py-1.5">
       <div class="flex items-center justify-end gap-2">
-        <% if current_user.admin? %>
-          <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
-                  class="group/history flex items-center gap-1 rounded px-1 text-xs text-stone-400 hover:bg-stone-100 aria-expanded:bg-stone-100">
-            <%= chevron_icon("group-aria-expanded/history:rotate-90") %>
-            <%= t(".history") %>
-          </button>
-        <% end %>
-        <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
-                                      question: data[:open_questions].include?(unit.id) %>
+        <%# Issues, comments, history : on the left, pushing the rest right %>
+        <div class="mr-auto flex min-w-0 items-center gap-2">
+          <%# Open issues of the key (a consistency review's points) %>
+          <%= render "issues_button", unit: unit, language: language, count: data[:issues][unit.id] || 0 %>
+          <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+                                        question: data[:open_questions].include?(unit.id) %>
+          <% if current_user.admin? %>
+            <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
+                    class="group/history flex items-center gap-1 rounded px-1 text-xs text-stone-400 hover:bg-stone-100 aria-expanded:bg-stone-100">
+              <%= chevron_icon("group-aria-expanded/history:rotate-90") %>
+              <%= t(".history") %>
+            </button>
+          <% end %>
+        </div>
         <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
         <% if local_assigns[:saved] %><span class="text-xs text-emerald-700 group-has-data-dirty:hidden">✓ <%= t(".saved") %></span><% end %>
         <%# Saving an outdated translation unchanged revalidates it against the current fr : always allowed.
@@ -87,14 +97,7 @@
         <% clean_save = !t&.outdated? %>
         <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
                        class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:hidden" %>
-        <% if current_user.can_review?(language) %>
-          <%# Already reviewed and up to date : nothing to approve until edited (disabled and hidden like the save).
-              Hidden while the text is blank, which removes the translation (i18n-text follows the edits) %>
-          <% clean_review = t&.approved? && !t.outdated? %>
-          <%= button_tag t(".save_and_review"), name: "reviewed", value: "1", title: t("unsaved.review_shortcut"), disabled: clean_review, hidden: t.nil?,
-                         data: { i18n_text_target: "review", dirty_form_target: ("submit" if clean_review) },
-                         class: "rounded border border-emerald-600 px-2 py-0.5 text-xs text-emerald-700 disabled:hidden" %>
-        <% end %>
+        <%= render "review_button", unit: unit, language: language, translation: t, contested: data[:contested].include?(unit.id) %>
       </div>
     </div>
   <% end %>

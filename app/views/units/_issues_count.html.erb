@@ -1,0 +1,6 @@
+<%# The key's open issues in every language, on the Translations header : replaced when one is closed from a panel %>
+<span id="unit_issues_count_<%= unit.id %>" class="contents">
+  <% if count.positive? %>
+    <span class="flex items-center gap-1 font-medium text-amber-700"><%= issue_icon %><%= t("units.show.issues", count: count) %></span>
+  <% end %>
+</span>
