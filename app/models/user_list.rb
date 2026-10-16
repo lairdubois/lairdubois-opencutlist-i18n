@@ -6,12 +6,14 @@
 #   language  a language code : a membership in it, combined with AND
 #   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
 #   seen      ACTIVITIES : a request (User#last_seen_at, consultation included) in the last n days, or "never"
-#   sort      SORTS (name by default), dir "asc" or "desc" (the sort's own direction by default)
+#   sort      SORTS (DEFAULT_SORT by default), dir "asc" or "desc" (the sort's own direction by default) : the search bar's sort menu
+#             and the table's column headers (UsersHelper)
 class UserList
   ROLES = %w[admin reviewer translator none disabled].freeze
   ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
   # Each sort, with its default direction
-  SORTS = { "name" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
+  SORTS = { "name" => "asc", "email" => "asc", "languages" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
+  DEFAULT_SORT = "seen"
 
   # A user's revisions : how many, the last one's date
   Stat = Data.define(:count, :last_at)
@@ -28,13 +30,18 @@ class UserList
     @dir = params[:dir] if %w[asc desc].include?(params[:dir])
   end
 
-  # The picked sort, nil when none (by name)
+  # The sort applied
+  def sort_column
+    @sort || DEFAULT_SORT
+  end
+
+  # The picked sort (its chip), nil for the default one in its own direction : reversed, it is one, so that its chip keeps it
   def sort
-    @sort unless @sort == "name"
+    sort_column unless sort_column == DEFAULT_SORT && sort_dir == SORTS.fetch(DEFAULT_SORT)
   end
 
   def sort_dir
-    @dir || SORTS.fetch(sort || "name")
+    @dir || SORTS.fetch(sort_column)
   end
 
   def any_chip?
@@ -114,14 +121,16 @@ class UserList
     end
   end
 
-  # Ties (and users without activity, always last) by name
+  # Ties (and users without activity or language, always last) by name
   def sorted(users)
     by_name = users.sort_by { |user| SqliteFold.fold(user.name) }
-    by_name.reverse! if sort.nil? && sort_dir == "desc"
-    return by_name unless sort
+    return sort_dir == "desc" ? by_name.reverse : by_name if sort_column == "name"
 
     key = ->(user) {
-      case sort
+      case sort_column
+      when "email" then SqliteFold.fold(user.email)
+      # Codes in alphabetical order, as the column shows them : "de" before "de es" before "es"
+      when "languages" then user.memberships.map { |m| m.language.code }.sort.join(" ").presence
       when "activity" then stats[user.id]&.last_at
       when "seen" then user.last_seen_at
       when "contributions" then stats[user.id]&.count

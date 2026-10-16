@@ -7,6 +7,22 @@ module ApplicationHelper
     "approved" => "bg-emerald-500"
   }.freeze
 
+  # A sortable table column's header link : the current column reverses, another starts in its default direction.
+  # url : the path for a sort and a direction
+  def sort_header_link(label, column, sort:, dir:, default_dir:, url:)
+    current = sort == column
+    next_dir = current ? (dir == "asc" ? "desc" : "asc") : default_dir
+    link_to url.(column, next_dir), class: "inline-flex items-center gap-1 hover:text-stone-900 #{"text-stone-900" if current}" do
+      safe_join([label, (tag.span(dir == "desc" ? "↓" : "↑", aria: { hidden: true }) if current)].compact)
+    end
+  end
+
+  # The header cell's aria-sort
+  def aria_sort(column, sort:, dir:)
+    return "none" unless sort == column
+    dir == "desc" ? "descending" : "ascending"
+  end
+
   # Why a translation is to review : the fr changed, or an open issue contests it
   def to_review_label(translation)
     translation.outdated? ? t("status.outdated") : t("status.contested")

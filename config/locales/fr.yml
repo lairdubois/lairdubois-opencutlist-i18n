@@ -526,19 +526,22 @@ fr:
       volunteers: "Candidatures"
       new: "Ajouter un utilisateur"
       legend: "✓ = relecteur pour la langue"
-      contributions:
-        one: "%{formatted} contribution"
-        other: "%{formatted} contributions"
       ago: "il y a %{time}"
-      no_contribution: "aucune contribution"
-      seen: "vu il y a %{time}"
-      never_seen: "jamais vu"
       filtered: "Aucun utilisateur avec ces filtres."
       show_unfiltered:
         one: "Voir l'utilisateur sans filtre →"
         other: "Voir les %{count} utilisateurs sans filtre →"
       empty: "Aucun utilisateur."
       disabled: "désactivé"
+      never: "jamais"
+      columns:
+        name: "Nom"
+        email: "E-mail"
+        languages: "Langues"
+        seen: "Dernière visite"
+        contributions: "Contributions"
+        activity: "Dernière activité"
+        created: "Invité"
     search_bar:
       placeholder: "Rechercher un nom, un e-mail…"
       shortcuts: |
@@ -569,6 +572,8 @@ fr:
         never: "jamais"
       sorts:
         name: "nom"
+        email: "e-mail"
+        languages: "langues"
         activity: "dernière activité"
         seen: "dernière visite"
         contributions: "nombre de contributions"

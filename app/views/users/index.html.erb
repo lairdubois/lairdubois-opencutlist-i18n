@@ -22,36 +22,60 @@
     <% end %>
   </p>
 <% else %>
-  <div class="rounded border border-stone-200 bg-white text-sm">
-    <% @list.users.each do |user| %>
-      <% stat = @list.stats[user.id] %>
-      <%# The whole row opens the user's page %>
-      <%# A disabled user's row is faded %>
-      <%= link_to edit_user_path(user), class: "flex items-center gap-4 border-b border-stone-100 px-4 py-2 last:border-0 hover:bg-stone-50 #{'opacity-50' if user.disabled?}" do %>
-        <span class="w-40 font-medium"><%= user.name %><%= " (admin)" if user.admin? %><%= " (#{t('.disabled')})" if user.disabled? %></span>
-        <span class="w-64 truncate text-stone-500"><%= user.email %></span>
-        <span class="flex flex-1 flex-wrap gap-1">
-          <% user.memberships.sort_by { |m| m.language.code }.each do |m| %>
-            <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
-          <% end %>
-        </span>
-        <span class="w-40 text-right text-xs text-stone-400 tabular-nums">
-          <% if user.last_seen_at %>
-            <time datetime="<%= user.last_seen_at.iso8601 %>" title="<%= l(user.last_seen_at, format: :long) %>"><%= t(".seen", time: time_ago_in_words(user.last_seen_at)) %></time>
-          <% else %>
-            <%= t(".never_seen") %>
-          <% end %>
-        </span>
-        <span class="w-56 text-right text-xs text-stone-400 tabular-nums">
-          <% if stat %>
-            <%= t(".contributions", count: stat.count, formatted: number_with_delimiter(stat.count)) %> ·
-            <time datetime="<%= stat.last_at.iso8601 %>" title="<%= l(stat.last_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(stat.last_at)) %></time>
-          <% else %>
-            <%= t(".no_contribution") %>
-          <% end %>
-        </span>
-      <% end %>
-    <% end %>
+  <%# Each header sorts like the search bar's sort menu (its chip follows) %>
+  <div class="overflow-x-auto rounded border border-stone-200 bg-white">
+    <table class="w-full text-sm">
+      <thead class="border-b border-stone-200 bg-stone-50 text-left text-xs text-stone-500">
+        <tr>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "name") %>"><%= users_sort_link(@list, "name", t(".columns.name")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "email") %>"><%= users_sort_link(@list, "email", t(".columns.email")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "languages") %>"><%= users_sort_link(@list, "languages", t(".columns.languages")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "seen") %>"><%= users_sort_link(@list, "seen", t(".columns.seen")) %></th>
+          <th class="px-3 py-2 text-right font-medium" aria-sort="<%= users_aria_sort(@list, "contributions") %>"><%= users_sort_link(@list, "contributions", t(".columns.contributions")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "activity") %>"><%= users_sort_link(@list, "activity", t(".columns.activity")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "created") %>"><%= users_sort_link(@list, "created", t(".columns.created")) %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100 tabular-nums">
+        <% @list.users.each do |user| %>
+          <% stat = @list.stats[user.id] %>
+          <%# The whole row opens the user's page (the name's link stretched over the row) ; a disabled user's row is faded %>
+          <tr class="relative hover:bg-stone-50 <%= 'opacity-50' if user.disabled? %>">
+            <td class="px-3 py-2 whitespace-nowrap">
+              <%= link_to user.name, edit_user_path(user), class: "font-medium after:absolute after:inset-0" %>
+              <% if user.admin? %><span class="ml-1 rounded bg-stone-800 px-1.5 text-xs text-white">admin</span><% end %>
+              <% if user.disabled? %><span class="ml-1 text-xs text-stone-500"><%= t(".disabled") %></span><% end %>
+            </td>
+            <td class="max-w-64 truncate px-3 py-2 text-stone-500" title="<%= user.email %>"><%= user.email %></td>
+            <td class="px-3 py-2">
+              <span class="flex flex-wrap gap-1">
+                <% user.memberships.sort_by { |m| m.language.code }.each do |m| %>
+                  <span class="rounded px-1.5 text-xs <%= m.reviewer? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-700' %>"><%= m.language.code.upcase %><%= " ✓" if m.reviewer? %></span>
+                <% end %>
+              </span>
+            </td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap text-stone-500">
+              <% if user.last_seen_at %>
+                <time datetime="<%= user.last_seen_at.iso8601 %>" title="<%= l(user.last_seen_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(user.last_seen_at)) %></time>
+              <% else %>
+                <span class="text-stone-300"><%= t(".never") %></span>
+              <% end %>
+            </td>
+            <td class="px-3 py-2 text-right <%= 'text-stone-300' unless stat %>"><%= number_with_delimiter(stat&.count || 0) %></td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap text-stone-500">
+              <% if stat %>
+                <time datetime="<%= stat.last_at.iso8601 %>" title="<%= l(stat.last_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(stat.last_at)) %></time>
+              <% else %>
+                <span class="text-stone-300">—</span>
+              <% end %>
+            </td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap text-stone-500">
+              <time datetime="<%= user.created_at.iso8601 %>" title="<%= l(user.created_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(user.created_at)) %></time>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
   <p class="mt-2 text-xs text-stone-500"><%= t(".legend") %></p>
 <% end %>

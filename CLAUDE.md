@@ -206,7 +206,8 @@ each entry's count under the other filters.
   `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language, `disabled` too),
   `days` (activity, or `never`), `seen` (same periods over `User#last_seen_at` : any request, consultation included,
   written by `ApplicationController#record_last_seen` at most every `User::SEEN_PRECISION` through `update_column`, so
-  the login tokens' `updated_at` stays put), sorts name / activity / seen / contributions / created.
+  the login tokens' `updated_at` stays put), sorts name / email / languages (codes) / activity / seen (default, `UserList::DEFAULT_SORT`) / contributions /
+  created, from the sort menu or the table's column headers (`UsersHelper`, shared `sort_header_link` with `/pretranslations`).
 - Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request
   (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
 - Invitations sent : `Invitation(user, inviter, email)`, written by `InvitationMailer`'s `after_deliver` only when

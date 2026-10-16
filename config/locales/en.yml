@@ -526,19 +526,22 @@ en:
       volunteers: "Applications"
       new: "Add a user"
       legend: "✓ = reviewer for the language"
-      contributions:
-        one: "%{formatted} contribution"
-        other: "%{formatted} contributions"
       ago: "%{time} ago"
-      no_contribution: "no contribution"
-      seen: "seen %{time} ago"
-      never_seen: "never seen"
       filtered: "No user with these filters."
       show_unfiltered:
         one: "See the user without filters →"
         other: "See the %{count} users without filters →"
       empty: "No user."
       disabled: "disabled"
+      never: "never"
+      columns:
+        name: "Name"
+        email: "E-mail"
+        languages: "Languages"
+        seen: "Last visit"
+        contributions: "Contributions"
+        activity: "Last activity"
+        created: "Invited"
     search_bar:
       placeholder: "Search a name, an e-mail…"
       shortcuts: |
@@ -569,6 +572,8 @@ en:
         never: "never"
       sorts:
         name: "name"
+        email: "e-mail"
+        languages: "languages"
         activity: "last activity"
         seen: "last visit"
         contributions: "number of contributions"
