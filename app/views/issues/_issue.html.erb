@@ -1,0 +1,52 @@
+<%# locals: (issue:, translation:, index:) %>
+<%# An issue's card on the issues page ; its buttons carry the list's filters, so their answer (IssuesController#render_card)
+    replaces it and the states' counts in place %>
+<% hit = ->(text) { highlight_search(text, @query.text, exact: @query.exact?) } %>
+<% card_params = @filters.merge(state: @state, card: 1) %>
+<div id="<%= dom_id(issue) %>" class="rounded border border-stone-200 bg-white px-4 py-3 text-sm <%= "opacity-60" if issue.closed? %>">
+  <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
+    <%= issue_kind_chip(issue.kind) %>
+    <% if issue.unit %>
+      <%# The key alone in the translator's list (none for a translator when out of their work) %>
+      <% if index && (issue.unit.translatable || current_user.admin?) %>
+        <%= link_to translate_path(@language.code, at: index), class: "font-mono text-stone-700 hover:underline" do %>
+          <span class="text-stone-400">#<%= index %></span> <%= hit.(issue.unit.key) %>
+        <% end %>
+      <% else %>
+        <span class="font-mono text-stone-700"><%= hit.(issue.unit.key) %></span>
+      <% end %>
+      <%# Admins only see these : the translators can't act on them %>
+      <% if (out = issue.out_of_work) %>
+        <span class="rounded bg-stone-200 px-1.5 py-0.5 text-stone-600" title="<%= t("issues.index.out_of_work_title") %>"><%= t("issues.index.out_of_work.#{out}") %></span>
+      <% end %>
+    <% else %>
+      <span class="font-medium text-stone-700"><%= t("issues.index.whole_language") %></span>
+    <% end %>
+    <span class="ml-auto" title="<%= l issue.created_at %>"><%= t("issues.index.raised", origin: issue.origin || "—", time: time_ago_in_words(issue.created_at)) %></span>
+    <% if issue.closed? %>
+      <span class="text-emerald-700" title="<%= l issue.closed_at %>"><%= t("issues.index.closed_by", name: issue.closed_by&.name || "—", time: time_ago_in_words(issue.closed_at)) %></span>
+      <%= button_to t("issues.index.reopen"), close_issue_path(issue), method: :patch, params: card_params.merge(reopen: 1),
+                    class: "rounded px-2 py-0.5 hover:bg-stone-100" %>
+    <% else %>
+      <%= render "issues/close_button", issue: issue, params: card_params %>
+    <% end %>
+  </div>
+  <p class="whitespace-pre-wrap"><%= hit.(issue.body) %></p>
+  <% if issue.unit %>
+    <%# The texts it is about : the fr source, the translation now, and as raised when it changed since %>
+    <dl class="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-dashed border-stone-200 pt-2 text-xs">
+      <dt class="text-stone-400">FR</dt>
+      <dd class="font-mono whitespace-pre-wrap text-stone-600" dir="ltr"><%= hit.(issue.unit.source_text) %></dd>
+      <dt class="text-stone-400"><%= @language.code.upcase %></dt>
+      <% if translation %>
+        <dd class="font-mono whitespace-pre-wrap text-stone-900" dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= hit.(translation.text) %></dd>
+      <% else %>
+        <dd class="text-stone-400 italic"><%= t("issues.index.not_translated") %></dd>
+      <% end %>
+      <% if issue.text.present? && issue.text != translation&.text %>
+        <dt class="text-stone-400"><%= t("issues.index.as_raised") %></dt>
+        <dd class="font-mono whitespace-pre-wrap text-stone-500" dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= hit.(issue.text) %></dd>
+      <% end %>
+    </dl>
+  <% end %>
+</div>

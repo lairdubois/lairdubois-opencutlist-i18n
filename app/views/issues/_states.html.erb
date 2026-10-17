@@ -1,0 +1,9 @@
+<%# The state tabs, with their counts under the filters (replaced by IssuesController#render_card) %>
+<nav id="issues_states" class="flex gap-1 text-sm">
+  <% IssuesController::STATES.each do |state| %>
+    <%= link_to issues_path(@language.code, @filters.merge(state: (state unless state == "open")).compact), aria: { current: (state == @state || nil) },
+                class: "rounded px-2 py-0.5 text-stone-600 hover:bg-stone-200 aria-[current]:bg-stone-800 aria-[current]:text-white" do %>
+      <%= t("issues.index.states.#{state}") %> <span class="tabular-nums opacity-70"><%= @counts[state] %></span>
+    <% end %>
+  <% end %>
+</nav>

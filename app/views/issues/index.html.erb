@@ -1,19 +1,9 @@
 <% content_for :title, "#{t(".title")} · #{@language.name} · OpenCutList Localize" %>
-<%# The tabs keep the search and filters %>
-<% filters = { q: @query[:q], kind: @kinds.presence, at: @query[:at], key: @query[:key], prefix: @query[:prefix], unit: @unit&.id }.compact_blank %>
-<% hit = ->(text) { highlight_search(text, @query.text, exact: @query.exact?) } %>
 <%# Toolbar (title, states, search) stays on screen above the list (.toolbar in application.css) %>
 <div class="toolbar">
   <div class="mb-2 flex flex-wrap items-baseline gap-x-4 gap-y-2">
     <h1 class="text-lg font-semibold"><%= t(".title") %> · <%= link_to @language.name, translate_path(@language.code), class: "hover:underline" %></h1>
-    <nav class="flex gap-1 text-sm">
-      <% IssuesController::STATES.each do |state| %>
-        <%= link_to issues_path(@language.code, filters.merge(state: (state unless state == "open")).compact), aria: { current: (state == @state || nil) },
-                    class: "rounded px-2 py-0.5 text-stone-600 hover:bg-stone-200 aria-[current]:bg-stone-800 aria-[current]:text-white" do %>
-          <%= t(".states.#{state}") %> <span class="tabular-nums opacity-70"><%= @counts[state] %></span>
-        <% end %>
-      <% end %>
-    </nav>
+    <%= render "states" %>
     <p class="basis-full text-sm text-stone-600"><%= t(".intro") %></p>
   </div>
   <div class="mb-2 flex flex-wrap items-start gap-3">
@@ -23,55 +13,7 @@
 
 <div class="flex flex-col gap-3">
   <% @issues.each do |issue| %>
-    <% translation = @translations[issue.unit_id] %>
-    <% index = @indexes[issue.unit_id] %>
-    <div id="<%= dom_id(issue) %>" class="rounded border border-stone-200 bg-white px-4 py-3 text-sm <%= "opacity-60" if issue.closed? %>">
-      <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
-        <%= issue_kind_chip(issue.kind) %>
-        <% if issue.unit %>
-          <%# The key alone in the translator's list (none for a translator when out of their work) %>
-          <% if index && (issue.unit.translatable || current_user.admin?) %>
-            <%= link_to translate_path(@language.code, at: index), class: "font-mono text-stone-700 hover:underline" do %>
-              <span class="text-stone-400">#<%= index %></span> <%= hit.(issue.unit.key) %>
-            <% end %>
-          <% else %>
-            <span class="font-mono text-stone-700"><%= hit.(issue.unit.key) %></span>
-          <% end %>
-          <%# Admins only see these : the translators can't act on them %>
-          <% if (out = issue.out_of_work) %>
-            <span class="rounded bg-stone-200 px-1.5 py-0.5 text-stone-600" title="<%= t(".out_of_work_title") %>"><%= t(".out_of_work.#{out}") %></span>
-          <% end %>
-        <% else %>
-          <span class="font-medium text-stone-700"><%= t(".whole_language") %></span>
-        <% end %>
-        <span class="ml-auto" title="<%= l issue.created_at %>"><%= t(".raised", origin: issue.origin || "—", time: time_ago_in_words(issue.created_at)) %></span>
-        <% if issue.closed? %>
-          <span class="text-emerald-700" title="<%= l issue.closed_at %>"><%= t(".closed_by", name: issue.closed_by&.name || "—", time: time_ago_in_words(issue.closed_at)) %></span>
-          <%= button_to t(".reopen"), close_issue_path(issue), method: :patch, params: { reopen: 1 },
-                        class: "rounded px-2 py-0.5 hover:bg-stone-100" %>
-        <% else %>
-          <%= render "close_button", issue: issue %>
-        <% end %>
-      </div>
-      <p class="whitespace-pre-wrap"><%= hit.(issue.body) %></p>
-      <% if issue.unit %>
-        <%# The texts it is about : the fr source, the translation now, and as raised when it changed since %>
-        <dl class="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-dashed border-stone-200 pt-2 text-xs">
-          <dt class="text-stone-400">FR</dt>
-          <dd class="font-mono whitespace-pre-wrap text-stone-600" dir="ltr"><%= hit.(issue.unit.source_text) %></dd>
-          <dt class="text-stone-400"><%= @language.code.upcase %></dt>
-          <% if translation %>
-            <dd class="font-mono whitespace-pre-wrap text-stone-900" dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= hit.(translation.text) %></dd>
-          <% else %>
-            <dd class="text-stone-400 italic"><%= t(".not_translated") %></dd>
-          <% end %>
-          <% if issue.text.present? && issue.text != translation&.text %>
-            <dt class="text-stone-400"><%= t(".as_raised") %></dt>
-            <dd class="font-mono whitespace-pre-wrap text-stone-500" dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= hit.(issue.text) %></dd>
-          <% end %>
-        </dl>
-      <% end %>
-    </div>
+    <%= render "issue", issue: issue, translation: @translations[issue.unit_id], index: @indexes[issue.unit_id] %>
   <% end %>
-  <% if @issues.empty? %><p class="text-sm text-stone-500"><%= t(filters.empty? ? ".empty" : ".empty_filtered") %></p><% end %>
+  <% if @issues.empty? %><p class="text-sm text-stone-500"><%= t(@filters.empty? ? ".empty" : ".empty_filtered") %></p><% end %>
 </div>

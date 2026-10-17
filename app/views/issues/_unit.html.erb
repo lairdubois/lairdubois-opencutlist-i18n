@@ -14,7 +14,7 @@
           <% end %>
           <p class="mt-0.5 text-stone-400" title="<%= l issue.created_at %>"><%= t("issues.index.raised", origin: issue.origin || "—", time: time_ago_in_words(issue.created_at)) %></p>
         </div>
-        <%= render "issues/close_button", issue: issue, row: true %>
+        <%= render "issues/close_button", issue: issue, params: { row: 1 } %>
       </div>
     <% end %>
     <% if issues.empty? %><p class="text-stone-500"><%= t("issues.unit.none") %></p><% end %>

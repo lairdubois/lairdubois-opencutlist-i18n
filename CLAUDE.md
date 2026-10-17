@@ -124,7 +124,7 @@ Weblate was evaluated and rejected.
   handle them on `/translate/:lang/issues` (`IssuesController`, anyone who can translate the language : state tabs and
   `issues/_search_bar` (same `search_bar_controller`) : `q` over the body, text as raised, key, fr and translation (`ListFilters::Query`,
   highlighted), `kind[]` OR-ed, `at` / `key` / `prefix` chips and their `q` keywords (a single `at` exclusive, the state kept),
-  `unit` (from a panel) ; counts under the other filters, "Résolu" (like closing a GitHub issue, no confirmation, `issues/_close_button`) sets `closed_at` + `closed_by`, reopen), those whose key left the work (archived, not translatable) hidden from translators, page and toolbar count
+  `unit` (from a panel) ; counts under the other filters, "Résolu" (like closing a GitHub issue, no confirmation, `issues/_close_button`, `card=1` + the list's filters on the page : streams for that card (`issues/_issue`) and the tabs' counts, scroll kept) sets `closed_at` + `closed_by`, reopen), those whose key left the work (archived, not translatable) hidden from translators, page and toolbar count
   (`Issue.visible_to` / `in_work`, nothing closed : they come back with the key), tagged for admins (`Issue#out_of_work`), linked from the translator's toolbar (open count),
   each row with open ones (an issues button (Remix Icon issues-line, `issue_icon`) unfolding them in a lazy panel, `issues#unit`, closable there : `row=1` answers with
   streams for the panel, status, button and approval), the pre-translation page (a column) and the key page (open count on the Translations

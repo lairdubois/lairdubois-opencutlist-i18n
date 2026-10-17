@@ -11,14 +11,7 @@ class IssuesController < ApplicationController
   # kinds' counts under the others. A single index is exclusive (the state kept), as on the other lists. Those whose
   # key left the work are left out for a translator
   def index
-    @state = STATES.include?(params[:state]) ? params[:state] : "open"
-    @query = ListFilters::Query.new(params)
-    @unit = Unit.find_by(id: params[:unit]) if params[:unit].present? && !@query.single_index?
-    @kinds = @query.single_index? ? [] : Issue::KINDS & Array(params[:kind])
-    base = searched(Issue.visible_to(current_user).where(language: @language))
-    by_state = { "open" => base.still_open, "closed" => base.closed, "all" => base }
-    @counts = by_state.transform_values { |scope| (@kinds.any? ? scope.where(kind: @kinds) : scope).count }
-    scope = by_state.fetch(@state)
+    scope = set_filters.fetch(@state)
     @kind_counts = scope.group(:kind).count
     scope = scope.where(kind: @kinds) if @kinds.any?
     # The language-wide ones first, then the keys' order
@@ -41,10 +34,37 @@ class IssuesController < ApplicationController
 
     issue.update!(params[:reopen] ? { closed_at: nil, closed_by: nil } : { closed_at: Time.current, closed_by: current_user })
     return render_row(issue) if params[:row] && issue.unit
+    return render_card(issue) if params[:card]
     redirect_back_or_to issues_path(issue.language.code)
   end
 
   private
+
+  # The list's filters (state, query, unit, kinds) and the states' counts under them ; the scopes by state
+  def set_filters
+    @state = STATES.include?(params[:state]) ? params[:state] : "open"
+    @query = ListFilters::Query.new(params)
+    @unit = Unit.find_by(id: params[:unit]) if params[:unit].present? && !@query.single_index?
+    @kinds = @query.single_index? ? [] : Issue::KINDS & Array(params[:kind])
+    # Kept by the tabs and the cards' buttons
+    @filters = { q: @query[:q], kind: @kinds.presence, at: @query[:at], key: @query[:key], prefix: @query[:prefix], unit: @unit&.id }.compact_blank
+    base = searched(Issue.visible_to(current_user).where(language: @language))
+    by_state = { "open" => base.still_open, "closed" => base.closed, "all" => base }
+    @counts = by_state.transform_values { |scope| (@kinds.any? ? scope.where(kind: @kinds) : scope).count }
+    by_state
+  end
+
+  # Resolved or reopened from the issues page : its card and the states' counts follow, the list stays as it is (scroll kept)
+  def render_card(issue)
+    @language = issue.language
+    set_filters
+    translation = Translation.find_by(unit_id: issue.unit_id, language: @language) if issue.unit
+    index = Unit.tree_indexes(Unit.active.where(id: issue.unit_id).ids)[issue.unit_id] if issue.unit
+    render turbo_stream: [
+      turbo_stream.replace(issue, partial: "issues/issue", locals: { issue: issue, translation: translation, index: index }),
+      turbo_stream.replace("issues_states", partial: "issues/states")
+    ]
+  end
 
   def unit_locals(unit, language)
     { unit: unit, language: language, issues: unit.issues.still_open.where(language: language).order(:id).to_a,
