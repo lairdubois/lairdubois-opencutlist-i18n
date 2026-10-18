@@ -54,6 +54,27 @@ class Unit < ApplicationRecord
     unscoped.from(ranked, :units).where(id: ids).pluck(:id, :idx).to_h
   end
 
+  # The active unit at a 1-based index of the flattened tree, nil out of it
+  def self.at_index(index)
+    active.reorder(:position, :id).offset(index - 1).first if index.positive?
+  end
+
+  # SQL condition on units for index ranges of the flattened tree ([[from, to], …], nil = open end, OR-ed) : a start
+  # beyond the last key matches nothing, an end beyond it leaves the range open
+  def self.index_condition(ranges)
+    conditions = ranges.filter_map do |from, to|
+      first = from && at_index(from)
+      next if from && !first
+
+      last = to && at_index(to)
+      bounds = []
+      bounds << sanitize_sql_array(["(units.position, units.id) >= (?, ?)", first.position, first.id]) if first
+      bounds << sanitize_sql_array(["(units.position, units.id) <= (?, ?)", last.position, last.id]) if last
+      "(#{bounds.presence&.join(' AND ') || '1 = 1'})"
+    end
+    conditions.presence&.join(" OR ") || "1 = 0"
+  end
+
   # true (@translate), false (@no-translate) or nil (no directive) : the note's last directive line
   def self.directive(note)
     match = note.to_s.lines.reverse_each.lazy.filter_map { |l| l.match(DIRECTIVE) }.first

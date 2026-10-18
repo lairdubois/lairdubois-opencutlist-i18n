@@ -59,12 +59,19 @@ then click Save to save it without leaving the page.
   before pressing <kbd>Enter</kbd>:
 </p>
 <dl>
-  <dt><code>#120</code>, <code>#120-180</code></dt><dd>by row number</dd>
+  <dt><code>#120</code>, <code>#120-180</code>, <code>#12,45,78</code></dt><dd>by row number (a list may mix numbers and ranges)</dd>
   <dt><code>key:…</code></dt><dd>by key name</dd>
   <dt><code>branch:…</code></dt><dd>by branch (<code>tab.cutlist</code>)</dd>
   <dt><code>user:…</code></dt><dd>by author (name or its start)</dd>
   <dt><code>"Word "</code></dt><dd>exact text between quotes: spaces, case and accents included</dd>
 </dl>
+
+<h2>Divergent Translations</h2>
+<p>
+  When the same French text sits in several keys and your language translates it in several ways, a
+  <strong>divergent translations</strong> link shows above the list. Harmonize the translations if they mean the same
+  thing; keep them different if the keys' contexts really differ (a label and a column header, for instance).
+</p>
 
 <% if current_user.editable_languages.exists? %>
 <h2>Testing in OpenCutList</h2>

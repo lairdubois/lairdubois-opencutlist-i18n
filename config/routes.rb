@@ -17,6 +17,8 @@ Rails.application.routes.draw do
   get "translate/:lang/issues", to: "issues#index", as: :issues
   patch "issues/:id/close", to: "issues#close", as: :close_issue
   get "translate/:lang/:unit_id/issues", to: "issues#unit", as: :translate_unit_issues
+  # The fr duplicates translated in several ways, harmonized by the language's translators
+  get "translate/:lang/duplicates", to: "duplicates#index", as: :duplicates
   # A language's yml, downloaded by its translators (and admins, fr included)
   get "export", to: "exports#index", as: :exports
   get "export/:lang", to: "exports#show", as: :export

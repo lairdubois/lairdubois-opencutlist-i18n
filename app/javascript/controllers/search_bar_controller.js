@@ -5,17 +5,17 @@ import { Controller } from "@hotwired/stimulus"
 // in the filters menu ; a list chip (user, language) holds a list (a popover) filling a hidden field, submitted as soon
 // as an entry is picked ;
 // a status, the questions / issues / warnings flag or the period is a hidden input inside its chip, so removing the chip drops it.
-// A single index (no "-") is exclusive : applying it drops every other filter (FILTERS : the issues page's kinds and
+// A single index (no "-" nor ",") is exclusive : applying it drops every other filter (FILTERS : the issues page's kinds and
 // key too), any other change drops it.
-// A range mixes with the rest.
-// In the text search, keywords fill the field chips : #120 (or #120-180…), key:…, branch:…, user:… (a name,
+// A range or a list (#145,168,200-210) mixes with the rest.
+// In the text search, keywords fill the field chips : #120 (or #120-180, #145,168…), key:…, branch:…, user:… (a name,
 // or the start of one : left in the text when no name matches)
 // The sort (where offered) is not a filter : a menu of its own, its chip holding the sort and direction inputs,
 // its arrow reversing it.
 export default class extends Controller {
   static targets = ["chips", "field", "menu"]
   static FILTERS = ["q", "status[]", "questions", "issues", "warnings", "notranslate", "days", "key", "prefix", "user", "at", "kind[]", "unit"]
-  static KEYWORDS = { at: /^#(\d+(?:-\d*)?|-\d+)$/, key: /^(?:key|cl[eé]):(.+)$/i, prefix: /^(?:branch|branche):(.+)$/i, user: /^(?:user|utilisateur):(.+)$/i }
+  static KEYWORDS = { at: /^#((?:\d+(?:-\d*)?|-\d+)(?:,(?:\d+(?:-\d*)?|-\d+))*)$/, key: /^(?:key|cl[eé]):(.+)$/i, prefix: /^(?:branch|branche):(.+)$/i, user: /^(?:user|utilisateur):(.+)$/i }
   static REFOCUS = "search-bar:refocus"
 
   // A field submitted with Enter (or reset with Esc twice) gets the focus back on the rendered page,
@@ -104,7 +104,7 @@ export default class extends Controller {
   // Leaves empty fields out of the query string, and keeps a single index exclusive
   prune(event) {
     const at = event.formData.get("at") || ""
-    const single = at !== "" && !at.includes("-")
+    const single = at !== "" && !/[-,]/.test(at)
     const index = single && this.origin === "at"
     for (const [name, value] of [...event.formData]) {
       const dropped = index ? name !== "at" && this.constructor.FILTERS.includes(name) : single && name === "at"

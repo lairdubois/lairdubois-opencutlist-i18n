@@ -42,7 +42,7 @@ class UnitsController < ApplicationController
     @language = @languages.find { |l| l.code == params[:lang] } || @languages.find { |l| l.code == "en" } || @languages.first
     @duplicates = SourceDuplicates.new(@language)
     @groups = params[:divergent] == "1" ? @duplicates.divergent : @duplicates.groups
-    # Each key's "edit" link opens it alone in the language's translator's list (?at=index)
+    # Each group's "edit" button opens its keys in the language's translator's list (?at=index,index,…)
     @indexes = Unit.tree_indexes(@groups.flat_map { |g| g.units.map(&:id) })
   end
 

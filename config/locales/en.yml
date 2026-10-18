@@ -57,7 +57,7 @@ en:
         Esc: leave the field
         Esc + Esc: clear everything, text, filters and sort
         In the text, before Enter:
-        #120, #120-180: by number
+        #120, #120-180, #12,45: by number
         key:…: by key
         branch:…: by branch
         user:…: by user (name or start of it)
@@ -80,7 +80,7 @@ en:
         key: "contains…"
         prefix: "tab.cutlist"
         user: "choose…"
-        at: "120, 120-180, 120-…"
+        at: "120 · 120-180 · 12,45"
       statuses:
         not_translated: "Not translated"
         outdated: "To review"
@@ -240,7 +240,7 @@ en:
         Esc + Esc: clear everything, text and filters
         Searches the issue, the key, the fr text, the translation and the text as raised
         In the text, before Enter:
-        #120, #120-180: by key number
+        #120, #120-180, #12,45: by key number
         key:…: by key
         branch:…: by branch
         "Word ": exact text between quotes (spaces, case and accents included)
@@ -344,6 +344,9 @@ en:
       issues:
         one: "%{count} open issue"
         other: "%{count} open issues"
+      duplicates:
+        one: "%{count} divergent translation"
+        other: "%{count} divergent translations"
       reference: "Reference:"
       show_whitespace: "Show spaces and line breaks"
       show_keys: "Always show the key names"
@@ -508,6 +511,20 @@ en:
       moved:
         one: "%{count} key moved from %{from} to %{to}."
         other: "%{count} keys moved from %{from} to %{to}."
+
+  duplicates:
+    index:
+      title: "Divergent translations"
+      intro: "The same FR text in several keys, translated in several ways. Harmonize them if they mean the same thing: “Edit” opens the group's keys in the list to translate; the variants differing from the most common one are in orange."
+      empty: "No divergent translations."
+      keys:
+        one: "%{count} key"
+        other: "%{count} keys"
+      variants:
+        one: "%{count} variant"
+        other: "%{count} variants"
+      edit: "Edit"
+      edit_title: "Open these keys in the list to translate (new tab)"
 
   exports:
     index:

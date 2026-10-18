@@ -1,0 +1,33 @@
+<%# locals: (group:) %>
+<%# A fr text and its keys with their translations, the ones differing from the most common in amber ; "edit" opens
+    the group's keys in the translator's list (at : their indexes) %>
+<% usual = group.usual_translation %>
+<section class="rounded border border-stone-200 bg-white">
+  <div class="flex items-start gap-3 border-b border-stone-200 px-4 py-2">
+    <div class="min-w-0 flex-1 whitespace-pre-wrap font-mono text-sm"><%= group.text %></div>
+    <span class="shrink-0 text-xs text-stone-500"><%= t("duplicates.index.keys", count: group.units.size) %>
+      · <%= t("duplicates.index.variants", count: group.variants.size) %></span>
+    <%= link_to t("duplicates.index.edit"), translate_path(@language.code, at: group.units.map { |u| @indexes[u.id] }.join(",")),
+                target: "_blank", title: t("duplicates.index.edit_title"),
+                class: "shrink-0 rounded border border-stone-300 px-1.5 text-xs text-stone-600 hover:border-stone-400 hover:text-stone-900" %>
+  </div>
+  <% group.units.each do |unit| %>
+    <% translation = group.translations[unit.id] %>
+    <div class="flex gap-4 border-b border-stone-100 px-4 py-1.5 text-sm last:border-0">
+      <div class="w-2/5 min-w-0 shrink-0">
+        <div class="truncate font-mono text-stone-700" title="<%= unit.key %>">
+          <span class="text-stone-400">#<%= @indexes[unit.id] %></span>
+          <%= current_user.admin? ? link_to(unit.key, unit_path(unit), class: "hover:text-stone-900 hover:underline") : unit.key %>
+        </div>
+        <%# The key's YAML comment : often what tells its context %>
+        <% if unit.note.present? %><div class="whitespace-pre-line text-xs text-stone-500"><%= unit.note %></div><% end %>
+      </div>
+      <% if translation %>
+        <span class="min-w-0 flex-1 whitespace-pre-wrap <%= 'text-amber-800' if translation != usual %>"
+              dir="<%= @language.rtl ? "rtl" : "ltr" %>" lang="<%= @language.code %>"><%= translation %></span>
+      <% else %>
+        <span class="flex-1 italic text-stone-400"><%= t("status.not_translated") %></span>
+      <% end %>
+    </div>
+  <% end %>
+</section>

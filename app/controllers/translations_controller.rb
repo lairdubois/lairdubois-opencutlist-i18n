@@ -46,6 +46,7 @@ class TranslationsController < ApplicationController
     return render partial: "page_frame" if turbo_frame_request?
 
     @open_issues = Issue.still_open.visible_to(current_user).where(language: @language).count
+    @divergent_duplicates = SourceDuplicates.new(@language, translatable: true).divergent.size
     # The language switch, with each one's progress
     languages = current_user.editable_languages.to_a
     @language_stats = Language.stats(languages) if languages.size > 1
@@ -221,21 +222,7 @@ class TranslationsController < ApplicationController
   end
 
   def filter_by_index(scope)
-    return scope if params[:at].blank?
-
-    from, to = index_range
-    if from
-      first = unit_at_index(from)
-      scope = first ? scope.where("(units.position, units.id) >= (?, ?)", first.position, first.id) : scope.none
-    end
-    if to && (last = unit_at_index(to))
-      scope = scope.where("(units.position, units.id) <= (?, ?)", last.position, last.id)
-    end
-    scope
-  end
-
-  def unit_at_index(index)
-    Unit.active.reorder(:position, :id).offset(index - 1).first if index.positive?
+    index_ranges.empty? ? scope : scope.where(Unit.index_condition(index_ranges))
   end
 
   def sanitize_join

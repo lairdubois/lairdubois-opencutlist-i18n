@@ -29,8 +29,7 @@
     <% else %>
       <%= render "reference", unit: unit, outdated: outdated, en_missing: @en.present? %>
     <% end %>
-    <%# ?focus=1 (the FR duplicates' links) : the editor takes the focus on load %>
-    <%= render "editor", unit: unit, language: @language, data: @data, autofocus: params[:focus] == "1" %>
+    <%= render "editor", unit: unit, language: @language, data: @data %>
     <%# Comments : opened from the editor's buttons row, on the next row under the language's column ; lazy frame loads once shown %>
     <div data-disclosure-target="panel" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
       <%= turbo_frame_tag "comments_#{unit.id}_#{@language.code}", src: unit_comments_path(unit, lang: @language.code), loading: :lazy do %>

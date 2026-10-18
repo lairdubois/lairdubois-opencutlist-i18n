@@ -35,8 +35,7 @@
   <% end %>
   <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
   <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
-                data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: refs_json(@refs[unit.id]),
-                        i18n_text_autofocus_value: local_assigns[:autofocus] } do %>
+                data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: refs_json(@refs[unit.id]) } do %>
     <%# The box : the editor, then the proposals under it, so they grow the row (the source box beside follows).
         Its background, the translation's status (or unsaved), runs under both %>
     <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.to_review? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">

@@ -12,8 +12,8 @@
 #   key        substring of the key
 #   prefix     branch : the key itself or anything under it
 #   user       user id : keys with a revision by them (Revision.by_user)
-#   at         index range in the flattened tree (#120, #120-180, #120-, #-180). A single index (#120)
-#              is exclusive : it drops every other param above
+#   at         indexes or index ranges in the flattened tree, comma separated and combined with OR (#120, #120-180,
+#              #120-, #-180, #145,168,200-210). A single index (#120) is exclusive : it drops every other param above
 #   sort       order of the list, where offered (translator's list) : "index" (the default) or "updated"
 #              (last revision) ; not a filter, kept by a single index
 #   dir        "asc" or "desc", the sort's own direction by default
@@ -26,6 +26,8 @@ module ListFilters
   PERIODS = %w[1 7 30 90].freeze
   # Values of the notranslate filter : all the keys out of the translators' work, or one kind of them
   NOTRANSLATE = %w[1 directive copied].freeze
+  # Most indexes and ranges read from the at param
+  MAX_INDEX_RANGES = 50
   # Each sort, with its default direction
   SORTS = { "index" => "asc", "updated" => "desc" }.freeze
 
@@ -46,9 +48,9 @@ module ListFilters
       @values[name.to_s].presence
     end
 
-    # ?at=120 : a single key, alone in the list
+    # ?at=120 : a single key, alone in the list (not a range nor a list)
     def single_index?
-      self[:at].is_a?(String) && !self[:at].include?("-")
+      self[:at].is_a?(String) && !self[:at].match?(/[-,]/)
     end
 
     # The searched text (q) : trimmed, or the text between its double quotes as is ("word " keeps the space)
@@ -140,12 +142,18 @@ module ListFilters
       @user = self[:user] && User.find_by(id: self[:user])
     end
 
-    # Index range in the flattened tree, as [from, to] (nil = open end) : ?at=120 is the key #120 alone,
-    # ?at=120-180 a range, ?at=120- from #120 on, ?at=-180 up to #180
-    def index_range
-      at = self[:at].to_s.delete("#").strip
-      from, to = at.split("-", 2).map { |n| n.strip.presence&.to_i }
-      at.include?("-") ? [from, to] : [from, from]
+    # Index ranges in the flattened tree, as [[from, to], …] (nil = open end), OR-ed : ?at=120 is the key #120 alone,
+    # ?at=120-180 a range, ?at=120- from #120 on, ?at=-180 up to #180, ?at=145,168,200-210 any of them.
+    # Unreadable parts are left out (none = no index filter)
+    def index_ranges
+      return [] unless self[:at].is_a?(String)
+
+      self[:at].delete("#").split(",").first(MAX_INDEX_RANGES).filter_map do |part|
+        from, to = part.split("-", 2).map { |n| n.strip.presence&.to_i }
+        next if from.nil? && to.nil?
+
+        part.include?("-") ? [from, to] : [from, from]
+      end
     end
   end
 
@@ -160,7 +168,7 @@ module ListFilters
     @list_query ||= Query.new(params)
   end
 
-  delegate :single_index?, :statuses, :questions?, :issues?, :warnings?, :notranslate?, :filtered?, :searched?, :index_range, to: :list_query, private: true
+  delegate :single_index?, :statuses, :questions?, :issues?, :warnings?, :notranslate?, :filtered?, :searched?, :index_ranges, to: :list_query, private: true
 
   def list_text
     list_query.text

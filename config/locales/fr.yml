@@ -57,7 +57,7 @@ fr:
         Échap : quitter le champ
         Échap + Échap : tout effacer, texte, filtres et tri
         Dans le texte, avant Entrée :
-        #120, #120-180 : par numéro
+        #120, #120-180, #12,45 : par numéro
         key:… : par clé
         branch:… : par branche
         user:… : par utilisateur (nom ou début du nom)
@@ -80,7 +80,7 @@ fr:
         key: "contient…"
         prefix: "tab.cutlist"
         user: "choisir…"
-        at: "120, 120-180, 120-…"
+        at: "120 · 120-180 · 12,45"
       statuses:
         not_translated: "Non traduites"
         outdated: "À revoir"
@@ -240,7 +240,7 @@ fr:
         Échap + Échap : tout effacer, texte et filtres
         Cherche dans le ticket, la clé, le texte fr, la traduction et le texte au signalement
         Dans le texte, avant Entrée :
-        #120, #120-180 : par numéro de clé
+        #120, #120-180, #12,45 : par numéro de clé
         key:… : par clé
         branch:… : par branche
         "Mot " : texte exact entre guillemets (espaces, majuscules et accents compris)
@@ -344,6 +344,9 @@ fr:
       issues:
         one: "%{count} ticket ouvert"
         other: "%{count} tickets ouverts"
+      duplicates:
+        one: "%{count} traduction divergente"
+        other: "%{count} traductions divergentes"
       reference: "Référence :"
       show_whitespace: "Afficher les espaces et retours à la ligne"
       show_keys: "Toujours afficher les noms des clés"
@@ -508,6 +511,20 @@ fr:
       moved:
         one: "%{count} clé déplacée de %{from} vers %{to}."
         other: "%{count} clés déplacées de %{from} vers %{to}."
+
+  duplicates:
+    index:
+      title: "Traductions divergentes"
+      intro: "Un même texte FR présent dans plusieurs clés, traduit de plusieurs façons. Harmonise-les si elles désignent la même chose : « Éditer » ouvre les clés du groupe dans la liste à traduire ; les variantes qui s'écartent de la plus fréquente sont en orange."
+      empty: "Aucune traduction divergente."
+      keys:
+        one: "%{count} clé"
+        other: "%{count} clés"
+      variants:
+        one: "%{count} variante"
+        other: "%{count} variantes"
+      edit: "Éditer"
+      edit_title: "Ouvrir ces clés dans la liste à traduire (nouvel onglet)"
 
   exports:
     index:

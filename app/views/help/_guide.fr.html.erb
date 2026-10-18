@@ -63,12 +63,20 @@
   modification. Dans le champ de recherche, avant <kbd>Entrée</kbd> :
 </p>
 <dl>
-  <dt><code>#120</code>, <code>#120-180</code></dt><dd>par numéro de ligne</dd>
+  <dt><code>#120</code>, <code>#120-180</code>, <code>#12,45,78</code></dt><dd>par numéro de ligne (une liste peut mêler numéros et intervalles)</dd>
   <dt><code>key:…</code></dt><dd>par nom de clé</dd>
   <dt><code>branch:…</code></dt><dd>par branche (<code>tab.cutlist</code>)</dd>
   <dt><code>user:…</code></dt><dd>par auteur (nom ou début du nom)</dd>
   <dt><code>"Mot "</code></dt><dd>texte exact entre guillemets : espaces, majuscules et accents compris</dd>
 </dl>
+
+<h2>Traductions divergentes</h2>
+<p>
+  Quand un même texte français se trouve dans plusieurs clés et que ta langue le traduit de plusieurs façons, un lien
+  <strong>traductions divergentes</strong> apparaît au-dessus de la liste. Harmonise les traductions si elles désignent
+  la même chose ; garde-les différentes si les contextes des clés diffèrent vraiment (un libellé et un en-tête de
+  colonne, par exemple).
+</p>
 
 <% if current_user.editable_languages.exists? %>
 <h2>Tester dans OpenCutList</h2>

@@ -31,6 +31,10 @@
       <div class="min-w-0 flex-1 whitespace-pre-wrap font-mono text-sm"><%= group.text %></div>
       <span class="shrink-0 text-xs text-stone-500"><%= t(".keys", count: group.units.size) %></span>
       <% if group.divergent? %><span class="shrink-0 rounded bg-amber-100 px-1.5 text-xs text-amber-800"><%= t(".divergent") %></span><% end %>
+      <%# The group's keys in the language's translator's list (at : their indexes) %>
+      <%= link_to t(".edit"), translate_path(@language.code, at: group.units.map { |u| @indexes[u.id] }.join(",")),
+                  target: "_blank", title: t("duplicates.index.edit_title"),
+                  class: "shrink-0 rounded border border-stone-300 px-1.5 text-xs text-stone-600 hover:border-stone-400 hover:text-stone-900" %>
     </div>
     <% group.units.each do |unit| %>
       <% translation = group.translations[unit.id] %>
@@ -42,8 +46,6 @@
         <% else %>
           <span class="flex-1 italic text-stone-400"><%= t("status.not_translated") %></span>
         <% end %>
-        <%= link_to t(".edit"), translate_path(@language.code, at: @indexes[unit.id], focus: 1), target: "_blank",
-                    class: "shrink-0 self-start rounded border border-stone-300 px-1.5 text-xs text-stone-600 hover:border-stone-400 hover:text-stone-900" %>
       </div>
     <% end %>
   </section>

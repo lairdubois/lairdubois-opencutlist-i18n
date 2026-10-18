@@ -143,10 +143,10 @@ class UnitList
   end
 
   def filter_by_index(units)
-    return units if query[:at].blank?
+    ranges = query.index_ranges
+    return units if ranges.empty?
 
-    from, to = query.index_range
-    units.select { |u| (i = indexes[u.id]) >= (from || 1) && (to.nil? || i <= to) }
+    units.select { |u| (i = indexes[u.id]) && ranges.any? { |from, to| i >= (from || 1) && (to.nil? || i <= to) } }
   end
 
   def question_ids

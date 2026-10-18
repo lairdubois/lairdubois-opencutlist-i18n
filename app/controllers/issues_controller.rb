@@ -102,7 +102,7 @@ class IssuesController < ApplicationController
     if (prefix = @query[:prefix])
       scope = scope.where("units.key = :p OR units.key LIKE :like ESCAPE '\\'", p: prefix, like: "#{Unit.sanitize_sql_like(prefix)}.%")
     end
-    scope = by_index(scope) if @query[:at]
+    scope = by_index(scope) if @query.index_ranges.any?
     return scope unless (text = @query.text)
 
     scope = scope.joins(Issue.sanitize_sql_array(["LEFT JOIN translations ON translations.unit_id = issues.unit_id AND translations.language_id = ?", @language.id]))
@@ -114,23 +114,10 @@ class IssuesController < ApplicationController
     end
   end
 
-  # Between two indexes of the keys list (active keys, in the keys' order), an open end left out : the whole
+  # At indexes or between two indexes of the keys list (active keys, in the keys' order), an open end left out : the whole
   # language's issues and archived keys' aside
   def by_index(scope)
-    from, to = @query.index_range
-    scope = scope.where(units: { archived_at: nil })
-    if from
-      first = unit_at_index(from)
-      scope = first ? scope.where("(units.position, units.id) >= (?, ?)", first.position, first.id) : scope.none
-    end
-    if to && (last = unit_at_index(to))
-      scope = scope.where("(units.position, units.id) <= (?, ?)", last.position, last.id)
-    end
-    scope
-  end
-
-  def unit_at_index(index)
-    Unit.active.reorder(:position, :id).offset(index - 1).first if index.positive?
+    scope.where(units: { archived_at: nil }).where(Unit.index_condition(@query.index_ranges))
   end
 
   def set_language

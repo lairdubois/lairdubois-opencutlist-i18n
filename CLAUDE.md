@@ -74,7 +74,10 @@ Weblate was evaluated and rejected.
   `OclRepo#fr_text` then raises `OclRepo::Error`, shown by the sync / publish pages. Applying a sync clears it.
 - `TranslationChecks` : non-blocking warnings (text rules on any text, fr included, and comparison with the fr source) ;
   `SourceDuplicates` (`/units/duplicates`) : fr texts repeated over several keys, to factor them into `$t()`.
-  Both ported from a Python lint by mobilarte.
+  Both ported from a Python lint by mobilarte. Translators get the divergent groups (`/translate/:lang/duplicates`,
+  `DuplicatesController`, anyone who can translate the language, `SourceDuplicates translatable: true` : their work
+  only), linked with their count from the translator's toolbar ; each group's "edit" button opens its keys in the
+  translator's list (`at=12,45,78`).
 - Progress (home cards and the translator's language switch) : `Language.stats` (translated incl. outdated, reviewed,
   over the translatable units), drawn by `shared/_progress_bar`.
 - Translation history (admins only) : translator's rows and the key page (shared `_history_entry`, tinted by the
@@ -196,11 +199,11 @@ each entry's count under the other filters.
   (same kinds as the sort on the translator's list, any on the keys list).
 - Chips : `key`, `prefix`, `at` with their own input ; `user` (id, hidden field) with a popover of names : users having
   revisions (in the edited language on the translator's list ; `Revision.by_user` includes Transifex imports through
-  `transifex_username`). A single `at` index (no `-`) is exclusive : applying it drops the others, any other change
+  `transifex_username`). A single `at` index (no `-` nor `,`) is exclusive : applying it drops the others, any other change
   drops it (`ListFilters` too ; the menu's counts leave it out).
 - Keys : Mod-F focuses `q` (again in it : the browser's find), Esc blurs it and the chips' inputs, a second Esc
   within 500 ms resets the search (not Shift-Esc : Chrome's task manager) ; Enter and the reset keep the focus across
-  the Turbo visit (sessionStorage flag). On Enter, `#120` / `#120-180`, `key:…`, `branch:…`, `user:…` (a name or its
+  the Turbo visit (sessionStorage flag). On Enter, `#120` / `#120-180` / `#145,168,200-210` (OR-ed, a list or range mixes with the other filters), `key:…`, `branch:…`, `user:…` (a name or its
   start, `_` for a space, left in `q` unless exactly one matches) words of `q` move to their chip.
 - Users page : its own `users/_search_bar` (same look, same `search_bar_controller`) over `UserList` (in memory) :
   `q` (name, e-mail, logins), `language` (a list chip, like `user`), `role[]` OR-ed (narrowed to the language, `disabled` too),

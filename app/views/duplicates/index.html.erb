@@ -1,0 +1,16 @@
+<% content_for :title, "#{t(".title")} · #{@language.name} · OpenCutList Localize" %>
+<%# Toolbar (title, intro) stays on screen above the groups (.toolbar in application.css) %>
+<div class="toolbar">
+  <div class="mb-2 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+    <h1 class="text-lg font-semibold"><%= t(".title") %> · <%= link_to @language.name, translate_path(@language.code), class: "hover:underline" %></h1>
+    <span class="text-sm tabular-nums text-stone-500"><%= @groups.size %></span>
+    <p class="basis-full text-sm text-stone-600"><%= t(".intro") %></p>
+  </div>
+</div>
+
+<div class="flex flex-col gap-3">
+  <% @groups.each do |group| %>
+    <%= render "group", group: group %>
+  <% end %>
+  <% if @groups.empty? %><p class="text-sm text-stone-500"><%= t(".empty") %></p><% end %>
+</div>

@@ -21,6 +21,11 @@
         <%= issue_icon("text-amber-600") %> <%= t(".issues", count: @open_issues) %>
       <% end %>
     <% end %>
+    <%# Same fr text over several keys, translated in several ways %>
+    <% if @divergent_duplicates.positive? %>
+      <%= link_to t(".duplicates", count: @divergent_duplicates), duplicates_path(@language.code),
+                  class: "rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100" %>
+    <% end %>
     <% if Pretranslator.enabled? && todo.any? %>
       <%= button_to pretranslate_path(@language.code), params: { unit_ids: todo.map(&:id) },
                     class: "flex items-center gap-1.5 rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" do %>
