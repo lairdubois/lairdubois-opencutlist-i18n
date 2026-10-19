@@ -7,7 +7,7 @@ then click Save to save it without leaving the page.
 
 <h2>Statuses</h2>
 <dl>
-  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since your translation. Check it, fix it if needed, then save, even unchanged, to validate it again. Or an open issue questions it, whatever its kind: fix it if needed, then mark the issue resolved. It can't be approved before.</dd>
+  <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "outdated" %> <strong>To review</strong></dt><dd>The French text has changed since you translated it. Check your translation, correct it if necessary, and then save it—even if you don't make any changes—to validate it again. Or, if there's an open ticket disputing it—regardless of the ticket type—correct it if necessary, and then mark the ticket as resolved. It cannot be approved until then.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_translated" %> <strong>Not translated</strong></dt><dd>Nothing written in your language yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "not_approved" %> <strong>Not approved</strong></dt><dd>Translated, but not approved yet.</dd>
   <dt class="flex h-6 items-center gap-2 self-start"><%= status_dot "approved" %> <strong>Approved</strong></dt><dd>Approved by a reviewer of the language.</dd>
@@ -68,9 +68,10 @@ then click Save to save it without leaving the page.
 
 <h2>Divergent Translations</h2>
 <p>
-  When the same French text sits in several keys and your language translates it in several ways, a
-  <strong>divergent translations</strong> link shows above the list. Harmonize the translations if they mean the same
-  thing; keep them different if the keys' contexts really differ (a label and a column header, for instance).
+  If the same French text appears in several keys and is translated into different languages, a 
+  link showing <strong>divergent translations</strong> appears above the list. If the translations mean the same 
+  thing, harmonise them; if the contexts of the keys really differ (a label and a column header, 
+  for instance), keep them different.
 </p>
 
 <% if current_user.editable_languages.exists? %>
@@ -86,5 +87,5 @@ then click Save to save it without leaving the page.
 <p>
   Unsure what a text means? The <strong>comments</strong> button under each translation lets you ask a question about
   that key: the admins and your language's reviewers are notified, and the answer shows in the same place. For anything else
-  (access, a new language, a problem with the tool…), write to us with the form.
+  (access, a new language, a problem with the tool…), write to us using the form.
 </p>
