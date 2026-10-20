@@ -528,11 +528,11 @@ en:
 
   exports:
     index:
-      title: "Export translations"
+      title: "Export Translations"
       audience: "Only for advanced translators who want to test their translations straight from the OpenCutList sources: others don't need to export, the files are generated automatically by the team."
-      intro: "A language's yml, as a publication writes it into the repo: the translated keys (to review or not yet approved included), the copied keys with their fr source, in the fr.yml's order and with its comments. Untranslated keys are left out: OpenCutList then falls back to English."
+      intro: "A language's YML file, as written by the publication in the repo: the translated keys (including those that need to be reviewed or have not yet been approved), the keys copied along with their French source, in order and with the comments from fr.yml. Untranslated keys are omitted: OpenCutList then uses the English version."
       none: "No language is assigned to you yet. Ask an administrator."
-      source: "source language"
+      source: "Source language"
       translated: "%{count} / %{total} translated"
       download: "Download"
     show:
