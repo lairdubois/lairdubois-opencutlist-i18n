@@ -91,5 +91,14 @@
 <p>
   Un doute sur le sens d'un texte ? Le bouton <strong>commentaires</strong> sous chaque traduction permet de poser une
   question sur cette clé : les administrateurs et les relecteurs de ta langue sont prévenus, et la réponse s'affiche au même
-  endroit. Pour tout le reste (accès, nouvelle langue, problème avec l'outil…), écris-nous avec le formulaire.
+  endroit. <strong>↳ Répondre</strong> sous une question (ou une de ses réponses) poursuit la discussion juste en dessous : son
+  auteur et ceux qui y ont déjà répondu sont prévenus. Pour tout le reste (accès, nouvelle langue, problème avec l'outil…),
+  écris-nous avec le formulaire.
 </p>
+<% if current_user.admin? %>
+<p>
+  Admins : choisir <strong>Note admin</strong> sous le champ d'un commentaire le réserve aux administrateurs, ses réponses
+  comprises (ni traducteurs ni relecteurs ne le voient, personne n'est prévenu). Une note ouverte marque la clé d'un badge sarcelle jusqu'à « marquer résolue », et le filtre
+  <strong>Notes admin ouvertes</strong> les retrouve.
+</p>
+<% end %>

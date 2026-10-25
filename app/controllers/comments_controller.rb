@@ -5,17 +5,28 @@ class CommentsController < ApplicationController
     render partial: "thread", locals: { unit: @unit, language: @language }
   end
 
+  # kind : "comment" (key page), "question" or "admin_note" (admins only, never a question). A reply (parent_id) takes its question's or note's language
+  # and visibility, and is neither.
   def create
-    comment = @unit.comments.create!(user: current_user, body: params.require(:body).strip,
-                                     language: @language,
-                                     question: @language.present? || params[:question] == "1")
+    body = params.require(:body).strip
+    comment = if params[:parent_id].present?
+      parent = thread_comments.find(params[:parent_id])
+      return head :unprocessable_content unless parent.takes_replies?
+
+      @unit.comments.create!(user: current_user, body: body, parent: parent, language: parent.language, admin_only: parent.admin_only)
+    else
+      admin_only = current_user.admin? && params[:kind] == "admin_note"
+      @unit.comments.create!(user: current_user, body: body, language: @language, admin_only: admin_only,
+                             question: !admin_only && (@language.present? || params[:kind] == "question"))
+    end
     CommentNotifier.new(comment).call
-    render partial: "thread", locals: { unit: @unit, language: @language }
+    render partial: "thread", locals: { unit: @unit, language: @language, posted: comment }
   end
 
   def resolve
-    comment = Comment.find(params[:id])
+    comment = Comment.visible_to(current_user).find(params[:id])
     return head :forbidden unless current_user.admin? || comment.user == current_user
+    return head :unprocessable_content unless comment.takes_replies?
 
     comment.update!(resolved_at: Time.current)
     language = Language.find_by(code: params[:lang])
@@ -30,5 +41,10 @@ class CommentsController < ApplicationController
     @language = Language.find_by(code: params[:lang]) if params[:lang].present?
     allowed = @language ? current_user.can_translate?(@language) : current_user.admin?
     head :forbidden unless allowed
+  end
+
+  # The comments the thread shows
+  def thread_comments
+    (@language ? @unit.comments.visible_in(@language) : @unit.comments).visible_to(current_user)
   end
 end

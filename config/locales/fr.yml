@@ -91,6 +91,8 @@ fr:
       with: "Avec"
       questions_chip: "question ouverte"
       issues_chip: "ticket ouvert"
+      admin_notes: "Notes admin ouvertes"
+      admin_notes_chip: "note admin ouverte"
       warnings: "Avertissements"
       warnings_chip: "avertissement"
       notranslates:
@@ -496,7 +498,12 @@ fr:
       comments:
         one: "%{count} commentaire"
         other: "%{count} commentaires"
-      open_question: "question ouverte"
+      questions:
+        one: "%{count} question"
+        other: "%{count} questions"
+      admin_notes:
+        one: "%{count} note admin"
+        other: "%{count} notes admin"
     pretranslate:
       started:
         one: "Pré-traduction de %{count} chaîne lancée : recharge la page dans un moment."
@@ -538,12 +545,23 @@ fr:
   comments:
     thread:
       all_languages: "toutes les langues"
-      resolved: "question résolue"
-      open: "question ouverte"
+      resolved: "résolue"
+      question: "Question"
       resolve: "marquer résolue"
       placeholder: "Écrire un commentaire…"
       question_placeholder: "Poser une question sur cette traduction…"
-      is_question: "C'est une question"
+      all_question_placeholder: "Poser une question aux traducteurs de toutes les langues…"
+      admin_note_placeholder: "Écrire une note pour les admins…"
+      kinds:
+        comment: "Commentaire"
+        question: "Question"
+        admin_note: "Note admin"
+      reply: "Répondre"
+      reply_placeholder: "Répondre…"
+      replies:
+        one: "réponse"
+        other: "réponses"
+      admin_only: "Note admin"
       send: "Envoyer"
 
   units:
@@ -576,9 +594,6 @@ fr:
         zero: "aucun commentaire"
         one: "%{count} commentaire"
         other: "%{count} commentaires"
-      open_questions:
-        one: "%{count} question ouverte"
-        other: "%{count} questions ouvertes"
     show:
       previous: "Précédente : %{key}"
       next: "Suivante : %{key}"
@@ -990,6 +1005,9 @@ fr:
       magic_link: "Il n'y a pas de mot de passe : tu recevras à cette adresse un lien de connexion, valable 30 minutes et utilisable une seule fois. Refais la même chose chaque fois que tu dois te reconnecter."
   comment_mailer:
     posted:
+      subject_reply: "Réponse sur %{key}"
+      replied: "%{name} a répondu sur %{key}%{language} :"
+      in_reply_to: "En réponse à %{name} :"
       subject_question: "Question sur %{key}"
       subject_comment: "Commentaire sur %{key}"
       asked: "%{name} pose une question sur %{key}%{language} :"

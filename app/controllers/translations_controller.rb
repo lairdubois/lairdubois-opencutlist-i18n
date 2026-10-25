@@ -35,7 +35,7 @@ class TranslationsController < ApplicationController
     @counts = filter_counts(searched)
     searched = filter_by_index(searched) if single_index?
     @count = single_index? ? searched.where(translatable_condition).count : @counts[:list]
-    scope = sorted(searched.where(translatable_condition).where(status_condition).where(questions_condition).where(issues_condition).where(warnings_condition).where(days_condition))
+    scope = sorted(searched.where(translatable_condition).where(filter_conditions.values.join(" AND ")))
     @page = [params[:page].to_i, 1].max
     @units = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE).to_a
     @more = @page * PER_PAGE < @count
@@ -95,6 +95,11 @@ class TranslationsController < ApplicationController
     current_user.admin? && list_query.notranslate?
   end
 
+  # Admin notes : an admin's filter
+  def admin_notes?
+    current_user.admin? && list_query.admin_notes?
+  end
+
   # The translators' keys, or (notranslate) the picked kind of the others. An admin's single index shows its key either way.
   def translatable_condition
     return "1 = 1" if single_index? && current_user.admin?
@@ -140,6 +145,15 @@ class TranslationsController < ApplicationController
     issues? ? open_issue_condition : "1 = 1"
   end
 
+  # Admin notes for this language or for all of them
+  def open_admin_note_condition
+    "units.id IN (#{Comment.open_admin_notes.visible_in(@language).select(:unit_id).to_sql})"
+  end
+
+  def admin_notes_condition
+    admin_notes? ? open_admin_note_condition : "1 = 1"
+  end
+
   # Ids of a few hundred units at most, computed (and cached) by TranslationChecks
   def warning_condition
     @warning_condition ||= TranslationChecks.unit_ids(@language)
@@ -162,18 +176,30 @@ class TranslationsController < ApplicationController
     list_days ? period_condition(list_days) : "1 = 1"
   end
 
+  # The AND-ed filters' conditions, by name
+  def filter_conditions
+    { status: status_condition, questions: questions_condition, issues: issues_condition, admin_notes: admin_notes_condition,
+      warnings: warnings_condition, days: days_condition }.transform_values { |sql| "(#{sql})" }
+  end
+
+  # The AND-ed filters, one of them replaced by its own match
+  def filters_with(name, sql)
+    filter_conditions.merge(name => "(#{sql})").values.join(" AND ")
+  end
+
   # In one query : each status's matches with the other filters (shown in the filters menu),
-  # the questions', issues', warnings', notranslate's (admins) and periods' ones, the listed units, and the search alone
-  # (for the empty list hint). All of them among the translators' keys or, notranslate, the others.
+  # the questions', issues', admin notes' (admins), warnings', notranslate's (admins) and periods' ones, the listed units,
+  # and the search alone (for the empty list hint). All of them among the translators' keys or, notranslate, the others.
   def filter_counts(scope)
-    others = "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})"
-    conditions = STATUSES.to_h { |key| [key, "(#{status_conditions[key]}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})"] }
-                         .merge("questions" => "(#{status_condition}) AND #{open_question_condition} AND (#{issues_condition}) AND (#{warnings_condition}) AND (#{days_condition})",
-                                "issues" => "(#{status_condition}) AND (#{questions_condition}) AND #{open_issue_condition} AND (#{warnings_condition}) AND (#{days_condition})",
-                                "warnings" => "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND #{warning_condition} AND (#{days_condition})")
-                         .merge(PERIODS.to_h { |days| ["days_#{days}", "(#{status_condition}) AND (#{questions_condition}) AND (#{issues_condition}) AND (#{warnings_condition}) AND #{period_condition(days.to_i)}"] })
-                         .merge(list: others, searched: "1 = 1")
-                         .transform_values { |sql| "(#{sql}) AND #{translatable_condition}" }
+    others = filter_conditions.values.join(" AND ")
+    conditions = STATUSES.to_h { |key| [key, filters_with(:status, status_conditions[key])] }
+                         .merge("questions" => filters_with(:questions, open_question_condition),
+                                "issues" => filters_with(:issues, open_issue_condition),
+                                "warnings" => filters_with(:warnings, warning_condition))
+                         .merge(PERIODS.to_h { |days| ["days_#{days}", filters_with(:days, period_condition(days.to_i))] })
+    conditions["admin_notes"] = filters_with(:admin_notes, open_admin_note_condition) if current_user.admin?
+    conditions = conditions.merge(list: others, searched: "1 = 1")
+                           .transform_values { |sql| "(#{sql}) AND #{translatable_condition}" }
     if current_user.admin?
       NOTRANSLATE_CONDITIONS.each { |value, sql| conditions[value == "1" ? "notranslate" : "notranslate_#{value}"] = "#{others} AND #{sql}" }
     end
@@ -254,8 +280,9 @@ class TranslationsController < ApplicationController
       # Units with an open issue of any kind : to review, no approval until closed
       contested: Translation.preload_contested(translations, language, ids),
       machine: Suggestion.current.where(unit_id: ids, language: language).pluck(:unit_id, :text).to_h,
-      comment_counts: Comment.visible_in(language).where(unit_id: ids).group(:unit_id).count,
-      open_questions: Comment.open_questions.visible_in(language).where(unit_id: ids).distinct.pluck(:unit_id).to_set,
+      comment_counts: Comment.visible_in(language).visible_to(current_user).where(unit_id: ids).group(:unit_id).count,
+      open_questions: Comment.open_questions.visible_in(language).where(unit_id: ids).group(:unit_id).count,
+      open_admin_notes: Comment.open_admin_notes.visible_in(language).visible_to(current_user).where(unit_id: ids).group(:unit_id).count,
       issues: Issue.still_open.where(language: language, unit_id: ids).group(:unit_id).count,
       # Same fr text already translated elsewhere in this language
       suggestions: Translation.joins(:unit).merge(Unit.active).where(language: language, units: { source_text: texts })

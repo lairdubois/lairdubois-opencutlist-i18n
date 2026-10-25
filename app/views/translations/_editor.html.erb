@@ -20,7 +20,7 @@
     </div>
     <div class="flex items-center justify-end gap-2 px-3 py-1.5">
       <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
-                                    question: data[:open_questions].include?(unit.id) %>
+                                    questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
     </div>
   <% else %>
   <%# hidden : the streams stay out of the frame's grid until Turbo performs and drops them %>
@@ -80,7 +80,7 @@
           <%# Open issues of the key (a consistency review's points) %>
           <%= render "issues_button", unit: unit, language: language, count: data[:issues][unit.id] || 0 %>
           <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
-                                        question: data[:open_questions].include?(unit.id) %>
+                                        questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
           <% if current_user.admin? %>
             <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
                     class="group/history flex items-center gap-1 rounded px-1 text-xs text-stone-400 hover:bg-stone-100 aria-expanded:bg-stone-100">

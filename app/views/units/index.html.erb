@@ -15,7 +15,7 @@
 </div>
 
 <% if total_units.zero? %>
-  <%= render "shared/empty_list", counts: @counts, unfiltered_url: units_path(list_params.except(:status, :questions, :issues, :warnings)) %>
+  <%= render "shared/empty_list", counts: @counts, unfiltered_url: units_path(list_params.except(:status, :questions, :issues, :admin_notes, :warnings)) %>
 <% else %>
   <div class="rounded border border-stone-200 bg-white text-sm"
        data-controller="branch-tree">

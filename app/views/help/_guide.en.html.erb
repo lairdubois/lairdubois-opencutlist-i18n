@@ -86,6 +86,14 @@ then click Save to save it without leaving the page.
 <h2>Asking a Question</h2>
 <p>
   Unsure what a text means? The <strong>comments</strong> button under each translation lets you ask a question about
-  that key: the admins and your language's reviewers are notified, and the answer shows in the same place. For anything else
-  (access, a new language, a problem with the tool…), write to us using the form.
+  that key: the admins and your language's reviewers are notified, and the answer shows in the same place. <strong>↳ Reply</strong>
+  under a question (or one of its replies) carries on the discussion right below it: its author and those who already replied
+  are notified. For anything else (access, a new language, a problem with the tool…), write to us using the form.
 </p>
+<% if current_user.admin? %>
+<p>
+  Admins: picking <strong>Admin note</strong> under a comment's field keeps it for the admins, its replies included
+  (neither translators nor reviewers see it, nobody is notified). An open note marks the key with a teal badge until “mark resolved”, and the
+  <strong>Open admin notes</strong> filter finds them.
+</p>
+<% end %>

@@ -138,5 +138,5 @@
 </div>
 <% if @units.empty? %>
   <%= render "shared/empty_list", counts: @counts,
-             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions, :issues, :warnings)) %>
+             unfiltered_url: translate_path(@language.code, list_params.except(:status, :questions, :issues, :admin_notes, :warnings)) %>
 <% end %>

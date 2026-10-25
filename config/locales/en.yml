@@ -91,6 +91,8 @@ en:
       with: "With"
       questions_chip: "open question"
       issues_chip: "open issue"
+      admin_notes: "Open admin notes"
+      admin_notes_chip: "open admin note"
       warnings: "Warnings"
       warnings_chip: "warning"
       notranslates:
@@ -496,7 +498,12 @@ en:
       comments:
         one: "%{count} comment"
         other: "%{count} comments"
-      open_question: "open question"
+      questions:
+        one: "%{count} question"
+        other: "%{count} questions"
+      admin_notes:
+        one: "%{count} admin note"
+        other: "%{count} admin notes"
     pretranslate:
       started:
         one: "Pre-translation of %{count} string started: reload the page in a moment."
@@ -538,12 +545,23 @@ en:
   comments:
     thread:
       all_languages: "all languages"
-      resolved: "resolved question"
-      open: "open question"
+      resolved: "resolved"
+      question: "Question"
       resolve: "mark resolved"
       placeholder: "Write a comment…"
       question_placeholder: "Ask a question about this translation…"
-      is_question: "This is a question"
+      all_question_placeholder: "Ask the translators of every language a question…"
+      admin_note_placeholder: "Write a note for the admins…"
+      kinds:
+        comment: "Comment"
+        question: "Question"
+        admin_note: "Admin note"
+      reply: "Reply"
+      reply_placeholder: "Reply…"
+      replies:
+        one: "reply"
+        other: "replies"
+      admin_only: "Admin note"
       send: "Send"
 
   units:
@@ -576,9 +594,6 @@ en:
         zero: "no comments"
         one: "%{count} comment"
         other: "%{count} comments"
-      open_questions:
-        one: "%{count} open question"
-        other: "%{count} open questions"
     show:
       previous: "Previous: %{key}"
       next: "Next: %{key}"
@@ -990,6 +1005,9 @@ en:
       magic_link: "There is no password: you will receive a login link at this address, valid for 30 minutes and usable once. Do the same whenever you need to log in again."
   comment_mailer:
     posted:
+      subject_reply: "Reply on %{key}"
+      replied: "%{name} replied on %{key}%{language}:"
+      in_reply_to: "In reply to %{name}:"
       subject_question: "Question about %{key}"
       subject_comment: "Comment on %{key}"
       asked: "%{name} asks a question about %{key}%{language}:"

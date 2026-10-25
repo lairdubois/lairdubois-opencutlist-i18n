@@ -1,5 +1,7 @@
-<%# The key page's comments header : kept in step by the thread when a comment is added or resolved %>
+<%# The key page's comments header : kept in step by the thread when a comment is added or resolved. Open questions and
+    admin notes as badges, as the translator's comments button %>
 <span id="unit_comments_summary_<%= unit.id %>" class="ml-auto flex items-center gap-2 text-xs font-normal text-stone-500 tabular-nums">
-  <% if questions.positive? %><span class="font-medium text-sky-700"><%= t(".open_questions", count: questions) %></span><% end %>
   <span><%= t(".comments", count: count) %></span>
+  <% if questions.positive? %><span class="rounded bg-sky-200 px-1.5 font-medium text-sky-900"><%= t("translations.comments_button.questions", count: questions) %></span><% end %>
+  <% if admin_notes.positive? %><span class="rounded bg-teal-200 px-1.5 font-medium text-teal-900"><%= t("translations.comments_button.admin_notes", count: admin_notes) %></span><% end %>
 </span>

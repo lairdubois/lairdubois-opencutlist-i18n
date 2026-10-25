@@ -180,7 +180,8 @@
       <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
       <%= t(".comments") %>
       <% comments = @unit.comments.to_a %>
-      <%= render "comments_summary", unit: @unit, count: comments.size, questions: comments.count { |c| c.question && !c.resolved? } %>
+      <%= render "comments_summary", unit: @unit, count: comments.size, questions: comments.count(&:open_question?),
+                                    admin_notes: comments.count(&:open_admin_note?) %>
     </button>
   </h2>
   <div data-collapsible-target="panel" class="border-t border-stone-200 p-4" <%= "hidden" unless unfolded %>>

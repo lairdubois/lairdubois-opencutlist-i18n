@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_24_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_25_100000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -37,7 +37,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_24_110000) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "admin_only", default: false, null: false
+    t.integer "parent_id"
     t.index ["language_id"], name: "index_comments_on_language_id"
+    t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["unit_id"], name: "index_comments_on_unit_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
@@ -252,6 +255,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_24_110000) do
     t.index ["user_id"], name: "index_volunteer_requests_on_user_id"
   end
 
+  add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "languages"
   add_foreign_key "comments", "units"
   add_foreign_key "comments", "users"

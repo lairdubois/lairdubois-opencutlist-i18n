@@ -78,6 +78,16 @@ Weblate was evaluated and rejected.
   `DuplicatesController`, anyone who can translate the language, `SourceDuplicates translatable: true` : their work
   only), linked with their count from the translator's toolbar ; each group's "edit" button opens its keys in the
   translator's list (`at=12,45,78`).
+- Comments (`Comment`, a unit's thread, language nil = all of them) : `question` stays open until resolved. An admin
+  note (`admin_only`, an admin's "Note admin" kind in the thread form's switch (radios, each with its placeholder : `placeholder_controller`), in both threads) is seen by the admins alone (`Comment.visible_to` :
+  thread, counts, `resolve`), never a question nor mailed (`CommentNotifier`) ; open ones (`open_admin_notes`) tint it
+  teal, mark the row's comments button and the key page's header, and feed the admins' `admin_notes=1` filter.
+  Questions and admin notes take replies (`parent_id`, one level, `Comment#takes_replies?`) : plain comments of the
+  parent's language and `admin_only`, no state. Replies laid out as L'Air du Bois's (`comments/_comment`, boxes) :
+  the footer's "Répondre" (also under each reply, `disclosure#open` : unfolds, focuses `data-disclosure-focus`) and
+  "N réponses" (folds) ; the replies' group (indented, its reply field last) shown while open, folded once resolved
+  (unless `posted` is one of them), hidden without any. The question / note keeps its tint while open, its replies too.
+  Resolving and replying are independent. A reply mails the question's author and repliers only.
 - Progress (home cards and the translator's language switch) : `Language.stats` (translated incl. outdated, reviewed,
   over the translatable units), drawn by `shared/_progress_bar`.
 - Translation history (admins only) : translator's rows and the key page (shared `_history_entry`, tinted by the
@@ -253,7 +263,7 @@ each entry's count under the other filters.
 - `q` searches the texts only, case and accents aside (`"…"` : exact, spaces, case and accents included,
   `Query#exact?`), matches highlighted (`SearchHelper#highlight_search`, `data-search-text` / `-exact` for the
   `i18n-text` views) ; `status[]` (not_translated / outdated / not_approved / approved, a partition) is OR-ed ;
-  `questions=1`, `issues=1` (an open ticket : in the language, in any on the keys list), `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
+  `questions=1`, `issues=1` (an open ticket : in the language, in any on the keys list), `admin_notes=1` (admins), `warnings=1` and `days` AND-ed. `warnings` = `TranslationChecks.unit_ids`, cached on texts' count +
   max `updated_at` + the rules file's digest. `days` = `ListFilters::PERIODS`, one at a time, a revision since then
   (same kinds as the sort on the translator's list, any on the keys list).
 - Chips : `key`, `prefix`, `at` with their own input ; `user` (id, hidden field) with a popover of names : users having

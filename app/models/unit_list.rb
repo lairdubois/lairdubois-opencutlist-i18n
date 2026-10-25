@@ -1,6 +1,9 @@
 # The keys list : the active units in tree order, narrowed by a ListFilters::Query. Shown by
 # UnitsController#index, and walked by a key page's previous / next.
 class UnitList
+  # The AND-ed filters, each one through its <name>_match?
+  FILTERS = %i[status questions issues admin_notes warnings notranslate days].freeze
+
   attr_reader :query, :units, :indexes, :stats
 
   def initialize(query, languages:)
@@ -72,16 +75,17 @@ class UnitList
     @listed ||= (query.single_index? ? filter_by_index(searched) : searched).select { |u| match?(u) }
   end
 
-  # Each status's matches with the other filters (shown in the filters menu), the questions', issues', warnings',
-  # notranslate's and periods' ones, and the search alone (for the empty list hint). A single index drops the other
-  # filters when applied (ListFilters) and they drop it : the counts leave it out.
+  # Each status's matches with the other filters (shown in the filters menu), the questions', issues', admin notes',
+  # warnings', notranslate's and periods' ones, and the search alone (for the empty list hint). A single index drops the
+  # other filters when applied (ListFilters) and they drop it : the counts leave it out.
   def counts
-    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) }] }
-                         .merge("questions" => searched.count { |u| status_match?(u) && question_ids.include?(u.id) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
-                                "issues" => searched.count { |u| status_match?(u) && questions_match?(u) && issue_ids.include?(u.id) && warnings_match?(u) && notranslate_match?(u) && days_match?(u) },
-                                "warnings" => searched.count { |u| status_match?(u) && questions_match?(u) && issues_match?(u) && warning_ids.include?(u.id) && notranslate_match?(u) && days_match?(u) },
+    ListFilters::STATUSES.to_h { |key| [key, searched.count { |u| status?(key, u) && match?(u, except: :status) }] }
+                         .merge("questions" => searched.count { |u| question_ids.include?(u.id) && match?(u, except: :questions) },
+                                "issues" => searched.count { |u| issue_ids.include?(u.id) && match?(u, except: :issues) },
+                                "admin_notes" => searched.count { |u| admin_note_ids.include?(u.id) && match?(u, except: :admin_notes) },
+                                "warnings" => searched.count { |u| warning_ids.include?(u.id) && match?(u, except: :warnings) },
                                 **notranslate_counts)
-                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| status_match?(u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && notranslate_match?(u) && revised_ids(days.to_i).include?(u.id) }] })
+                         .merge(ListFilters::PERIODS.to_h { |days| ["days_#{days}", searched.count { |u| revised_ids(days.to_i).include?(u.id) && match?(u, except: :days) }] })
                          .merge(searched: searched.size)
   end
 
@@ -93,8 +97,9 @@ class UnitList
 
   private
 
-  def match?(unit)
-    status_match?(unit) && questions_match?(unit) && issues_match?(unit) && warnings_match?(unit) && notranslate_match?(unit) && days_match?(unit)
+  # Matches every filter, but the one left out
+  def match?(unit, except: nil)
+    (FILTERS - [except]).all? { |name| send(:"#{name}_match?", unit) }
   end
 
   def notranslate_match?(unit)
@@ -103,7 +108,7 @@ class UnitList
 
   # Each notranslate value's matches with the other filters : "notranslate" (all), "notranslate_directive", "notranslate_copied"
   def notranslate_counts
-    others = searched.select { |u| !u.translatable && status_match?(u) && questions_match?(u) && issues_match?(u) && warnings_match?(u) && days_match?(u) }
+    others = searched.select { |u| !u.translatable && match?(u, except: :notranslate) }
     { "notranslate" => others.size, "notranslate_directive" => others.count { |u| !u.copied }, "notranslate_copied" => others.count(&:copied) }
   end
 
@@ -117,6 +122,10 @@ class UnitList
 
   def issues_match?(unit)
     !query.issues? || issue_ids.include?(unit.id)
+  end
+
+  def admin_notes_match?(unit)
+    !query.admin_notes? || admin_note_ids.include?(unit.id)
   end
 
   def warnings_match?(unit)
@@ -151,6 +160,11 @@ class UnitList
 
   def question_ids
     @question_ids ||= Comment.open_questions.distinct.pluck(:unit_id).to_set
+  end
+
+  # In any language
+  def admin_note_ids
+    @admin_note_ids ||= Comment.open_admin_notes.distinct.pluck(:unit_id).to_set
   end
 
   # An open ticket in any language

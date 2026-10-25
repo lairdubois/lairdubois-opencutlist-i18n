@@ -1,7 +1,12 @@
-<%= t(@comment.question ? ".asked" : ".commented", name: @comment.user.name, key: @comment.unit.key,
+<%= t(@comment.reply? ? ".replied" : @comment.question ? ".asked" : ".commented", name: @comment.user.name, key: @comment.unit.key,
       language: (" (#{@comment.language.name})" if @comment.language)) %>
 
 <%= @comment.body %>
+<% if @comment.reply? %>
+
+<%= t(".in_reply_to", name: @comment.parent.user.name) %>
+<%= @comment.parent.body %>
+<% end %>
 
 <%= t(".source") %> <%= @comment.unit.source_text %>
 
