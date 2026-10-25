@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_25_110000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -222,7 +222,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_100000) do
     t.boolean "admin", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "transifex_username"
     t.bigint "github_id"
     t.string "github_login"
     t.text "github_access_token"
@@ -236,7 +235,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_100000) do
     t.string "glossary_columns"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["github_id"], name: "index_users_on_github_id", unique: true
-    t.index ["transifex_username"], name: "index_users_on_transifex_username", unique: true
   end
 
   create_table "volunteer_requests", force: :cascade do |t|

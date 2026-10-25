@@ -46,7 +46,6 @@ module ApplicationHelper
     export: %w[exports],
     pretranslations: %w[pretranslations],
     users: %w[users volunteers],
-    migration: %w[migrations],
     publish: %w[publications github_accounts],
     help: %w[help help_requests]
   }.freeze
@@ -63,7 +62,7 @@ module ApplicationHelper
   end
 
   # The admin sections, grouped in the header's dropdown (admin_menu_link)
-  ADMIN_MENU = %i[sync import pretranslations users migration publish].freeze
+  ADMIN_MENU = %i[sync import pretranslations users publish].freeze
 
   def nav_badge(badge)
     tag.span(badge, class: "rounded-full bg-sky-600 px-1.5 text-xs leading-4 font-medium text-white tabular-nums") if badge.to_i.positive?

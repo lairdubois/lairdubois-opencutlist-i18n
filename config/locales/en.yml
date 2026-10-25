@@ -170,7 +170,6 @@ en:
       pretranslations: "Pre-translation"
       admin: "Admin"
       users: "Users"
-      migration: "Migration"
       publish: "Publish"
       logout: "Log out"
       repo_changed: "The repo's fr.yml has changed."
@@ -924,58 +923,6 @@ en:
     warnings:
       leftover: "Remaining use of the old branch `%{prefix}` (dynamic?): `%{ref}`"
       deleted_key: "Deleted key `%{key}` still used: %{path}:%{line}"
-
-  migrations:
-    not_configured: "Transifex is not configured."
-    failed: "Call failed: %{error}"
-    show:
-      title: "Migrating from Transifex"
-      connection: "Connection"
-      resource: "Resource"
-      language_map: "mappings"
-      analyze: "1. Analyze the Transifex translations"
-      invite: "2. Invite the translators"
-      not_configured_html: "Set <code>TRANSIFEX_TOKEN</code> and <code>TRANSIFEX_RESOURCE</code> (and if needed <code>TRANSIFEX_ORGANIZATION</code>, <code>TRANSIFEX_PROJECT</code>, <code>TRANSIFEX_LANGUAGE_MAP</code>), then restart."
-      switch: "Switchover"
-      step1: "Tell the translators the switchover date; on that day, make the Transifex project read-only."
-      step2_html: "Sync the repo's fr.yml, then <strong>analyze</strong> and <strong>apply</strong> the Transifex import (latest texts, review statuses, authors)."
-      step3: "Invite the translators (Transifex doesn't provide their e-mails: enter them)."
-      invited:
-        one: "%{count} already invited."
-        other: "%{count} already invited."
-      step4_html: "<strong>Publish</strong> the first PR from the tool and merge it: it replaces the “Updated translations” commits."
-      step5: "Turn off the Transifex integration (webhook, GitHub sync, links in the “for translators” docs)."
-    analyze:
-      title: "Transifex analysis"
-      dry_run: "nothing is written yet"
-      columns:
-        language: "Language"
-        found: "Found"
-        matched: "Matched"
-        updates: "Texts to update"
-        reviews: "Review statuses"
-        conflicts: "Conflicts"
-        unmatched: "Unknown keys"
-        translators: "Translators"
-      none_found: "No translations found for some languages: check TRANSIFEX_LANGUAGE_MAP (e.g. zh=zh_CN)."
-      examples: "Examples of updated texts"
-      conflicts: "Conflicts: changed here and on Transifex, the version from here is kept"
-      transifex_version: "Transifex (%{who}):"
-      unmatched:
-        one: "%{count} Transifex key with no matching string (ignored)"
-        other: "%{count} Transifex keys with no matching string (ignored)"
-      apply: "Apply the import"
-      apply_confirm: "Apply the Transifex import?"
-    roster:
-      title: "Transifex translators"
-      intro: "Transifex doesn't provide e-mails: enter the ones you know, each person receives an invitation with their languages and role."
-      invited: "invited: %{email}"
-    apply:
-      applied: "Transifex import applied: %{texts} text(s), %{reviews} review status(es)."
-    invite:
-      sent:
-        one: "%{count} invitation sent."
-        other: "%{count} invitations sent."
 
   login_mailer:
     link:

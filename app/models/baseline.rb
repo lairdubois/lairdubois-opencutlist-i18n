@@ -31,7 +31,7 @@ class Baseline < ApplicationRecord
   end
 
   # Active units by key, a repo key going to the unit the current baseline ties it to (renamed in the tool since
-  # or not), else by current key : for files keyed as the repo is (Transifex, a language's yml)
+  # or not), else by current key : for files keyed as the repo is (a language's yml)
   def self.units_by_repo_key
     active = Unit.active.index_by(&:id)
     by_baseline = (current&.entries || []).filter_map { |e| [e["key"], active[e["unit_id"]]] if active[e["unit_id"]] }.to_h

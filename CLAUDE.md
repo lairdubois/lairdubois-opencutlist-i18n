@@ -18,8 +18,8 @@ Weblate was evaluated and rejected.
   Tailwind : new classes need `bin/dev` or `bin/rails tailwindcss:watch` (or `:build`). `app/assets/builds/` is generated.
 - CodeMirror is vendored in `vendor/javascript` as jsDelivr minified builds (`dist/index.min.js`) :
   `bin/importmap pin` / `update` / `pristine` download unminified files, re-fetch the `.min.js` after.
-- `.env` (git-ignored) holds `TRANSIFEX_TOKEN` (secret : never print it, `source .env` without echoing)
-  and `TRANSIFEX_RESOURCE=v6`.
+- `.env` (git-ignored) holds secrets (GitHub App credentials, `OCL_API_TOKEN`) : never print them, `source .env`
+  without echoing.
 - CI (`.github/workflows/ci.yml`, on push to main) runs `bin/rubocop`, `bin/brakeman --no-pager`, `bin/bundler-audit`
   and `bin/importmap audit` : run `bin/rubocop` (`-a` fixes) and `bin/brakeman` after changing Ruby code. Style is
   rubocop-rails-omakase without `Layout/SpaceInsideArrayLiteralBrackets` (`[a, b]`). Brakeman skips `storage/`
@@ -32,7 +32,7 @@ Weblate was evaluated and rejected.
 
 - **No e-mail to translators** for now : `perform_deliveries` stays off unless `OCL_MAIL_ENABLED=1`.
   Never enable it without asking. Dev shows the login link on the login page.
-- Don't apply the Transifex import, publish, push or deploy without an explicit request.
+- Don't publish, push or deploy without an explicit request.
 
 ## Core design
 
@@ -214,10 +214,8 @@ Weblate was evaluated and rejected.
   `pretranslations#no_translate`) makes `#pending` (so `#todo`, the API, the counts) cover the @no-translate keys too,
   never the copied ones ; every column sorts (`sort` / `dir`, counts descending first) ; a badge for `OCL_API_TOKEN`. The language links to its
   translator's list filtered on not translated + outdated.
-- Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
-  the tool = conflict), `TransifexRoster` (API exposes no e-mails).
 - Import of a language's yml (`/import`, admins, `ImportsController` + `TranslationFileImport`) : keys through
-  `Baseline.units_by_repo_key` (shared with `TransifexImport`), language picked or from the file name ; blank, copied
+  `Baseline.units_by_repo_key`, language picked or from the file name ; blank, copied
   and fr-equal values only counted, `@no-translate` ones listed read-only (`Plan#no_translate`, never written).
   Preview groups added (checked) / changed (`WordDiff`, unchecked), file kept in `tmp/imports/<token>.yml` ; picks `rows[unit_id] = Row#stamp` skip translations changed since.
   Written by `TranslationOperations#import` : `translated`, current `source_hash`, `import` revision of the chosen user.
@@ -270,8 +268,7 @@ each entry's count under the other filters.
   max `updated_at` + the rules file's digest. `days` = `ListFilters::PERIODS`, one at a time, a revision since then
   (same kinds as the sort on the translator's list, any on the keys list).
 - Chips : `key`, `prefix`, `at` with their own input ; `user` (id, hidden field) with a popover of names : users having
-  revisions (in the edited language on the translator's list ; `Revision.by_user` includes Transifex imports through
-  `transifex_username`). A single `at` index (no `-` nor `,`) is exclusive : applying it drops the others, any other change
+  revisions (in the edited language on the translator's list ; `Revision.by_user`). A single `at` index (no `-` nor `,`) is exclusive : applying it drops the others, any other change
   drops it (`ListFilters` too ; the menu's counts leave it out).
 - Keys : Mod-F focuses `q` (again in it : the browser's find), Esc blurs it and the chips' inputs, a second Esc
   within 500 ms resets the search (not Shift-Esc : Chrome's task manager) ; Enter and the reset keep the focus across
@@ -323,8 +320,7 @@ each entry's count under the other filters.
 ## Testing harnesses (keep them in the scratchpad, never in the repo)
 
 - Local OCL repo : `git clone --bare --depth 1 --branch 8.0.0 file://<ocl repo>` + `OCL_REPO_URL`.
-- Fake Transifex (port 7858) via `TRANSIFEX_API_URL` ; fake GitHub
-  API via `OCL_GITHUB_API_URL` (+ `OCL_GITHUB_WEB_URL` for the OAuth endpoints).
+- Fake GitHub API via `OCL_GITHUB_API_URL` (+ `OCL_GITHUB_WEB_URL` for the OAuth endpoints).
 - Editor JS without a browser : Node + jsdom, vendored CodeMirror files copied into a scratch `node_modules` (one
   package dir per bare specifier, `"type": "module"`) ; `npm i` prunes them. Expose jsdom's `window`, `document`,
   `Window`… as globals before importing the module.

@@ -1,4 +1,4 @@
-# A unit's history, newest first : the revisions of one language (Transifex imports included) between
+# A unit's history, newest first : the revisions of one language between
 # the unit's own events (fr source changes, renames), for the translator's editor ; every revision
 # without a language, for the key page
 class TranslationHistory

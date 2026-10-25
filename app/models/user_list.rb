@@ -1,10 +1,10 @@
 # The users page's list (UsersController#index, users/_search_bar), searched, filtered and sorted in memory
 # (a few hundred users at most). Params :
-#   q         name, e-mail, GitHub login or Transifex username (case and accents aside)
+#   q         name, e-mail or GitHub login (case and accents aside)
 #   role[]    OR-ed : admin, reviewer / translator (in some language, or in the picked one), none (no language, not admin),
 #             disabled
 #   language  a language code : a membership in it, combined with AND
-#   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
+#   days      ACTIVITIES : a revision (Revision.by_user) in the last n days, or "never"
 #   seen      ACTIVITIES : a request (User#last_seen_at, consultation included) in the last n days, or "never"
 #   sort      SORTS ("invited" : the last invitation sent) (DEFAULT_SORT by default), dir "asc" or "desc" (the sort's own direction by default) : the search bar's sort menu
 #             and the table's column headers (UsersHelper)
@@ -69,16 +69,9 @@ class UserList
 
   def stats
     @stats ||= begin
-      revisions = Revision.unscope(:order)
-      own = revisions.where.not(user_id: nil).group(:user_id)
-      imported = revisions.where(user_id: nil).where("author LIKE 'transifex:%'").group(:author)
-      own_counts, own_last = own.count, own.maximum(:created_at)
-      imported_counts, imported_last = imported.count, imported.maximum(:created_at)
-      all.to_h do |user|
-        author = "transifex:#{user.transifex_username}" if user.transifex_username.present?
-        count = own_counts[user.id].to_i + imported_counts[author].to_i
-        [user.id, (Stat.new(count, [own_last[user.id], imported_last[author]].compact.max) if count > 0)]
-      end
+      revisions = Revision.unscope(:order).where.not(user_id: nil).group(:user_id)
+      counts, last = revisions.count, revisions.maximum(:created_at)
+      all.to_h { |user| [user.id, (Stat.new(counts[user.id], last[user.id]) if counts[user.id])] }
     end
   end
 
@@ -94,7 +87,7 @@ class UserList
   end
 
   def match?(user, roles: @roles, language: @language, days: @days, seen: @seen)
-    return false if @q && [user.name, user.email, user.github_login, user.transifex_username].compact.none? { |t| SqliteFold.fold(t).include?(folded_q) }
+    return false if @q && [user.name, user.email, user.github_login].compact.none? { |t| SqliteFold.fold(t).include?(folded_q) }
     return false if language && user.memberships.none? { |m| m.language_id == language.id }
     return false if roles.any? && roles.none? { |role| role?(user, role, language) }
     return false unless within?(user.last_seen_at, seen)

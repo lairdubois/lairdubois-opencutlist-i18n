@@ -89,11 +89,6 @@ Rails.application.routes.draw do
   post "github/connect", to: "github_accounts#connect", as: :connect_github
   get "github/callback", to: "github_accounts#callback", as: :github_callback
   delete "github/connect", to: "github_accounts#disconnect", as: :disconnect_github
-  get "migration", to: "migrations#show", as: :migration
-  post "migration/analyze", to: "migrations#analyze", as: :migration_analyze
-  post "migration/apply", to: "migrations#apply", as: :migration_apply
-  get "migration/roster", to: "migrations#roster", as: :migration_roster
-  post "migration/invite", to: "migrations#invite", as: :migration_invite
   post "github/webhook", to: "github_webhooks#create"
 
   # Suggestions written by Claude Code (OCL_API_TOKEN)

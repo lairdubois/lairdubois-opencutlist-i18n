@@ -15,14 +15,3 @@ Rails.configuration.x.ocl = ActiveSupport::OrderedOptions.new.tap do |c|
   c.api_token = ENV["OCL_API_TOKEN"] # bearer token of /api/suggestions (Claude Code) ; the API is off while empty
   c.checkout_dir = ENV.fetch("OCL_CHECKOUT_DIR", Rails.root.join("storage", "ocl_repo").to_s)
 end
-
-# Transifex, for the migration only
-Rails.configuration.x.transifex = ActiveSupport::OrderedOptions.new.tap do |c|
-  c.api_url = ENV.fetch("TRANSIFEX_API_URL", "https://rest.api.transifex.com")
-  c.token = ENV["TRANSIFEX_TOKEN"]
-  c.organization = ENV.fetch("TRANSIFEX_ORGANIZATION", "opencutlist")
-  c.project = ENV.fetch("TRANSIFEX_PROJECT", "opencutlist")
-  c.resource = ENV["TRANSIFEX_RESOURCE"]
-  # OCL code => Transifex code, when they differ : "zh=zh_CN,pt=pt_PT"
-  c.language_map = ENV.fetch("TRANSIFEX_LANGUAGE_MAP", "").split(",").to_h { |pair| pair.split("=", 2).map(&:strip) }
-end

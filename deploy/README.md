@@ -56,7 +56,6 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
      (`sudo install -m 640 -o root -g ocl-localize <key>.pem /var/www/localize.opencutlist.org/github-app.pem`) ;
    - in `/etc/ocl-localize.env` : `OCL_GITHUB_APP_ID`, `OCL_GITHUB_APP_CLIENT_ID`,
      `OCL_GITHUB_APP_CLIENT_SECRET`, and `OCL_GITHUB_WEBHOOK_SECRET` = `openssl rand -hex 32` ;
-     `TRANSIFEX_TOKEN` for the migration ;
    - `sudo systemctl restart ocl-localize`.
 
 3. Push webhook, on GitHub (OCL repo admin) : Settings → Webhooks → Add webhook,
@@ -82,7 +81,7 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
    hand over. Other accounts are created from the users page.
 
 5. In the tool : "Connecter GitHub" on the publication page (optional : without it, publishing uses
-   the App), then the Transifex import from the migration page (`/migration`).
+   the App).
 
 ## Updates
 

@@ -170,7 +170,6 @@ fr:
       pretranslations: "Pré-traduction"
       admin: "Administration"
       users: "Utilisateurs"
-      migration: "Migration"
       publish: "Publier"
       logout: "Déconnexion"
       repo_changed: "Le fr.yml du repo a changé."
@@ -924,58 +923,6 @@ fr:
     warnings:
       leftover: "Usage restant de l'ancienne branche `%{prefix}` (dynamique ?) : `%{ref}`"
       deleted_key: "Clé supprimée `%{key}` encore utilisée : %{path}:%{line}"
-
-  migrations:
-    not_configured: "Transifex n'est pas configuré."
-    failed: "Échec de l'appel : %{error}"
-    show:
-      title: "Migration depuis Transifex"
-      connection: "Connexion"
-      resource: "Ressource"
-      language_map: "correspondances"
-      analyze: "1. Analyser les traductions Transifex"
-      invite: "2. Inviter les traducteurs"
-      not_configured_html: "Définir <code>TRANSIFEX_TOKEN</code> et <code>TRANSIFEX_RESOURCE</code> (et au besoin <code>TRANSIFEX_ORGANIZATION</code>, <code>TRANSIFEX_PROJECT</code>, <code>TRANSIFEX_LANGUAGE_MAP</code>), puis redémarrer."
-      switch: "Bascule"
-      step1: "Prévenir les traducteurs de la date de bascule ; ce jour-là, passer le projet Transifex en lecture seule."
-      step2_html: "Synchroniser le fr.yml du repo, puis <strong>analyser</strong> et <strong>appliquer</strong> l'import Transifex (derniers textes, statuts relus, auteurs)."
-      step3: "Inviter les traducteurs (leurs e-mails ne sont pas fournis par Transifex : à saisir)."
-      invited:
-        one: "%{count} déjà invité."
-        other: "%{count} déjà invités."
-      step4_html: "<strong>Publier</strong> la première PR depuis l'outil et la merger : elle remplace les commits « Updated translations »."
-      step5: "Couper l'intégration Transifex (webhook, synchro GitHub, liens dans la doc « for translators »)."
-    analyze:
-      title: "Analyse Transifex"
-      dry_run: "rien n'est encore écrit"
-      columns:
-        language: "Langue"
-        found: "Trouvées"
-        matched: "Reliées"
-        updates: "Textes à mettre à jour"
-        reviews: "Statuts relu"
-        conflicts: "Conflits"
-        unmatched: "Clés inconnues"
-        translators: "Traducteurs"
-      none_found: "Aucune traduction trouvée pour certaines langues : vérifier TRANSIFEX_LANGUAGE_MAP (ex. zh=zh_CN)."
-      examples: "Exemples de textes mis à jour"
-      conflicts: "Conflits : modifié ici et sur Transifex, la version d'ici est gardée"
-      transifex_version: "Transifex (%{who}) :"
-      unmatched:
-        one: "%{count} clé Transifex sans chaîne correspondante (ignorée)"
-        other: "%{count} clés Transifex sans chaîne correspondante (ignorées)"
-      apply: "Appliquer l'import"
-      apply_confirm: "Appliquer l'import Transifex ?"
-    roster:
-      title: "Traducteurs Transifex"
-      intro: "Transifex ne fournit pas les e-mails : saisis ceux que tu connais, chaque personne reçoit une invitation avec ses langues et son rôle."
-      invited: "invité : %{email}"
-    apply:
-      applied: "Import Transifex appliqué : %{texts} texte(s), %{reviews} statut(s) relu."
-    invite:
-      sent:
-        one: "%{count} invitation envoyée."
-        other: "%{count} invitations envoyées."
 
   login_mailer:
     link:

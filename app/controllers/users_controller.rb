@@ -37,7 +37,7 @@ class UsersController < ApplicationController
     end
   end
 
-  # The user's revisions (Transifex imports included), newest first : a page per lazy frame, the next one
+  # The user's revisions, newest first : a page per lazy frame, the next one
   # chained at its bottom. Filters : language = a code, the source's for the revisions without one (fr, keys),
   # kind = Revision::KINDS. The first page lists each filter's entries, counted under the other filter
   def history
