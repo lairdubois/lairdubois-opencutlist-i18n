@@ -153,7 +153,7 @@ Weblate was evaluated and rejected.
   same words all kept, one tooltip), `glossary_json(…, via:)` telling the fr term first ; the toolbar's glossary link
   then shows `cols[]=en,<lang>`. The warnings stay on the fr source. `TranslationChecks.call(…, glossary:, language:)` warns on a missing expected
   term, a term to avoid, a translated `no_translate` one ; `unit_ids`' cache key holds `Glossary.fingerprint` and
-  glossary.rb's digest. The pre-translation prompt and `todo` get the batch's terms (`Pretranslator#glossary`,
+  glossary.rb's digest. The suggestions API's `todo` gets the batch's terms (`Pretranslator#glossary`,
   `Glossary#describe`) ; `GET /api/glossary/:language` gives them all (with their `id`).
   Filled by Claude Code ("remplis le glossaire", same bearer, `OCL_API_URL`) : `GET /api/glossary` (`Api::GlossaryTermsController`,
   no language) = every active term (`id`, `fr`, `fr_variants`, `definition`, `keep_as_is`) with each target's `entries`
@@ -166,9 +166,12 @@ Weblate was evaluated and rejected.
   Written through `GlossaryOperations.new(nil, origin:)` : `GlossaryRevision#origin` = `Api::BaseController::ORIGIN`
   ("OpenCutBot", the issues' too), shown as the history's author. The former badge / balise rule of `SYSTEM` is two
   seeded terms.
-- `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
+- Pre-translation = `Suggestion`s only, never translations, written by Claude Code through the API below : no call to
+  the Anthropic API from the app (the former in-app button and its `anthropic` gem were removed ; their suggestions
+  keep `origin` `claude-opus-5-5`). `Pretranslator` only gathers what the API serves (`pending`, `todo`, `strings`,
+  `examples`, `glossary`, the `SYSTEM` rules).
   A suggestion keeps the `source_hash` it was computed on : `Suggestion.current` (hash = the unit's) are the only
-  ones shown and are never recomputed (the button and `Pretranslator#call` skip them ; nil = older rows, stale).
+  ones shown and are never recomputed (`todo` skips them ; nil = older rows, stale).
   Like translations, a minor fr edit moves their hash along (a major one leaves them stale) ; key renames leave them
   alone (a fr text rewritten by `rewrite_references` makes its suggestion stale). `Suggestion.store!` writes one
   (replaces the previous, refuses a blank text or a moved `source_hash`).
@@ -209,7 +212,7 @@ Weblate was evaluated and rejected.
   (not translated or outdated), covered by a current suggestion (one column per `origin`), `#todo` (without one),
   stale suggestions, latest ; a per-language "@no-translate" toggle (`Language#pretranslate_no_translate`,
   `pretranslations#no_translate`) makes `#pending` (so `#todo`, the API, the counts) cover the @no-translate keys too,
-  never the copied ones ; every column sorts (`sort` / `dir`, counts descending first) ; badges for `ANTHROPIC_API_KEY` / `OCL_API_TOKEN`. The language links to its
+  never the copied ones ; every column sorts (`sort` / `dir`, counts descending first) ; a badge for `OCL_API_TOKEN`. The language links to its
   translator's list filtered on not translated + outdated.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).
@@ -320,7 +323,7 @@ each entry's count under the other filters.
 ## Testing harnesses (keep them in the scratchpad, never in the repo)
 
 - Local OCL repo : `git clone --bare --depth 1 --branch 8.0.0 file://<ocl repo>` + `OCL_REPO_URL`.
-- Fake Anthropic server via the client's `base_url` ; fake Transifex (port 7858) via `TRANSIFEX_API_URL` ; fake GitHub
+- Fake Transifex (port 7858) via `TRANSIFEX_API_URL` ; fake GitHub
   API via `OCL_GITHUB_API_URL` (+ `OCL_GITHUB_WEB_URL` for the OAuth endpoints).
 - Editor JS without a browser : Node + jsdom, vendored CodeMirror files copied into a scratch `node_modules` (one
   package dir per bare specifier, `"type": "module"`) ; `npm i` prunes them. Expose jsdom's `window`, `document`,

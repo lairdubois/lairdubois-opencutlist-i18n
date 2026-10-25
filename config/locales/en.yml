@@ -292,15 +292,13 @@ en:
   pretranslations:
     index:
       no_translate: "@no-translate"
-      no_translate_title: "Include the @no-translate keys (not the copied ones) in this language's pre-translation: button, Claude Code API and counts. They stay out of the translators' work (review them in the list with the \"Keys out of translation\" filter)."
+      no_translate_title: "Include the @no-translate keys (not the copied ones) in this language's pre-translation: Claude Code API and counts. They stay out of the translators' work (review them in the list with the \"Keys out of translation\" filter)."
       no_translate_on: "Included"
       no_translate_off: "Excluded"
       issues: "Issues"
       issues_title: "Open issues (consistency review)"
       title: "Pre-translation"
       intro_html: "Suggestions offered to translators under the editor (%{icon}), never translations. Only those computed on the current fr text count (a minor edit keeps it)."
-      anthropic_on_html: "%{icon} button on (ANTHROPIC_API_KEY)"
-      anthropic_off_html: "%{icon} button off (no ANTHROPIC_API_KEY)"
       api_on_html: "Claude Code API on (OCL_API_TOKEN)"
       api_off_html: "Claude Code API off (no OCL_API_TOKEN)"
       language: "Language"
@@ -309,7 +307,7 @@ en:
       split: "%{not_translated} not translated, %{outdated} outdated"
       coverage: "With a suggestion"
       todo: "Without"
-      todo_title: "Strings to do without a current suggestion: what the pre-translation button or Claude Code would handle"
+      todo_title: "Strings to do without a current suggestion: what Claude Code would handle"
       stale: "Stale"
       stale_title: "Suggestions computed on an older fr text: hidden, replaced on the next run"
       last: "Latest"
@@ -465,9 +463,6 @@ en:
       only_status: "Show only the \"%{status}\" keys"
       remove_status: "Remove the \"%{status}\" filter"
       more_filters: "More…"
-      pretranslate:
-        one: "Suggest translations (%{language}) for the first string to do without a suggestion"
-        other: "Suggest translations (%{language}) for the first %{count} strings to do without a suggestion"
     row:
       revised_ago: "changed %{time} ago"
       never_revised: "never changed"
@@ -504,10 +499,6 @@ en:
       admin_notes:
         one: "%{count} admin note"
         other: "%{count} admin notes"
-    pretranslate:
-      started:
-        one: "Pre-translation of %{count} string started: reload the page in a moment."
-        other: "Pre-translation of %{count} strings started: reload the page in a moment."
 
   translation_checks:
     missing:

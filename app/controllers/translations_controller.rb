@@ -19,13 +19,6 @@ class TranslationsController < ApplicationController
   before_action :set_unit, only: [:update, :history]
   before_action :require_admin, only: [:history]
 
-  # Asks Claude for suggestions on the untranslated or outdated strings of the current page (Pretranslator skips current ones)
-  def pretranslate
-    ids = params.require(:unit_ids).map(&:to_i)
-    PretranslateJob.perform_later(@language.id, ids)
-    redirect_back_or_to translate_path(@language.code), notice: t(".started", count: ids.size)
-  end
-
   def index
     searched = searched_units
     # The user filter offers who worked on this language

@@ -6,7 +6,7 @@ class Api::SuggestionsController < Api::BaseController
 
   # The language's units not translated or outdated, without a current suggestion, in the keys' order
   def todo
-    pretranslator = Pretranslator.new(@language, client: nil)
+    pretranslator = Pretranslator.new(@language)
     scope = pretranslator.todo
     units = scope.limit(limit(50)).to_a
     render json: {
@@ -44,7 +44,7 @@ class Api::SuggestionsController < Api::BaseController
   # one still to do replaces its suggestion, even a current one (a correction)
   def create
     items = params.require(:suggestions).map { |s| s.permit(:id, :source_hash, :text) }
-    pending = Pretranslator.new(@language, client: nil).pending.where(id: items.map { |s| s[:id] }).index_by(&:id)
+    pending = Pretranslator.new(@language).pending.where(id: items.map { |s| s[:id] }).index_by(&:id)
     written, skipped = items.partition do |s|
       unit = pending[s[:id].to_i]
       unit && Suggestion.store!(unit, @language, s[:text].to_s, origin: ORIGIN, source_hash: s[:source_hash])

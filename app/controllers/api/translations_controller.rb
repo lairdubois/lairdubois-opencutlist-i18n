@@ -15,7 +15,7 @@ class Api::TranslationsController < Api::BaseController
       language: { code: @language.code, name: @language.name },
       total: scope.count,
       offset: offset,
-      strings: Pretranslator.new(@language, client: nil).strings(units).map do |s|
+      strings: Pretranslator.new(@language).strings(units).map do |s|
         t = translations[s[:id]]
         s.except(:source_hash).merge(text: t&.text, status: t&.status, outdated: (t.source_hash != by_id[s[:id]].source_hash if t),
                                      suggestion: suggestions[s[:id]]).compact

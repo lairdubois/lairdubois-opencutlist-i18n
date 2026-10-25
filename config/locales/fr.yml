@@ -292,15 +292,13 @@ fr:
   pretranslations:
     index:
       no_translate: "@no-translate"
-      no_translate_title: "Inclure les clés @no-translate (pas les copiées) dans la pré-traduction de cette langue : bouton, API Claude Code et compteurs. Elles restent hors du travail des traducteurs (à relire dans la liste avec le filtre « Clés hors traduction »)."
+      no_translate_title: "Inclure les clés @no-translate (pas les copiées) dans la pré-traduction de cette langue : API Claude Code et compteurs. Elles restent hors du travail des traducteurs (à relire dans la liste avec le filtre « Clés hors traduction »)."
       no_translate_on: "Inclus"
       no_translate_off: "Exclus"
       issues: "Tickets"
       issues_title: "Tickets ouverts (vérification de cohérence)"
       title: "Pré-traduction"
       intro_html: "Suggestions proposées aux traducteurs sous l'éditeur (%{icon}), jamais des traductions. Seules comptent celles calculées sur le texte fr actuel (une modification mineure le garde)."
-      anthropic_on_html: "Bouton %{icon} actif (ANTHROPIC_API_KEY)"
-      anthropic_off_html: "Bouton %{icon} inactif (ANTHROPIC_API_KEY absent)"
       api_on_html: "API Claude Code active (OCL_API_TOKEN)"
       api_off_html: "API Claude Code inactive (OCL_API_TOKEN absent)"
       language: "Langue"
@@ -309,7 +307,7 @@ fr:
       split: "%{not_translated} non traduites, %{outdated} obsolètes"
       coverage: "Avec suggestion"
       todo: "Sans suggestion"
-      todo_title: "Chaînes à faire sans suggestion à jour : ce que le bouton de pré-traduction ou Claude Code traiteraient"
+      todo_title: "Chaînes à faire sans suggestion à jour : ce que Claude Code traiterait"
       stale: "Périmées"
       stale_title: "Suggestions calculées sur un ancien texte fr : masquées, remplacées au prochain passage"
       last: "Dernière"
@@ -465,9 +463,6 @@ fr:
       only_status: "Afficher seulement les clés « %{status} »"
       remove_status: "Retirer le filtre « %{status} »"
       more_filters: "Plus…"
-      pretranslate:
-        one: "Proposer des traductions (%{language}) pour la première chaîne à faire sans proposition"
-        other: "Proposer des traductions (%{language}) pour les %{count} premières chaînes à faire sans proposition"
     row:
       revised_ago: "modifiée il y a %{time}"
       never_revised: "jamais modifiée"
@@ -504,10 +499,6 @@ fr:
       admin_notes:
         one: "%{count} note admin"
         other: "%{count} notes admin"
-    pretranslate:
-      started:
-        one: "Pré-traduction de %{count} chaîne lancée : recharge la page dans un moment."
-        other: "Pré-traduction de %{count} chaînes lancée : recharge la page dans un moment."
 
   translation_checks:
     missing:

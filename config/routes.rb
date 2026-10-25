@@ -12,7 +12,6 @@ Rails.application.routes.draw do
   patch "translate/reference", to: "reference_languages#update", as: :reference_language
   patch "translate/:lang/:unit_id", to: "translations#update", as: :translate_unit
   get "translate/:lang/:unit_id/history", to: "translations#history", as: :translate_unit_history
-  post "translate/:lang/pretranslate", to: "translations#pretranslate", as: :pretranslate
   # Points raised by a consistency review, closed by the language's translators
   get "translate/:lang/issues", to: "issues#index", as: :issues
   patch "issues/:id/close", to: "issues#close", as: :close_issue

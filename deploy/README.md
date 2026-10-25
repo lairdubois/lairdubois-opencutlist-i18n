@@ -56,7 +56,7 @@ publishing pushes the i18n branch to GitHub and opens a pull request there. No e
      (`sudo install -m 640 -o root -g ocl-localize <key>.pem /var/www/localize.opencutlist.org/github-app.pem`) ;
    - in `/etc/ocl-localize.env` : `OCL_GITHUB_APP_ID`, `OCL_GITHUB_APP_CLIENT_ID`,
      `OCL_GITHUB_APP_CLIENT_SECRET`, and `OCL_GITHUB_WEBHOOK_SECRET` = `openssl rand -hex 32` ;
-     `TRANSIFEX_TOKEN` for the migration, `ANTHROPIC_API_KEY` if wanted ;
+     `TRANSIFEX_TOKEN` for the migration ;
    - `sudo systemctl restart ocl-localize`.
 
 3. Push webhook, on GitHub (OCL repo admin) : Settings → Webhooks → Add webhook,

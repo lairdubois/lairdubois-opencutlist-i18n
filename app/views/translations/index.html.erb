@@ -11,9 +11,8 @@
                                      sorts: ListFilters::SORTS.keys %>
   </div>
 
-  <%# Open issues and pre-translation on the left, status shortcuts on the right, under the search bar (the language's header keeps the unsaved
-      edits' count). Strings to do without a suggestion computed on their current fr text %>
-  <% todo = @units.reject(&:copied).select { |u| ((t = @data[:translations][u.id]).nil? || t.outdated?) && !@data[:machine].key?(u.id) } %>
+  <%# Open issues, duplicates and glossary on the left, status shortcuts on the right, under the search bar (the language's header keeps the unsaved
+      edits' count) %>
   <div class="flex flex-wrap items-center gap-2 text-sm has-[>:not([hidden])]:mb-2">
     <%# Points raised by a consistency review, still to handle %>
     <% if @open_issues.positive? %>
@@ -30,12 +29,6 @@
         choice left as is %>
     <%= link_to t(".glossary"), glossary_path(cols: [(@en.code if @en_reference), @language.code].compact),
                 class: "rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100" %>
-    <% if Pretranslator.enabled? && todo.any? %>
-      <%= button_to pretranslate_path(@language.code), params: { unit_ids: todo.map(&:id) },
-                    class: "flex items-center gap-1.5 rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" do %>
-        <%= robot_icon %> <%= t(".pretranslate", language: @language.name, count: todo.size) %>
-      <% end %>
-    <% end %>
     <%# Shortcuts to the outdated and not translated keys, the other filters kept (their counts are the menu's) ;
         pressed when it is the only status, a click then drops it. A single index is exclusive : left out either way.
         Hidden without matches, unless pressed (to drop it). "More…" opens the search bar's filters menu, under its button,

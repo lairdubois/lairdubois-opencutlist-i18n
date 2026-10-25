@@ -1,11 +1,11 @@
-# State of the suggestions (Pretranslator, Claude Code through the API), per target language
+# State of the suggestions (written by Claude Code through the API), per target language
 class PretranslationsController < ApplicationController
   before_action :require_admin
 
   def index
     @languages = Language.targets.to_a
     @rows = @languages.to_h do |language|
-      pretranslator = Pretranslator.new(language, client: nil)
+      pretranslator = Pretranslator.new(language)
       pending = pretranslator.pending
       suggestions = Suggestion.where(language: language)
       [language, {

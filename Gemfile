@@ -50,6 +50,4 @@ group :development do
   gem "web-console"
 end
 
-gem "anthropic", "~> 1.76"
-
 gem "rails-i18n", "~> 8.1"

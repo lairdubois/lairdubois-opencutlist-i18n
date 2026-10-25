@@ -2,7 +2,7 @@
 <h1 class="mb-2 text-lg font-semibold"><%= t(".title") %></h1>
 <p class="mb-4 text-sm text-stone-600"><%= t(".intro_html", icon: robot_icon("text-violet-500")) %></p>
 <div class="mb-4 flex flex-wrap gap-2 text-xs">
-  <% { anthropic: Pretranslator.enabled?, api: Rails.configuration.x.ocl.api_token.present? }.each do |source, on| %>
+  <% { api: Rails.configuration.x.ocl.api_token.present? }.each do |source, on| %>
     <span class="rounded border px-2 py-0.5 <%= on ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-stone-200 bg-stone-50 text-stone-500" %>">
       <%= t(".#{source}_#{on ? "on" : "off"}_html", icon: robot_icon) %>
     </span>
