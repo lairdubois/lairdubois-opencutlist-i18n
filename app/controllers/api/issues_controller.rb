@@ -1,9 +1,6 @@
 # Points needing a human look, raised from outside (Api::BaseController) after a consistency review of a language :
 # GET lists them (to avoid raising one twice), POST raises new ones. Closed from the language's issues page.
 class Api::IssuesController < Api::BaseController
-  # Shown as the issues' author : the robot behind the consistency reviews
-  ORIGIN = "OpenCutBot".freeze
-
   # state : open (default), closed or all
   def index
     scope = Issue.where(language: @language).includes(:unit).order(:id)

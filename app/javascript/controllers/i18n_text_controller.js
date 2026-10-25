@@ -10,10 +10,10 @@ import { createI18nView, replaceText, insertText, focusSibling, missingInvariant
 // Inside a list's data-search-text wrapper (translator's list), the searched text is highlighted
 // (data-search-exact : case and accents included).
 // On any other element : a read-only view of the `text` value, invariants missing from `source` (if
-// given) flagged.
+// given) flagged. The `glossary` value's terms (GlossaryHelper#glossary_json) are underlined, their tooltip in the title.
 export default class extends Controller {
   static targets = ["field", "chips", "review"]
-  static values = { text: String, source: String, refs: Object }
+  static values = { text: String, source: String, refs: Object, glossary: Array }
 
   connect() {
     // A Turbo cache snapshot keeps the previous view's DOM : start clean
@@ -46,6 +46,7 @@ export default class extends Controller {
       text: this.textValue,
       source: this.hasSourceValue ? this.sourceValue : null,
       refs: this.refsValue,
+      glossary: this.glossaryValue,
       dir: this.element.dir || "ltr",
       search: this.search,
       searchExact: this.searchExact,
@@ -59,6 +60,7 @@ export default class extends Controller {
       text: field.value,
       source: this.hasSourceValue ? this.sourceValue : null,
       refs: this.refsValue,
+      glossary: this.glossaryValue,
       editable: true,
       search: this.search,
       searchExact: this.searchExact,

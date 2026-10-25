@@ -19,6 +19,7 @@ class ImportsController < ApplicationController
 
     @filename = File.basename(file.original_filename.to_s)
     @plan = TranslationFileImport.new(text, @language).plan
+    @glossary = Glossary.new([@language])
     return redirect_to new_import_path, alert: t(".empty") if @plan.unmatched.empty? && [@plan.added, @plan.changed, @plan.same, @plan.no_translate].all?(&:empty?) && @plan.skipped.empty?
 
     @token = SecureRandom.hex(8)

@@ -14,6 +14,7 @@ class Api::SuggestionsController < Api::BaseController
       total: scope.count,
       rules: Pretranslator::SYSTEM,
       examples: pretranslator.examples(units),
+      glossary: pretranslator.glossary(units),
       strings: pretranslator.strings(units)
     }
   end

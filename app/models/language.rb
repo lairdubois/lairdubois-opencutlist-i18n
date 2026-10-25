@@ -4,6 +4,8 @@ class Language < ApplicationRecord
   has_many :translations, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :issues, dependent: :destroy
+  has_many :glossary_entries, dependent: :destroy
+  has_many :glossary_revisions, dependent: :destroy
 
   validates :code, presence: true, uniqueness: true
 

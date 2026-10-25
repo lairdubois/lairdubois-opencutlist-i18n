@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :languages, through: :memberships
   has_many :revisions, dependent: :nullify
+  has_many :glossary_revisions, dependent: :nullify
   has_many :invitations, -> { order(created_at: :desc, id: :desc) }, dependent: :destroy
   has_many :sent_invitations, class_name: "Invitation", foreign_key: :inviter_id, dependent: :nullify
 

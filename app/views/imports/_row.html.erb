@@ -2,7 +2,7 @@
     checked is nil, read-only), the key, the fr source, then the text (added) or the change from the tool's text
     (changed), with its warnings %>
 <% translation = row.translation %>
-<% warnings = row.unit.translatable ? TranslationChecks.call(row.unit.source_text, row.text) : [] %>
+<% warnings = row.unit.translatable ? TranslationChecks.call(row.unit.source_text, row.text, glossary: @glossary, language: @language) : [] %>
 <label class="flex gap-3 border-b border-stone-100 px-4 py-2 text-sm last:border-0 hover:bg-stone-50">
   <% unless checked.nil? %>
     <%= check_box_tag "rows[#{row.unit.id}]", row.stamp, checked, id: nil, class: "mt-1 shrink-0",

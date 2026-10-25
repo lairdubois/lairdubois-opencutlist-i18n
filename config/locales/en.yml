@@ -138,16 +138,29 @@ en:
       unit:
         key: "Key"
         source_text: "FR text"
+      glossary_term:
+        term: "FR term"
+        variants: "Other forms"
+        definition: "Definition"
+        no_translate: "Kept as is"
+      glossary_entry:
+        term: "Expected term"
+        variants: "Other forms"
+        avoid: "To avoid"
+        note: "Note"
     errors:
       models:
         unit:
           attributes:
             key:
               overlapping_branch: "overlaps an existing branch or string"
+        glossary_term:
+          form_taken: "“%{form}” is already a form of “%{owner}”"
 
   layouts:
     application:
       translate: "Translate"
+      glossary: "Glossary"
       keys: "Keys"
       sync: "Sync FR"
       import: "Import"
@@ -169,6 +182,97 @@ en:
         one: "%{count} pending translator application"
         other: "%{count} pending translator applications"
 
+  glossary:
+    index:
+      title: "Glossary"
+      archived_title: "Glossary · archived terms"
+      new_term: "New term"
+      empty: "The glossary is empty."
+      none_found: "No term matches."
+      full_width: "Full width"
+    table:
+      label: "The glossary in every language"
+      missing: "No term yet"
+      avoid: "Terms to avoid"
+      note: "Note"
+      pick: "Click a cell to see the term, its forms and its note, and edit it if you review the language."
+    source_panel:
+      title: "Source term"
+    new_term_panel:
+      hint: "Each language's expected term is filled afterwards, in its cell."
+    cell_panel:
+      close: "Close"
+      archived: "archived"
+      missing: "No term in %{language} yet."
+      add: "Add"
+    search_bar:
+      placeholder: "Search a term, a definition, a note…"
+      shortcuts: |
+        ⌘/Ctrl + F: go to the search (twice: the browser's)
+        Enter: search
+        Esc: leave the field
+        Esc + Esc: clear everything, text and filters
+        Searches the FR term and its forms, the definition, and the term, forms, terms to avoid and note of the languages shown (case and accents aside)
+      count:
+        one: "%{count} term"
+        other: "%{count} terms"
+      missing_any: "Without a term in a language shown"
+      columns: "Columns"
+      column_drag: "%{name} · drag to move the column"
+      columns_all: "Every language shown: check some to keep them only"
+      columns_some:
+        one: "%{count} language shown"
+        other: "%{count} languages shown"
+      no_translate: "Kept as is"
+      archived: "Archived"
+      remove_all: "Remove all filters"
+    archive:
+      archived: "Term “%{term}” archived."
+    restore:
+      restored: "Term “%{term}” restored."
+    destroy:
+      deleted: "Term “%{term}” deleted for good."
+      not_archived: "Only an archived term can be deleted."
+    term:
+      no_translate: "kept as is"
+      kept_as_is: "The same in every language"
+      avoid: "To avoid:"
+      history: "History"
+      edit: "Edit"
+      archive: "Archive"
+      archive_confirm: "Archive “%{term}”? It will no longer be offered nor checked; its history is kept."
+      restore: "Restore"
+      delete: "Delete"
+      delete_confirm: "Delete “%{term}” for good? Its terms in every language and its history will be lost."
+    form:
+      variants_placeholder: "plural, other forms…"
+      definition_placeholder: "In English: read by every language's translators"
+      variants_hint: "Separate the forms with commas. Only the listed forms are recognized (case and accents aside, whole words)."
+      no_translate: "Kept as is in every language (product name…)"
+      entry_term: "Term expected in %{language}"
+      entry_variants_placeholder: "plural, inflections…"
+      avoid_placeholder: "translations to ban"
+      note_placeholder: "gender, acceptable synonyms, usage…"
+      entry_hint: "Separate the forms with commas. Clearing everything removes the entry."
+    history:
+      ago: "%{time} ago"
+      unknown: "unknown"
+      empty: "No change."
+      "yes": "yes"
+      "no": "no"
+      kinds:
+        create: "creation"
+        update: "change"
+        archive: "archiving"
+        restore: "restoring"
+    tooltip:
+      source: "FR: “%{term}”"
+      keep: "Glossary: “%{term}”, kept as is"
+      term: "Glossary: “%{term}”"
+      expected: "Glossary %{language}: %{term}"
+      missing: "Glossary: no term in %{language} yet"
+      avoid: "To avoid: %{avoid}"
+
   help:
     show:
       title: "Help"
@@ -185,6 +289,10 @@ en:
 
   pretranslations:
     index:
+      no_translate: "@no-translate"
+      no_translate_title: "Include the @no-translate keys (not the copied ones) in this language's pre-translation: button, Claude Code API and counts. They stay out of the translators' work (review them in the list with the \"Keys out of translation\" filter)."
+      no_translate_on: "Included"
+      no_translate_off: "Excluded"
       issues: "Issues"
       issues_title: "Open issues (consistency review)"
       title: "Pre-translation"
@@ -341,6 +449,7 @@ en:
 
   translations:
     index:
+      glossary: "Glossary"
       issues:
         one: "%{count} open issue"
         other: "%{count} open issues"
@@ -411,6 +520,10 @@ en:
       missing: "missing final dot"
       extra: "extra final dot"
     typographic_quotes: "typographic quotes absent from the source"
+    glossary:
+      keep: "glossary: “%{term}” is kept as is"
+      expected: "glossary: “%{term}” translates as “%{expected}”"
+      avoid: "glossary: “%{avoid}” is to avoid for “%{term}”"
     text:
       double_space: "double space"
       line_end_space: "space at the end of a line"
@@ -551,6 +664,7 @@ en:
       empty: "No user."
       disabled: "disabled"
       never: "never"
+      created_at: "Account created on %{date}"
       columns:
         name: "Name"
         email: "E-mail"
@@ -558,7 +672,7 @@ en:
         seen: "Last visit"
         contributions: "Contributions"
         activity: "Last activity"
-        created: "Invited"
+        invited: "Invited"
     search_bar:
       placeholder: "Search a name, an e-mail…"
       shortcuts: |
@@ -594,7 +708,7 @@ en:
         activity: "last activity"
         seen: "last visit"
         contributions: "number of contributions"
-        created: "invitation date"
+        invited: "invitation date"
     form:
       invitations: "Invitations sent"
       no_invitation: "No invitation sent."

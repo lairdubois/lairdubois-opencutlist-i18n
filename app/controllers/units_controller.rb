@@ -56,6 +56,7 @@ class UnitsController < ApplicationController
     @translations = @unit.translations_by_language
     @languages = Language.targets
     @refs = Unit.refs([@unit])[@unit.id]
+    @glossary = Glossary.new(@languages)
     @history_count = @unit.revisions.count
     @issues = @unit.issues.still_open.order(:id).group_by(&:language_id)
     @resolved_issues = @unit.issues.closed.group(:language_id).count

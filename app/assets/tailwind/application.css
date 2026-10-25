@@ -31,6 +31,8 @@
   .tok-unknown { color: var(--color-red-700); background: var(--color-red-50); text-decoration: wavy underline var(--color-red-400); }
   /* A symbol hard to type (→, −, °…) : free to edit, offered as a chip when missing */
   .tok-symbol { color: var(--color-sky-800); background: var(--color-sky-50); border-radius: 0.2rem; }
+  /* A glossary term (GlossaryHelper) : its tooltip tells the term expected */
+  .tok-glossary { text-decoration: underline dotted var(--color-emerald-600); text-underline-offset: 3px; cursor: help; }
   .tok-mark { color: var(--color-amber-600); }
   .tok-strong { color: var(--color-stone-950); font-weight: 600; }
   .tok-em { font-style: italic; }
@@ -77,3 +79,8 @@
   }
   p + .toolbar, p + * > .toolbar:first-child { @apply -mt-4; }
 }
+
+/* The glossary's table view at the window's width (html.wide-glossary, set by its toolbar's button, html_toggle_controller) :
+   the page and the header's nav lose their max width, on that page only (the class stays on <html> across Turbo visits).
+   Unlayered, to beat the max-w-6xl utility */
+.wide-glossary body:has([data-controller~="glossary-table"]) :is(main, header nav) { max-width: none; }

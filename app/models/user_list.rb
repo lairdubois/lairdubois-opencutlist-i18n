@@ -6,13 +6,13 @@
 #   language  a language code : a membership in it, combined with AND
 #   days      ACTIVITIES : a revision (Revision.by_user, Transifex imports included) in the last n days, or "never"
 #   seen      ACTIVITIES : a request (User#last_seen_at, consultation included) in the last n days, or "never"
-#   sort      SORTS (DEFAULT_SORT by default), dir "asc" or "desc" (the sort's own direction by default) : the search bar's sort menu
+#   sort      SORTS ("invited" : the last invitation sent) (DEFAULT_SORT by default), dir "asc" or "desc" (the sort's own direction by default) : the search bar's sort menu
 #             and the table's column headers (UsersHelper)
 class UserList
   ROLES = %w[admin reviewer translator none disabled].freeze
   ACTIVITIES = [*ListFilters::PERIODS, "never"].freeze
   # Each sort, with its default direction
-  SORTS = { "name" => "asc", "email" => "asc", "languages" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "created" => "desc" }.freeze
+  SORTS = { "name" => "asc", "email" => "asc", "languages" => "asc", "activity" => "desc", "seen" => "desc", "contributions" => "desc", "invited" => "desc" }.freeze
   DEFAULT_SORT = "seen"
 
   # A user's revisions : how many, the last one's date
@@ -82,6 +82,11 @@ class UserList
     end
   end
 
+  # Each user's last invitation sent (Invitation), by user id
+  def invited_at
+    @invited_at ||= Invitation.group(:user_id).maximum(:created_at)
+  end
+
   private
 
   def all
@@ -134,7 +139,7 @@ class UserList
       when "activity" then stats[user.id]&.last_at
       when "seen" then user.last_seen_at
       when "contributions" then stats[user.id]&.count
-      when "created" then user.created_at
+      when "invited" then invited_at[user.id]
       end
     }
     with, without = by_name.partition { |user| key.(user) }

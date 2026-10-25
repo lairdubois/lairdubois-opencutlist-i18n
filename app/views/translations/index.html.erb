@@ -26,6 +26,10 @@
       <%= link_to t(".duplicates", count: @divergent_duplicates), duplicates_path(@language.code),
                   class: "rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100" %>
     <% end %>
+    <%# The terms expected in the language : its column alone (after en's when it is the reference), the user's saved
+        choice left as is %>
+    <%= link_to t(".glossary"), glossary_path(cols: [(@en.code if @en_reference), @language.code].compact),
+                class: "rounded border border-stone-300 bg-white px-2 py-0.5 text-stone-700 hover:bg-stone-100" %>
     <% if Pretranslator.enabled? && todo.any? %>
       <%= button_to pretranslate_path(@language.code), params: { unit_ids: todo.map(&:id) },
                     class: "flex items-center gap-1.5 rounded border border-violet-300 bg-violet-50 px-2 py-0.5 text-violet-900" do %>

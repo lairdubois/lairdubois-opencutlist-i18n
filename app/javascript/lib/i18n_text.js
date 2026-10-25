@@ -87,12 +87,8 @@ const endOfLine = Decoration.widget({ widget: new EndOfLine(), side: 1 })
 // Case and accents aside, as the server's search (SqliteFold)
 const fold = (text) => text.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase()
 
-// The ranges of text matching search : exact, or folded
-function searchHits(text, search, exact) {
-  const pattern = exact ? search : fold(search)
-  if (!pattern) return []
-
-  // The folded text, and the offset in text of each folded character's source
+// The folded text (unless exact), and the offset in text of each folded character's source
+function foldMap(text, exact) {
   let folded = ""
   const origins = []
   for (let i = 0; i < text.length;) {
@@ -103,16 +99,60 @@ function searchHits(text, search, exact) {
     i += char.length
   }
   origins.push(text.length)
-  const hits = []
-  for (let at = folded.indexOf(pattern); at >= 0; at = folded.indexOf(pattern, at + pattern.length)) {
-    const last = origins[at + pattern.length - 1]
-    hits.push({ from: origins[at], to: last + String.fromCodePoint(text.codePointAt(last)).length })
+  // The range of text whose folding is folded[at, at + length)
+  const range = (at, length) => {
+    const last = origins[at + length - 1]
+    return { from: origins[at], to: last + String.fromCodePoint(text.codePointAt(last)).length }
   }
+  return { folded, range }
+}
+
+// The ranges of text matching search : exact, or folded
+function searchHits(text, search, exact) {
+  const pattern = exact ? search : fold(search)
+  if (!pattern) return []
+
+  const { folded, range } = foldMap(text, exact)
+  const hits = []
+  for (let at = folded.indexOf(pattern); at >= 0; at = folded.indexOf(pattern, at + pattern.length)) hits.push(range(at, pattern.length))
   return hits
 }
 
+// Same matching as the server's Glossary : whole words (not at an edge written in a script without spaces), case and
+// accents aside, any whitespace inside a form, invariants left out ; the longest wins on overlap
+const UNSPACED = /[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Thai}\p{sc=Lao}\p{sc=Khmer}\p{sc=Myanmar}]/u
+const WORD_CHAR = /[\p{L}\p{N}_]/u
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+// glossary : [{ forms, title }], the terms the server found in the text
+function glossaryHits(text, glossary, skip) {
+  if (!glossary.length) return []
+
+  const { folded, range } = foldMap(text, false)
+  const hits = []
+  for (const { forms, title } of glossary) {
+    for (const form of forms) {
+      const words = fold(form).trim().split(/\s+/).filter(Boolean)
+      if (!words.length) continue
+      const pattern = new RegExp(words.map(escapeRegExp).join("\\s+"), "gu")
+      for (const m of folded.matchAll(pattern)) {
+        const end = m.index + m[0].length
+        if (!UNSPACED.test(m[0].at(0)) && WORD_CHAR.test(folded[m.index - 1] || "")) continue
+        if (!UNSPACED.test(m[0].at(-1)) && WORD_CHAR.test(folded[end] || "")) continue
+        hits.push({ ...range(m.index, m[0].length), title })
+      }
+    }
+  }
+  const kept = []
+  for (const h of hits.sort((a, b) => (b.to - b.from) - (a.to - a.from) || a.from - b.from)) {
+    const free = (t) => !(h.from < t.to && h.to > t.from)
+    if (kept.every(free) && skip.every(free)) kept.push(h)
+  }
+  return kept
+}
+
 // Decorations of a text, and the ranges locked in the editor (invariants also in the source)
-function analyse(text, { source, refs, editable, search, searchExact }) {
+function analyse(text, { source, refs, glossary, editable, search, searchExact }) {
   const expected = source == null ? null : new Set(invariants(source).map((t) => normalize(t.text)))
   const tokens = invariants(text)
   const marks = []
@@ -127,6 +167,7 @@ function analyse(text, { source, refs, editable, search, searchExact }) {
     if (editable && expected && known) locked.push(t)
   }
   for (const t of symbols(text, tokens)) marks.push(Decoration.mark({ class: "tok-symbol" }).range(t.from, t.to))
+  for (const h of glossaryHits(text, glossary, tokens)) marks.push(Decoration.mark({ class: "tok-glossary", attributes: { title: h.title } }).range(h.from, h.to))
   for (const m of markup(text, tokens)) marks.push(Decoration.mark({ class: m.cls }).range(m.from, m.to))
   for (const m of text.matchAll(/[ \u00a0\t]/g)) {
     const cls = m[0] === " " ? "ws-space" : m[0] === "\t" ? "ws-tab" : "ws-nbsp"
@@ -202,11 +243,12 @@ const layout = EditorView.theme({
 
 // A CodeMirror view of an OCL string : the translator's editor, or a read-only reference.
 // source : the fr text ; invariants it lacks are flagged, the ones it has are locked in an editor (null :
-// nothing flagged nor locked, e.g. the fr source itself) ; refs : $t() key => { title (tooltip), url (opened by Mod-click) }.
+// nothing flagged nor locked, e.g. the fr source itself) ; refs : $t() key => { title (tooltip), url (opened by Mod-click) } ;
+// glossary : [{ forms, title }], its terms underlined, their tooltip in the title.
 // className : extra classes of the editor element (CodeMirror rewrites its class attribute, classList.add doesn't last).
 // search : the list's searched text, its matches highlighted (searchExact : case and accents included).
-export function createI18nView({ parent, text, source = null, refs = {}, editable = false, lang, dir = "ltr", className = "", search = "", searchExact = false, onChange, onSubmit }) {
-  const options = { source, refs, editable, search, searchExact }
+export function createI18nView({ parent, text, source = null, refs = {}, glossary = [], editable = false, lang, dir = "ltr", className = "", search = "", searchExact = false, onChange, onSubmit }) {
+  const options = { source, refs, glossary, editable, search, searchExact }
   const field = StateField.define({
     create: (state) => analyse(state.doc.toString(), options),
     update: (value, tr) => (tr.docChanged ? analyse(tr.state.doc.toString(), options) : value),

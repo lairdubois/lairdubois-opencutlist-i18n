@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_24_110000) do
   create_table "baselines", force: :cascade do |t|
     t.string "fr_hash"
     t.json "entries"
@@ -40,6 +40,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
     t.index ["language_id"], name: "index_comments_on_language_id"
     t.index ["unit_id"], name: "index_comments_on_unit_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "glossary_entries", force: :cascade do |t|
+    t.integer "glossary_term_id", null: false
+    t.integer "language_id", null: false
+    t.string "term"
+    t.text "variants"
+    t.text "avoid"
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["glossary_term_id", "language_id"], name: "index_glossary_entries_on_glossary_term_id_and_language_id", unique: true
+    t.index ["glossary_term_id"], name: "index_glossary_entries_on_glossary_term_id"
+    t.index ["language_id"], name: "index_glossary_entries_on_language_id"
+  end
+
+  create_table "glossary_revisions", force: :cascade do |t|
+    t.integer "glossary_term_id", null: false
+    t.integer "language_id"
+    t.integer "user_id"
+    t.string "kind", null: false
+    t.json "changes_made"
+    t.datetime "created_at", null: false
+    t.string "origin"
+    t.index ["glossary_term_id"], name: "index_glossary_revisions_on_glossary_term_id"
+    t.index ["language_id"], name: "index_glossary_revisions_on_language_id"
+    t.index ["user_id"], name: "index_glossary_revisions_on_user_id"
+  end
+
+  create_table "glossary_terms", force: :cascade do |t|
+    t.string "term", null: false
+    t.text "variants"
+    t.text "definition"
+    t.boolean "no_translate", default: false, null: false
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "help_requests", force: :cascade do |t|
@@ -88,6 +125,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "pretranslate_no_translate", default: false, null: false
     t.index ["code"], name: "index_languages_on_code", unique: true
   end
 
@@ -192,6 +230,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
     t.string "reference_language", default: "fr", null: false
     t.datetime "disabled_at"
     t.datetime "last_seen_at"
+    t.string "glossary_columns"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["github_id"], name: "index_users_on_github_id", unique: true
     t.index ["transifex_username"], name: "index_users_on_transifex_username", unique: true
@@ -216,6 +255,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
   add_foreign_key "comments", "languages"
   add_foreign_key "comments", "units"
   add_foreign_key "comments", "users"
+  add_foreign_key "glossary_entries", "glossary_terms"
+  add_foreign_key "glossary_entries", "languages"
+  add_foreign_key "glossary_revisions", "glossary_terms"
+  add_foreign_key "glossary_revisions", "languages"
+  add_foreign_key "glossary_revisions", "users"
   add_foreign_key "help_requests", "languages"
   add_foreign_key "help_requests", "users"
   add_foreign_key "invitations", "users"

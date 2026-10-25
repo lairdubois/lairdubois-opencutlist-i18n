@@ -1,6 +1,6 @@
 # Warnings about a text, never blocking a save. Text rules look at a text alone (any language, the fr
 # source included) ; a translation also gets compared with its fr source (invariants, markdown markers,
-# lines, final dot, quotes).
+# lines, final dot, quotes) and, given its language's Glossary, with the terms expected.
 class TranslationChecks
   TOKENS = {
     variable: /\{\{\s*[\w.]+\s*\}\}/,         # {{ count }}
@@ -25,14 +25,17 @@ class TranslationChecks
   LITERAL = /(?<![[:alpha:]])'[A-Za-z][\w.-]*'(?![[:alpha:]])/
   TYPOGRAPHIC_QUOTES = /[«»„“”]/
 
-  RULES_DIGEST = Digest::MD5.hexdigest(File.read(__FILE__))
+  # The glossary's matching too
+  RULES_DIGEST = Digest::MD5.hexdigest([__FILE__, File.expand_path("glossary.rb", __dir__)].map { |path| File.read(path) }.join)
 
   # A translation : its comparison with the source, then the text rules the source doesn't break itself
-  # (the translator isn't asked to fix those : they show on the key page)
-  def self.call(source, text)
+  # (the translator isn't asked to fix those : they show on the key page), then the glossary's (a Glossary
+  # loaded with the language)
+  def self.call(source, text, glossary: nil, language: nil)
     return [] if text.to_s.empty?
 
-    comparison_warnings(source.to_s, text.to_s) + messages(text_rules(text.to_s) - text_rules(source.to_s))
+    comparison_warnings(source.to_s, text.to_s) + messages(text_rules(text.to_s) - text_rules(source.to_s)) +
+      (glossary && language ? glossary.warnings(source, text, language) : [])
   end
 
   # A text alone, e.g. the fr source
@@ -42,15 +45,20 @@ class TranslationChecks
 
   # Set of the active units with a warning : in a language's translations, or (no language) in any
   # translation or in the fr source. For the search's "warnings" filter. Cached until a text changes
-  # (no bulk write touches a text without its updated_at) or these rules do.
+  # (no bulk write touches a text without its updated_at), the glossary or these rules do.
   def self.unit_ids(language = nil)
     units = Unit.active.reorder(nil)
     # A copied key's translations are left out of the export
     translations = Translation.joins(:unit).merge(units.where(copied: false))
     translations = translations.where(language: language) if language
     fingerprint = [units, translations].map { |scope| scope.pick(Arel.sql("COUNT(*)"), Arel.sql("MAX(#{scope.table_name}.updated_at)")) }
-    Rails.cache.fetch(["translation_checks", RULES_DIGEST, language&.id, fingerprint]) do
-      ids = translations.pluck(:unit_id, "units.source_text", :text).filter_map { |id, source, text| id if call(source, text).any? }
+    Rails.cache.fetch(["translation_checks", RULES_DIGEST, language&.id, fingerprint, Glossary.fingerprint]) do
+      languages = language ? [language] : Language.targets.to_a
+      glossary = Glossary.new(languages)
+      by_id = languages.index_by(&:id)
+      ids = translations.pluck(:unit_id, :language_id, "units.source_text", :text).filter_map do |id, language_id, source, text|
+        id if call(source, text, glossary: glossary, language: by_id[language_id]).any?
+      end
       ids += units.pluck(:id, :source_text).filter_map { |id, source| id if text_rules(source.to_s).any? } unless language
       ids.to_set
     end

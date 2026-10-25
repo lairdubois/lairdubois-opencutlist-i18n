@@ -33,9 +33,10 @@ class Pretranslator
     - Keep line breaks : the translation has the same number of lines as the source.
     - Use the woodworking vocabulary a craftsman of the target language would use, and stay consistent with the existing translations given as examples.
     - Short UI labels stay short.
-    - OpenCutList's own terms are distinct from SketchUp's : a "badge" (fr) is an OpenCutList keyword, several per part ;
-      a "balise" (fr, formerly "calque") is a SketchUp tag (formerly layer), one per entity. Never give them the same word :
-      the tag takes the name SketchUp uses in the target language, the badge another one.
+    - Follow the glossary given with the strings : each fr term (or one of its fr_variants) is translated by its
+      translation (or one of its variants, as the grammar needs), never by a term to avoid ; a keep_as_is term stays as
+      written. Its definitions tell the notions apart : two terms of different definitions never get the same word.
+      A term without a translation is translated following its definition and note.
     Answer with one translation per requested id.
   PROMPT
 
@@ -54,10 +55,12 @@ class Pretranslator
     units.reject { |u| done.include?(u.id) }.each_slice(BATCH_SIZE).sum { |batch| translate_batch(batch) }
   end
 
-  # The translators' units of this language not translated, or outdated (major fr change)
+  # The translators' units of this language not translated, or outdated (major fr change). With the language's
+  # pretranslate_no_translate, the @no-translate ones too (never the copied ones : nothing to translate)
   def pending
     translations = Translation.where(language: @language).where("translations.unit_id = units.id AND translations.source_hash = units.source_hash")
-    Unit.active.translatable.where.not(translations.arel.exists)
+    units = @language.pretranslate_no_translate? ? Unit.active.where(copied: false) : Unit.active.translatable
+    units.where.not(translations.arel.exists)
   end
 
   # The pending ones without a current suggestion
@@ -71,6 +74,11 @@ class Pretranslator
     en = Language.find_by(code: "en")
     references = en && @language != en ? Translation.where(unit: units, language: en).pluck(:unit_id, :text).to_h : {}
     units.map { |u| { id: u.id, key: u.key, fr: u.source_text, en: references[u.id], note: u.note, source_hash: u.source_hash }.compact }
+  end
+
+  # The glossary terms found in the units' fr texts, with the language's expected terms (Glossary#describe)
+  def glossary(units)
+    Glossary.new([@language]).describe_in(units.map(&:source_text), @language)
   end
 
   # Reviewed (else any) translations of this language from the same branches, short ones first
@@ -112,6 +120,9 @@ class Pretranslator
 
       Existing reviewed translations, as examples of the expected vocabulary and tone :
       #{examples(units).to_json}
+
+      Glossary :
+      #{glossary(units).to_json}
 
       Strings to translate :
       #{strings.to_json}

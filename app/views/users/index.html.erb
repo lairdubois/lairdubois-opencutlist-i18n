@@ -33,7 +33,7 @@
           <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "seen") %>"><%= users_sort_link(@list, "seen", t(".columns.seen")) %></th>
           <th class="px-3 py-2 text-right font-medium" aria-sort="<%= users_aria_sort(@list, "contributions") %>"><%= users_sort_link(@list, "contributions", t(".columns.contributions")) %></th>
           <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "activity") %>"><%= users_sort_link(@list, "activity", t(".columns.activity")) %></th>
-          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "created") %>"><%= users_sort_link(@list, "created", t(".columns.created")) %></th>
+          <th class="px-3 py-2 font-medium" aria-sort="<%= users_aria_sort(@list, "invited") %>"><%= users_sort_link(@list, "invited", t(".columns.invited")) %></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-stone-100 tabular-nums">
@@ -69,8 +69,14 @@
                 <span class="text-stone-300">—</span>
               <% end %>
             </td>
+            <%# The account's creation on hover, under the last invitation's date %>
+            <% created = t(".created_at", date: l(user.created_at, format: :long)) %>
             <td class="px-3 py-2 text-xs whitespace-nowrap text-stone-500">
-              <time datetime="<%= user.created_at.iso8601 %>" title="<%= l(user.created_at, format: :long) %>"><%= t(".ago", time: time_ago_in_words(user.created_at)) %></time>
+              <% if (invited_at = @list.invited_at[user.id]) %>
+                <time datetime="<%= invited_at.iso8601 %>" title="<%= l(invited_at, format: :long) %>&#10;<%= created %>"><%= t(".ago", time: time_ago_in_words(invited_at)) %></time>
+              <% else %>
+                <span class="text-stone-300" title="<%= created %>"><%= t(".never") %></span>
+              <% end %>
             </td>
           </tr>
         <% end %>

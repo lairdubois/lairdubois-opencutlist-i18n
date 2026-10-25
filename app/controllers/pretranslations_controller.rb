@@ -23,6 +23,13 @@ class PretranslationsController < ApplicationController
     sort_rows
   end
 
+  # Includes (or not) the language's @no-translate keys in its pre-translation
+  def no_translate
+    language = Language.targets.find_by!(code: params[:lang])
+    language.update!(pretranslate_no_translate: params[:enabled] == "1")
+    redirect_to pretranslations_path(sort: params[:sort], dir: params[:dir])
+  end
+
   private
 
   # Columns sortable through `sort` (an origin's as "origin:<name>") ; counts start descending, the language ascending

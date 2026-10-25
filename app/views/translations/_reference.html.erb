@@ -8,7 +8,8 @@
     <%# The edit and copy buttons sit beside the view : i18n-text replaces its element's content %>
     <div class="group/copy relative flex-1">
       <div class="px-3 py-2 font-mono whitespace-pre-wrap"
-           data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= refs_json(@refs[unit.id]) %>"><%= reference %></div>
+           data-controller="i18n-text" data-i18n-text-text-value="<%= reference %>" data-i18n-text-refs-value="<%= refs_json(@refs[unit.id]) %>"
+           data-i18n-text-glossary-value="<%= glossary_json(@glossary, reference, @language, via: (@en if en_main)) %>"><%= reference %></div>
       <%# Admins edit the fr source on the key page (a new tab : the list and its unsaved edits stay) %>
       <div class="absolute top-1 right-1 flex gap-1">
         <% if !en_main && current_user.admin? %>

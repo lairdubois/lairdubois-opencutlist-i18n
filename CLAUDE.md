@@ -99,6 +99,63 @@ Weblate was evaluated and rejected.
   the same thanks. Admins (`/volunteers`, badge on the Users link) accept (`accept!` : language created if new, user
   found or created, translator membership) then invite from the user's page, or reject. A stored one is mailed to the
   enabled admins (`VolunteerMailer`, `reply_to` the unverified address) when e-mails are on ; nothing to the applicant.
+- Glossary (`/glossary`, header link, everyone ; linked from the translator's toolbar with `cols[]=<lang>`) : `GlossaryTerm` (fr `term`, `variants` (a form, term or variant, belongs to one active term, `fold`), `definition` (in English : read by every language's translators), `no_translate` = kept as is, archived not
+  deleted) created / edited by the admins, `GlossaryEntry` (term × language : `term`, `variants`, `avoid`, `note`, all
+  blank = removed) by the language's reviewers, translators read only ; every change through `GlossaryOperations` into
+  `GlossaryRevision` (`changes_made` `{ field => [old, new] }`, language nil = the fr term). A table, the only view :
+  the fr terms down (forms ; the definition in the tooltip and the panel), the user's languages across (every target for an admin ;
+  `cell` / `history?code=` refuse the others), `cols[]` the ones checked in the search bar's "Colonnes" menu, one inner chip each, in their order (chips and headers
+  dragged to reorder them, `column_order_controller` rewrites `cols[]` and submits ; a header dragged with none checked checks them all), remembered in
+  `User#glossary_columns` (saved when the search bar sends `cols_set=1`, read when the URL has no `cols` : a link's
+  `cols` is shown, not saved) ; `GlossaryController#set_columns`, carried by the cells, the panel and the archive /
+  restore redirects through `column_params` ; header progress over the active terms to translate ;
+  `q` and `missing` (a term missing in any shown column) work on the shown columns. A cell (`glossary/_cell`) opens
+  `glossary#cell` (`/glossary/:id/cell/:code`) in the `glossary_panel` side frame (`_cell_panel`, its history through
+  `history?code=`) ; its reviewers edit it there, `save_cell` answering with streams for the panel, the cell and the
+  column header (`glossary_table_controller` marks the cell shown : rendered `selected`, target `current`, scrolled to).
+  A term added (none before) goes on to the next shown column without one the user reviews (`next_missing_column` :
+  its form in the panel, its cell selected ; nothing past the last). The fr cell opens `glossary#source`
+  (`_source_panel` : definition, history `?code=fr`, admins : edit, archive / restore back to the table, an archived one
+  deleted for good with its entries and history : `destroy`, `GlossaryOperations#delete_term`) ; `save_source`
+  streams the panel, the whole row (`_row`, a `display: contents` wrapper : kept as is may change) and the headers.
+  "Nouveau terme" (admins) opens `new_source` (`_new_term_panel`, fr only, `GlossaryOperations#create_term`) ;
+  `create_source` (the page's filters carried by `list_params`) updates `#glossary_count` and, when the new term matches
+  them, appends its row to `#glossary_grid`, the controller moving it to its place (`data-sort` = folded term) ; the panel
+  then shows the first shown column's form (fr panel when kept as is or not the user's to edit).
+  Keyboard (`glossary_table_controller`, keys on the window, `keyOrigin` : from a focused cell, the table's box, or the
+  cell shown with nothing focused (Safari doesn't focus a clicked link) ; never from a field nor with a modifier) :
+  arrows move the cell shown (focus + click, panel loaded ; up / down keep the column, `data-glossary-cell` = its code,
+  skipping kept-as-is rows ; nothing past the edges), Enter opens its form through the panel's `data-glossary-edit` link
+  (none : not editable) once the panel shows that cell (`turbo:frame-load`), Esc in the panel cancels a form (cell
+  reloaded, new term closed) and focuses the cell back. The table's box is fitted to the window (`fit`, a
+  ResizeObserver : what's above it and the legend below, `max-h` class as fallback) and `isolate`d (its sticky cells
+  stay under the sticky toolbar). Below 63rem the panel floats over the window's bottom, hidden while it holds the placeholder
+  (`data-glossary-placeholder`) ; the buttons above it (full width, "Nouveau terme") then go above the table. No visible
+  title (the header's link is the page's ; an `sr-only` h1). The full width button widens the page to the window
+  (`html.wide-glossary`, `html_toggle_controller`, an unlayered `:has()` rule of `application.css` scoped to that page). Search bar `glossary/_search_bar`
+  (same `search_bar_controller`) : `q` (fold, over the term, forms, definition and the shown columns' entries), `missing` /
+  `no_translate` / `archived` (admins) toggles as chips, counts under the other filters
+  (`GlossaryController#load_list`). `Glossary` (service) matches the declared forms only : whole words (not at an edge
+  in a script without spaces ; an expected term may start a longer word in `Glossary::COMPOUNDING` languages, de : « Plattenrest »), `fold`, invariants left out, the longest term wins ; same rules in `lib/i18n_text.js`
+  (`glossaryHits`, the `glossary` value from `GlossaryHelper#glossary_json` : the fr reference and the key page's source
+  underlined, `tok-glossary`, tooltip). The translator's en reference is matched through the en entries' forms
+  (`terms_in(text, via: en)`, `forms_for` : kept as is ones by their fr forms, no en entry = not found ; terms on the
+  same words all kept, one tooltip), `glossary_json(…, via:)` telling the fr term first ; the toolbar's glossary link
+  then shows `cols[]=en,<lang>`. The warnings stay on the fr source. `TranslationChecks.call(…, glossary:, language:)` warns on a missing expected
+  term, a term to avoid, a translated `no_translate` one ; `unit_ids`' cache key holds `Glossary.fingerprint` and
+  glossary.rb's digest. The pre-translation prompt and `todo` get the batch's terms (`Pretranslator#glossary`,
+  `Glossary#describe`) ; `GET /api/glossary/:language` gives them all (with their `id`).
+  Filled by Claude Code ("remplis le glossaire", same bearer, `OCL_API_URL`) : `GET /api/glossary` (`Api::GlossaryTermsController`,
+  no language) = every active term (`id`, `fr`, `fr_variants`, `definition`, `keep_as_is`) with each target's `entries`
+  (`translation`, `variants`, `avoid`, `note`) ; `POST /api/glossary/terms` `{ terms: [{ id?, term, variants, definition,
+  no_translate }] }` creates (one whose fr is a form of an active term : skipped `exists` with its `id`) or, with `id`,
+  changes the fields given (`updated` / `unchanged`) ; `POST /api/glossary/:language` `{ entries: [{ id or fr (any form),
+  translation, variants, avoid, note, replace? }] }` writes the fields given, a set field changed only with
+  `replace: true` (else skipped `already set` + `fields` : don't pass it unless asked), kept as is / archived terms
+  skipped. ≤ 200 items (`Api::BaseController#batch`), `variants` / `avoid` a string or an array. Definitions in English.
+  Written through `GlossaryOperations.new(nil, origin:)` : `GlossaryRevision#origin` = `Api::BaseController::ORIGIN`
+  ("OpenCutBot", the issues' too), shown as the history's author. The former badge / balise rule of `SYSTEM` is two
+  seeded terms.
 - `Pretranslator` (anthropic gem, `claude-opus-5-5`, structured output) only creates `Suggestion`s, never translations.
   A suggestion keeps the `source_hash` it was computed on : `Suggestion.current` (hash = the unit's) are the only
   ones shown and are never recomputed (the button and `Pretranslator#call` skip them ; nil = older rows, stale).
@@ -140,7 +197,9 @@ Weblate was evaluated and rejected.
   no approve button : `translations/_review_button`, given back by the streams when resolved from a panel).
 - Pre-translation page (`/pretranslations`, admins, header link) : per target language, `Pretranslator#pending`
   (not translated or outdated), covered by a current suggestion (one column per `origin`), `#todo` (without one),
-  stale suggestions, latest ; every column sorts (`sort` / `dir`, counts descending first) ; badges for `ANTHROPIC_API_KEY` / `OCL_API_TOKEN`. The language links to its
+  stale suggestions, latest ; a per-language "@no-translate" toggle (`Language#pretranslate_no_translate`,
+  `pretranslations#no_translate`) makes `#pending` (so `#todo`, the API, the counts) cover the @no-translate keys too,
+  never the copied ones ; every column sorts (`sort` / `dir`, counts descending first) ; badges for `ANTHROPIC_API_KEY` / `OCL_API_TOKEN`. The language links to its
   translator's list filtered on not translated + outdated.
 - Migration : `TransifexImport` (API v3, parallel fetch, keys mapped through the Baseline ; ours kept when edited in
   the tool = conflict), `TransifexRoster` (API exposes no e-mails).
@@ -210,7 +269,7 @@ each entry's count under the other filters.
   `days` (activity, or `never`), `seen` (same periods over `User#last_seen_at` : any request, consultation included,
   written by `ApplicationController#record_last_seen` at most every `User::SEEN_PRECISION` through `update_column`, so
   the login tokens' `updated_at` stays put), sorts name / email / languages (codes) / activity / seen (default, `UserList::DEFAULT_SORT`) / contributions /
-  created, from the sort menu or the table's column headers (`UsersHelper`, shared `sort_header_link` with `/pretranslations`).
+  invited (last `Invitation`), from the sort menu or the table's column headers (`UsersHelper`, shared `sort_header_link` with `/pretranslations`).
 - Disabling a user (`disabled_at`, `User.enabled`) : no login link, session dropped at the next request
   (`current_user`), no comment e-mail nor invitation ; memberships and history kept. Not oneself.
 - Invitations sent : `Invitation(user, inviter, email)`, written by `InvitationMailer`'s `after_deliver` only when

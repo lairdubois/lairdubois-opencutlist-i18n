@@ -233,6 +233,7 @@ class TranslationsController < ApplicationController
   def preload_rows(units)
     ids = units.map(&:id)
     @data = preload_language(@language, units)
+    @glossary = @data[:glossary]
     @indexes = Unit.tree_indexes(ids)
     @refs = Unit.refs(units)
     @references = @en ? Translation.where(unit_id: ids, language: @en).includes(:unit).index_by(&:unit_id) : {}
@@ -248,6 +249,8 @@ class TranslationsController < ApplicationController
     translations = Translation.where(unit_id: ids, language: language).includes(:unit).index_by(&:unit_id)
     {
       translations: translations,
+      # The terms expected in the language : the editor's warnings, the references' tooltips (en's found by its entries)
+      glossary: Glossary.new([language, @en].compact),
       # Units with an open issue of any kind : to review, no approval until closed
       contested: Translation.preload_contested(translations, language, ids),
       machine: Suggestion.current.where(unit_id: ids, language: language).pluck(:unit_id, :text).to_h,

@@ -138,16 +138,29 @@ fr:
       unit:
         key: "Clé"
         source_text: "Texte FR"
+      glossary_term:
+        term: "Terme FR"
+        variants: "Autres formes"
+        definition: "Définition"
+        no_translate: "À garder tel quel"
+      glossary_entry:
+        term: "Terme attendu"
+        variants: "Autres formes"
+        avoid: "À éviter"
+        note: "Note"
     errors:
       models:
         unit:
           attributes:
             key:
               overlapping_branch: "chevauche une branche ou une chaîne existante"
+        glossary_term:
+          form_taken: "« %{form} » est déjà une forme de « %{owner} »"
 
   layouts:
     application:
       translate: "Traduire"
+      glossary: "Glossaire"
       keys: "Clés"
       sync: "Synchroniser FR"
       import: "Importer"
@@ -169,6 +182,97 @@ fr:
         one: "%{count} candidature de traducteur en attente"
         other: "%{count} candidatures de traducteur en attente"
 
+  glossary:
+    index:
+      title: "Glossaire"
+      archived_title: "Glossaire · termes archivés"
+      new_term: "Nouveau terme"
+      empty: "Le glossaire est vide."
+      none_found: "Aucun terme ne correspond."
+      full_width: "Pleine largeur"
+    table:
+      label: "Le glossaire dans toutes les langues"
+      missing: "Pas encore de terme"
+      avoid: "Termes à éviter"
+      note: "Note"
+      pick: "Cliquez une case pour voir le terme, ses formes et sa note, et le modifier si vous relisez la langue."
+    source_panel:
+      title: "Terme source"
+    new_term_panel:
+      hint: "Les termes attendus dans chaque langue se renseignent ensuite, dans leurs cases."
+    cell_panel:
+      close: "Fermer"
+      archived: "archivé"
+      missing: "Pas encore de terme en %{language}."
+      add: "Ajouter"
+    search_bar:
+      placeholder: "Rechercher un terme, une définition, une note…"
+      shortcuts: |
+        ⌘/Ctrl + F : aller à la recherche (2e fois : celle du navigateur)
+        Entrée : rechercher
+        Échap : quitter le champ
+        Échap + Échap : tout effacer, texte et filtres
+        Cherche dans le terme FR et ses formes, la définition, et le terme, les formes, les termes à éviter et la note des langues affichées (majuscules et accents ignorés)
+      count:
+        one: "%{count} terme"
+        other: "%{count} termes"
+      missing_any: "Sans terme dans une langue affichée"
+      columns: "Colonnes"
+      column_drag: "%{name} · glisser pour déplacer la colonne"
+      columns_all: "Toutes les langues affichées : cochez pour n'en garder que certaines"
+      columns_some:
+        one: "%{count} langue affichée"
+        other: "%{count} langues affichées"
+      no_translate: "À garder tel quel"
+      archived: "Archivés"
+      remove_all: "Retirer tous les filtres"
+    archive:
+      archived: "Terme « %{term} » archivé."
+    restore:
+      restored: "Terme « %{term} » restauré."
+    destroy:
+      deleted: "Terme « %{term} » supprimé définitivement."
+      not_archived: "Seul un terme archivé peut être supprimé."
+    term:
+      no_translate: "à garder tel quel"
+      kept_as_is: "Identique dans toutes les langues"
+      avoid: "À éviter :"
+      history: "Historique"
+      edit: "Modifier"
+      archive: "Archiver"
+      archive_confirm: "Archiver « %{term} » ? Il ne sera plus proposé ni vérifié ; son historique est conservé."
+      restore: "Restaurer"
+      delete: "Supprimer"
+      delete_confirm: "Supprimer définitivement « %{term} » ? Ses termes dans chaque langue et son historique seront perdus."
+    form:
+      variants_placeholder: "pluriel, autres formes…"
+      definition_placeholder: "En anglais : lue par les traducteurs de toutes les langues"
+      variants_hint: "Les formes se séparent par des virgules. Seules les formes listées sont reconnues (casse et accents ignorés, mot entier)."
+      no_translate: "À garder tel quel dans toutes les langues (nom de produit…)"
+      entry_term: "Terme attendu en %{language}"
+      entry_variants_placeholder: "pluriel, déclinaisons…"
+      avoid_placeholder: "traductions à proscrire"
+      note_placeholder: "genre, synonymes acceptables, usage…"
+      entry_hint: "Les formes se séparent par des virgules. Tout vider supprime l'entrée."
+    history:
+      ago: "il y a %{time}"
+      unknown: "inconnu"
+      empty: "Aucune modification."
+      "yes": "oui"
+      "no": "non"
+      kinds:
+        create: "création"
+        update: "modification"
+        archive: "archivage"
+        restore: "restauration"
+    tooltip:
+      source: "FR : « %{term} »"
+      keep: "Glossaire : « %{term} », à garder tel quel"
+      term: "Glossaire : « %{term} »"
+      expected: "Glossaire %{language} : %{term}"
+      missing: "Glossaire : pas encore de terme en %{language}"
+      avoid: "À éviter : %{avoid}"
+
   help:
     show:
       title: "Aide"
@@ -185,6 +289,10 @@ fr:
 
   pretranslations:
     index:
+      no_translate: "@no-translate"
+      no_translate_title: "Inclure les clés @no-translate (pas les copiées) dans la pré-traduction de cette langue : bouton, API Claude Code et compteurs. Elles restent hors du travail des traducteurs (à relire dans la liste avec le filtre « Clés hors traduction »)."
+      no_translate_on: "Inclus"
+      no_translate_off: "Exclus"
       issues: "Tickets"
       issues_title: "Tickets ouverts (vérification de cohérence)"
       title: "Pré-traduction"
@@ -341,6 +449,7 @@ fr:
 
   translations:
     index:
+      glossary: "Glossaire"
       issues:
         one: "%{count} ticket ouvert"
         other: "%{count} tickets ouverts"
@@ -411,6 +520,10 @@ fr:
       missing: "point final manquant"
       extra: "point final en trop"
     typographic_quotes: "guillemets typographiques absents du source"
+    glossary:
+      keep: "glossaire : « %{term} » est à garder tel quel"
+      expected: "glossaire : « %{term} » se traduit « %{expected} »"
+      avoid: "glossaire : « %{avoid} » est à éviter pour « %{term} »"
     text:
       double_space: "double espace"
       line_end_space: "espace en fin de ligne"
@@ -551,6 +664,7 @@ fr:
       empty: "Aucun utilisateur."
       disabled: "désactivé"
       never: "jamais"
+      created_at: "Compte créé le %{date}"
       columns:
         name: "Nom"
         email: "E-mail"
@@ -558,7 +672,7 @@ fr:
         seen: "Dernière visite"
         contributions: "Contributions"
         activity: "Dernière activité"
-        created: "Invité"
+        invited: "Invité"
     search_bar:
       placeholder: "Rechercher un nom, un e-mail…"
       shortcuts: |
@@ -594,7 +708,7 @@ fr:
         activity: "dernière activité"
         seen: "dernière visite"
         contributions: "nombre de contributions"
-        created: "date d'invitation"
+        invited: "date d'invitation"
     form:
       invitations: "Invitations envoyées"
       no_invitation: "Aucune invitation envoyée."

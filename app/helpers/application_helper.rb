@@ -40,6 +40,7 @@ module ApplicationHelper
   NAV_SECTIONS = {
     keys: %w[units comments branches],
     translate: %w[languages translations reference_languages issues],
+    glossary: %w[glossary],
     sync: %w[syncs],
     import: %w[imports],
     export: %w[exports],

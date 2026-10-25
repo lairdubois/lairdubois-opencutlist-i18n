@@ -1,5 +1,5 @@
 <% t = data[:translations][unit.id] %>
-<% warnings = t ? TranslationChecks.call(unit.source_text, t.text) : [] %>
+<% warnings = t ? TranslationChecks.call(unit.source_text, t.text, glossary: data[:glossary], language: language) : [] %>
 <% fill = "const a = this.closest('turbo-frame').querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input'))" %>
 <%# Spans the row's 2 subgrid rows (box, extras) so its box shares the height of its neighbours %>
 <%# group : the frame's parts follow the form's unsaved state (dirty-form) %>
