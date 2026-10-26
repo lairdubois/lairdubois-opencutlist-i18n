@@ -3,8 +3,6 @@
 # Spam : a hidden honeypot field and a signed form timestamp (FormToken), a rate limit per IP in the controller,
 # a closed language list, one pending request per address and language, and a cap on the pending ones
 class VolunteerRequest < ApplicationRecord
-  # ISO 639-1 codes offered for a new language : { "de" => { "name" => "Deutsch", "rtl" => false } }
-  LANGUAGES = YAML.load_file(Rails.root.join("config/iso_languages.yml")).freeze
   # Beyond that many pending requests, new ones are dropped (a flood the admins should look at first)
   PENDING_MAX = 100
 
@@ -41,7 +39,7 @@ class VolunteerRequest < ApplicationRecord
 
   # The source language aside : existing target languages and the ISO list
   def self.codes
-    (Language.targets.pluck(:code) + LANGUAGES.keys).uniq - [Language::SOURCE_CODE]
+    (Language.targets.pluck(:code) + Language::ISO.keys).uniq - [Language::SOURCE_CODE]
   end
 
   # Already asked and still pending : not stored twice
@@ -54,7 +52,7 @@ class VolunteerRequest < ApplicationRecord
   end
 
   def language_name
-    language&.name || LANGUAGES.dig(language_code, "name") || language_code
+    language&.name || Language::ISO.dig(language_code, "name") || language_code
   end
 
   def existing_user
@@ -65,9 +63,7 @@ class VolunteerRequest < ApplicationRecord
   # an admin gets no membership (they have every language)
   def accept!(admin)
     transaction do
-      language = self.language || Language.create!(code: language_code, name: language_name,
-                                                   rtl: LANGUAGES.dig(language_code, "rtl") || false,
-                                                   position: Language.unscoped.maximum(:position).to_i + 1)
+      language = self.language || Language.create_from_iso!(language_code)
       user = User.create_with(name: name, locale: (locale if I18n.available_locales.map(&:to_s).include?(locale)))
                  .find_or_create_by!(email: email)
       user.memberships.find_or_create_by!(language: language) unless user.admin?

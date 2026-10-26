@@ -36,7 +36,7 @@
                 when the current page is one of them, and carries the pending volunteers' badge %>
             <% volunteers = VolunteerRequest.pending.count %>
             <% volunteers_title = t(".volunteers_pending", count: volunteers) if volunteers.positive? %>
-            <% admin_active = ApplicationHelper::ADMIN_MENU.any? { |s| ApplicationHelper::NAV_SECTIONS[s].include?(controller_name) } %>
+            <% admin_active = ApplicationHelper::ADMIN_MENU.any? { |s| nav_section?(s) } %>
             <div data-controller="popover" data-popover-align-value="left" class="flex h-full">
               <button type="button" popovertarget="admin-menu" data-popover-target="anchor" title="<%= volunteers_title %>"
                       class="flex h-full items-center gap-1.5 border-b-2 pt-0.5 <%= admin_active ? "border-stone-800 font-medium text-stone-900" : "border-transparent text-stone-600 hover:text-stone-900" %>">
@@ -47,6 +47,7 @@
                 <%= admin_menu_link :sync, new_sync_path %>
                 <%= admin_menu_link :import, new_import_path %>
                 <%= admin_menu_link :pretranslations, pretranslations_path %>
+                <%= admin_menu_link :languages, manage_languages_path %>
                 <%= admin_menu_link :users, users_path, badge: volunteers, title: volunteers_title %>
                 <%= admin_menu_link :publish, publications_path %>
               </div>
@@ -55,7 +56,7 @@
           <%# Help : the guide and the form to the admins, told where the user was (from) ; the admins' badge counts the open requests %>
           <% help_open = HelpRequest.unresolved.count if current_user.admin? %>
           <div class="ml-auto flex h-full">
-            <%= nav_link :help, help_path(from: (request.fullpath unless ApplicationHelper::NAV_SECTIONS[:help].include?(controller_name))),
+            <%= nav_link :help, help_path(from: (request.fullpath unless nav_section?(:help))),
                          badge: help_open, title: (t(".help_open", count: help_open) if help_open.to_i.positive?) %>
           </div>
           <span class="flex gap-1 text-xs">

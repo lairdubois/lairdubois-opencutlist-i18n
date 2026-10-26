@@ -8,6 +8,9 @@
       <% end %>
     </span>
   <% end %>
+  <% if current_user.admin? %>
+    <%= link_to t(".manage"), manage_languages_path, class: "ml-auto rounded bg-stone-800 px-2.5 py-0.5 text-xs text-white hover:bg-stone-700" %>
+  <% end %>
 </div>
 <% if @editable.empty? %>
   <p class="mb-4 text-stone-600"><%= t(".none") %></p>

@@ -50,6 +50,8 @@ Rails.application.routes.draw do
   end
 
   # Admins
+  get "languages/manage", to: "languages#manage", as: :manage_languages
+  resources :languages, only: [:create, :destroy]
   resources :units, only: [:index, :show] do
     get :duplicates, on: :collection
     resources :comments, only: [:index, :create]

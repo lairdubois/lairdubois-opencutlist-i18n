@@ -43,6 +43,10 @@ en:
     no_language_access: "You don't have access to this language."
 
   shared:
+    language_picker:
+      pick: "Pick a language"
+      search_placeholder: "Search a language"
+      no_match: "No matching language."
     file_input:
       choose: "Choose a file…"
     copy_button:
@@ -169,6 +173,7 @@ en:
       export: "Export"
       pretranslations: "Pre-translation"
       admin: "Admin"
+      languages: "Languages"
       users: "Users"
       publish: "Publish"
       logout: "Log out"
@@ -382,9 +387,6 @@ en:
       intro: "Offer to translate OpenCutList into your language, whether it is already in progress or a new one."
       existing_languages: "Languages in progress"
       new_languages: "New language"
-      pick: "Pick a language"
-      search_placeholder: "Search a language"
-      no_match: "No matching language."
       hint: "An admin will review your request and contact you at this address."
       submit: "Send my application"
       back: "Back to log in"
@@ -445,6 +447,31 @@ en:
       not_editable: "Language not assigned to you"
       all: "All"
       mine: "My languages"
+      manage: "Manage languages"
+    manage:
+      title: "Languages"
+      new_title: "New language"
+      intro: "Add a target language, then give it to translators from the users page."
+      language: "Language"
+      iso_languages: "ISO 639-1 list"
+      hint_html: "Its yml file will join the repo at the next publication. For OpenCutList to offer it, also add its code to <code>ENABLED_LANGUAGES</code> in <code>%{file}</code>."
+      submit: "Add the language"
+      existing_title: "Target languages"
+      destroy_hint: "Deleting a language erases all its work: translations, history, comments, suggestions, issues, glossary and translators' access. Its yml file stays in the OpenCutList repo."
+      columns:
+        language: "Language"
+        translations: "Translations"
+        members: "Members"
+      destroy: "Delete"
+      destroy_confirm: "Delete %{language} (%{code}) and all its work (translations: %{translations}, members: %{members})? History, comments, suggestions, issues and glossary included, for good."
+      protected: "Protected"
+      protected_title: "OpenCutList's fallback language and the translators' reference"
+    create:
+      invalid: "Pick a language of the list that doesn't exist yet."
+      created: "Language %{language} added. Give it to translators from their page."
+    destroy:
+      protected: "%{code} can't be deleted."
+      destroyed: "Language %{language} deleted."
 
   translations:
     index:

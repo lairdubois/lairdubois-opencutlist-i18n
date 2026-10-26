@@ -43,6 +43,10 @@ fr:
     no_language_access: "Tu n'as pas accès à cette langue."
 
   shared:
+    language_picker:
+      pick: "Choisir une langue"
+      search_placeholder: "Rechercher une langue"
+      no_match: "Aucune langue ne correspond."
     file_input:
       choose: "Choisir un fichier…"
     copy_button:
@@ -169,6 +173,7 @@ fr:
       export: "Exporter"
       pretranslations: "Pré-traduction"
       admin: "Administration"
+      languages: "Langues"
       users: "Utilisateurs"
       publish: "Publier"
       logout: "Déconnexion"
@@ -382,9 +387,6 @@ fr:
       intro: "Propose-toi pour traduire OpenCutList dans ta langue, qu'elle soit déjà en cours ou nouvelle."
       existing_languages: "Langues en cours"
       new_languages: "Nouvelle langue"
-      pick: "Choisir une langue"
-      search_placeholder: "Rechercher une langue"
-      no_match: "Aucune langue ne correspond."
       hint: "Un administrateur examinera ta demande et te contactera à cette adresse."
       submit: "Envoyer ma candidature"
       back: "Retour à la connexion"
@@ -445,6 +447,31 @@ fr:
       not_editable: "Langue qui ne t'est pas attribuée"
       all: "Toutes"
       mine: "Mes langues"
+      manage: "Gérer les langues"
+    manage:
+      title: "Langues"
+      new_title: "Nouvelle langue"
+      intro: "Ajoute une langue cible, puis donne-la à des traducteurs depuis la page des utilisateurs."
+      language: "Langue"
+      iso_languages: "Liste ISO 639-1"
+      hint_html: "Son fichier yml rejoindra le dépôt à la prochaine publication. Pour qu'OpenCutList la propose, ajouter aussi son code à <code>ENABLED_LANGUAGES</code> dans <code>%{file}</code>."
+      submit: "Ajouter la langue"
+      existing_title: "Langues cibles"
+      destroy_hint: "Supprimer une langue efface tout son travail : traductions, historique, commentaires, suggestions, tickets, glossaire et accès des traducteurs. Son fichier yml reste dans le dépôt d'OpenCutList."
+      columns:
+        language: "Langue"
+        translations: "Traductions"
+        members: "Membres"
+      destroy: "Supprimer"
+      destroy_confirm: "Supprimer %{language} (%{code}) et tout son travail (traductions : %{translations}, membres : %{members}) ? Historique, commentaires, suggestions, tickets et glossaire compris, sans retour possible."
+      protected: "Protégée"
+      protected_title: "Langue de repli d'OpenCutList et référence des traducteurs"
+    create:
+      invalid: "Choisis une langue de la liste qui n'existe pas encore."
+      created: "Langue %{language} ajoutée. Donne-la à des traducteurs depuis leur page."
+    destroy:
+      protected: "%{code} ne peut pas être supprimée."
+      destroyed: "Langue %{language} supprimée."
 
   translations:
     index:
