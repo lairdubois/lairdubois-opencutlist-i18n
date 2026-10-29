@@ -1,6 +1,7 @@
 # The translator's editor : fr source, en reference and the target language side by side
 class TranslationsController < ApplicationController
   include ListFilters
+  include TranslationEditorData
 
   PER_PAGE = 40
   # fr source revisions (no language) counting as a change for every language, in the sort by date
@@ -259,28 +260,5 @@ class TranslationsController < ApplicationController
     # Previous fr text, to show what changed on an outdated translation
     @previous_sources = Revision.where(unit_id: ids, kind: "source_major").group(:unit_id).maximum(:id)
                                 .then { |h| Revision.where(id: h.values).pluck(:unit_id, :old_value).to_h }
-  end
-
-  # What one language's editor needs
-  def preload_language(language, units)
-    ids = units.map(&:id)
-    texts = units.map(&:source_text)
-    translations = Translation.where(unit_id: ids, language: language).includes(:unit).index_by(&:unit_id)
-    {
-      translations: translations,
-      # The terms expected in the language : the editor's warnings, the references' tooltips (en's found by its entries)
-      glossary: Glossary.new([language, @en].compact),
-      # Units with an open issue of any kind : to review, no approval until closed
-      contested: Translation.preload_contested(translations, language, ids),
-      machine: Suggestion.current.where(unit_id: ids, language: language).pluck(:unit_id, :text).to_h,
-      comment_counts: Comment.visible_in(language).visible_to(current_user).where(unit_id: ids).group(:unit_id).count,
-      open_questions: Comment.open_questions.visible_in(language).where(unit_id: ids).group(:unit_id).count,
-      open_admin_notes: Comment.open_admin_notes.visible_in(language).visible_to(current_user).where(unit_id: ids).group(:unit_id).count,
-      issues: Issue.still_open.where(language: language, unit_id: ids).group(:unit_id).count,
-      # Same fr text already translated elsewhere in this language
-      suggestions: Translation.joins(:unit).merge(Unit.active).where(language: language, units: { source_text: texts })
-                              .where.not(unit_id: ids).pluck("units.source_text", "translations.text")
-                              .group_by(&:first).transform_values { |v| v.map(&:last).uniq.first(3) }
-    }
   end
 end

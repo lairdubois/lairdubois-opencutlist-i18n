@@ -1,8 +1,10 @@
 <% t = data[:translations][unit.id] %>
 <% warnings = t ? TranslationChecks.call(unit.source_text, t.text, glossary: data[:glossary], language: language) : [] %>
 <% fill = "const a = this.closest('turbo-frame').querySelector('textarea'); a.value = this.dataset.text; a.dispatchEvent(new Event('input'))" %>
-<%# Spans the row's 2 subgrid rows (box, extras) so its box shares the height of its neighbours %>
+<%# Spans the row's 2 subgrid rows (box, extras) so its box shares the height of its neighbours. unit_page : an admin's
+    correction on the key's page (UnitTranslationsController : the text saved alone, no comments nor history buttons) %>
 <%# group : the frame's parts follow the form's unsaved state (dirty-form) %>
+<% unit_page = local_assigns[:unit_page] %>
 <%= turbo_frame_tag dom_id(unit, language.code), class: "group row-span-2 grid min-w-0 grid-rows-subgrid" do %>
   <%# Copied as is into every language (Unit::COPIED_SOURCE) : read-only, what the export writes %>
   <% if unit.copied %>
@@ -19,7 +21,7 @@
       </div>
     </div>
     <div class="flex items-center justify-end gap-2 px-3 py-1.5">
-      <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+      <%= render "translations/comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
                                     questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
     </div>
   <% else %>
@@ -34,11 +36,12 @@
     </div>
   <% end %>
   <%# i18n-text swaps the textarea for a CodeMirror editor (source invariants locked), keeping it in sync for the form %>
-  <%= form_with url: translate_unit_path(language.code, unit), method: :patch, class: "contents",
+  <%= form_with url: unit_page ? unit_translation_path(unit, language.code) : translate_unit_path(language.code, unit), method: :patch,
+                class: "contents",
                 data: { controller: "i18n-text dirty-form", i18n_text_source_value: unit.source_text, i18n_text_refs_value: refs_json(@refs[unit.id]) } do %>
     <%# The box : the editor, then the proposals under it, so they grow the row (the source box beside follows).
         Its background, the translation's status (or unsaved), runs under both %>
-    <div class="flex min-w-0 flex-col border-y border-stone-200 md:border-l <%= t.nil? ? 'bg-yellow-50' : t.to_review? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
+    <div class="flex min-w-0 flex-col border-stone-200 <%= unit_page ? 'border-t md:border-t-0 md:border-l' : 'border-y md:border-l' %> <%= t.nil? ? 'bg-yellow-50' : t.to_review? ? 'bg-orange-50' : 'bg-white' %> group-has-data-dirty:bg-sky-50">
       <%= text_area_tag :text, t&.text, rows: 1, dir: language.rtl ? "rtl" : "ltr", lang: language.code,
                         data: { i18n_text_target: "field" },
                         class: "block w-full flex-1 resize-none overflow-hidden px-3 py-2 font-mono text-sm bg-transparent" %>
@@ -73,13 +76,19 @@
         <% end %>
       </div>
     </div>
-    <div class="flex flex-col gap-1 px-3 py-1.5">
+    <%# The key's page : the bar (its top line) hidden while it shows nothing (no issue nor saved mark, clean, nothing to approve) %>
+    <% bar = if !unit_page then ""
+             elsif data[:issues][unit.id] || local_assigns[:saved] then "border-t border-stone-200 md:border-l"
+             else "hidden border-t border-stone-200 md:border-l group-has-data-dirty:flex has-[[type=submit]:enabled:not([hidden])]:flex"
+             end %>
+    <div class="flex flex-col gap-1 px-3 py-1.5 <%= bar %>">
       <div class="flex items-center justify-end gap-2">
-        <%# Issues, comments, history : on the left, pushing the rest right %>
+        <%# Issues, comments, history : on the left, pushing the rest right. The key's page has its own comments and history %>
         <div class="mr-auto flex min-w-0 items-center gap-2">
           <%# Open issues of the key (a consistency review's points) %>
-          <%= render "issues_button", unit: unit, language: language, count: data[:issues][unit.id] || 0 %>
-          <%= render "comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
+          <%= render "translations/issues_button", unit: unit, language: language, count: data[:issues][unit.id] || 0 %>
+          <% unless unit_page %>
+          <%= render "translations/comments_button", unit: unit, language: language, count: data[:comment_counts][unit.id] || 0,
                                         questions: data[:open_questions][unit.id] || 0, admin_notes: data[:open_admin_notes][unit.id] || 0 %>
           <% if current_user.admin? %>
             <button type="button" data-disclosure-target="button" data-action="disclosure#toggle" data-disclosure-panel-param="history"
@@ -88,15 +97,25 @@
               <%= t(".history") %>
             </button>
           <% end %>
+          <% end %>
         </div>
         <span class="hidden text-xs text-sky-700 group-has-data-dirty:inline">● <%= t("unsaved.marker") %></span>
         <% if local_assigns[:saved] %><span class="text-xs text-emerald-700 group-has-data-dirty:hidden">✓ <%= t(".saved") %></span><% end %>
+        <%# The key's page : the saved text back (the editor reloaded), left of the save, while there are edits %>
+        <% if unit_page %>
+          <%= link_to t(".cancel"), unit_edit_translation_path(unit, language.code),
+                      class: "hidden rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-600 group-has-data-dirty:inline-block hover:border-stone-400 hover:text-stone-900" %>
+        <% end %>
         <%# Saving an outdated translation unchanged revalidates it against the current fr : always allowed.
-            Otherwise disabled, and hidden, while the form is clean (dirty-form) %>
-        <% clean_save = !t&.outdated? %>
+            Otherwise disabled, and hidden, while the form is clean (dirty-form). The key's page saves the text alone
+            (status kept) : nothing to save while clean %>
+        <% clean_save = unit_page || !t&.outdated? %>
         <%= submit_tag t(".save"), title: t("unsaved.save_shortcut"), disabled: clean_save, data: { dirty_form_target: ("submit" if clean_save) },
                        class: "rounded border border-stone-800 bg-stone-800 px-2 py-0.5 text-xs text-white disabled:hidden" %>
-        <%= render "review_button", unit: unit, language: language, translation: t, contested: data[:contested].include?(unit.id) %>
+        <%# The key's page keeps the status on save : nothing to approve on an approved, up to date translation, even edited %>
+        <% unless unit_page && t&.approved? && !t.outdated? %>
+          <%= render "translations/review_button", unit: unit, language: language, translation: t, contested: data[:contested].include?(unit.id) %>
+        <% end %>
       </div>
     </div>
   <% end %>

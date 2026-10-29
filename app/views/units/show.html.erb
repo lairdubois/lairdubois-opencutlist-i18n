@@ -99,7 +99,7 @@
   <% end %>
   <%# i18n-text without a source value : highlighted, nothing locked (this is the source) %>
   <%= form_with url: source_unit_path(@unit), method: :patch, class: "group",
-                data: { controller: "i18n-text dirty-form", i18n_text_refs_value: refs_json(@refs), i18n_text_glossary_value: glossary_json(@glossary, @unit.source_text) } do %>
+                data: { controller: "i18n-text dirty-form", i18n_text_refs_value: refs_json(@refs[@unit.id]), i18n_text_glossary_value: glossary_json(@glossary, @unit.source_text) } do %>
     <%= text_area_tag :source_text, @unit.source_text, rows: [@unit.source_text.lines.size + 1, 2].max, lang: Language::SOURCE_CODE,
                       data: { i18n_text_target: "field" }, class: "min-h-16 w-full rounded border border-stone-300 px-3 py-2 font-mono text-sm group-data-dirty:border-sky-500" %>
     <% TranslationChecks.text(@unit.source_text).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
@@ -138,31 +138,22 @@
     </button>
   </h2>
   <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
+    <%# As the translator's rows : the language on the left (name, status, copy), its editor on the right (2 subgrid rows :
+        box, buttons), its open tickets under it (the editor's issues button unfolds them) %>
     <% @languages.each do |language| %>
       <% t = @translations[language] %>
-      <div class="border-b border-stone-100 px-4 py-2 last:border-0" data-controller="disclosure">
-        <div class="group/copy flex gap-4">
-          <span class="w-24 shrink-0 text-sm text-stone-500"><%= language.name %></span>
-          <% if t %>
-            <div class="min-w-0 flex-1">
-              <div class="whitespace-pre-wrap font-mono text-sm" dir="<%= language.rtl ? "rtl" : "ltr" %>"
-                   data-controller="i18n-text" data-i18n-text-text-value="<%= t.text %>" data-i18n-text-source-value="<%= @unit.source_text %>"
-                   data-i18n-text-refs-value="<%= refs_json(@refs) %>"><%= t.text %></div>
-              <% TranslationChecks.call(@unit.source_text, t.text, glossary: @glossary, language: language).each do |w| %><p class="text-xs text-amber-700">⚠ <%= w %></p><% end %>
-            </div>
-            <%= render "shared/copy_button", text: t.text, class: "h-fit shrink-0" %>
-            <%= render "language_status", unit: @unit, language: language, translation: t %>
-          <% else %>
-            <span class="flex-1 text-sm italic text-stone-400"><%= t("status.not_translated") %></span>
-          <% end %>
+      <div class="group/copy grid grid-cols-1 border-b border-stone-200 last:border-0 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-controller="disclosure">
+        <div class="relative row-span-2 px-4 py-2">
+          <%= render "language_status", unit: @unit, language: language, translation: t %>
         </div>
-        <%# The language's open tickets on this key, under its text (the name column's width + gap) : an issues button unfolds
-            them, as on the translator's row (same panel, closing one there answers with streams) %>
+        <% if @unit.copied %>
+          <%# Copied as is into every language : its stored text, kept but not exported, read-only %>
+          <div class="row-span-2 border-stone-200 bg-stone-50 px-3 py-2 font-mono text-sm whitespace-pre-wrap text-stone-500 md:border-l" dir="<%= language.rtl ? "rtl" : "ltr" %>"><%= t&.text %></div>
+        <% else %>
+          <%= render "translations/editor", unit: @unit, language: language, data: @editor_data[language.id], unit_page: true %>
+        <% end %>
         <% if (issues = @issues[language.id]) %>
-          <div class="mt-1 flex pl-28">
-            <%= render "translations/issues_button", unit: @unit, language: language, count: issues.size %>
-          </div>
-          <div data-disclosure-target="panel" data-disclosure-name="issues" hidden class="mt-1 pl-28 text-xs">
+          <div data-disclosure-target="panel" data-disclosure-name="issues" hidden class="min-w-0 border-t border-stone-200 px-3 py-2 text-xs md:col-start-2">
             <%= render "issues/unit", unit: @unit, language: language, issues: issues, translation: t, resolved: @resolved_issues.fetch(language.id, 0) %>
           </div>
         <% end %>
@@ -203,13 +194,11 @@
             class="group/section flex w-full items-center gap-2 px-4 py-2 text-left font-semibold hover:bg-stone-50">
       <%= chevron_icon("text-stone-400 group-aria-expanded/section:rotate-90") %>
       <%= t(".history") %>
-      <span class="ml-auto text-xs font-normal text-stone-500 tabular-nums"><%= t(".history_count", count: @history_count) %></span>
+      <%= render "history_count", unit: @unit, count: @history_count %>
     </button>
   </h2>
   <div data-collapsible-target="panel" class="border-t border-stone-200" <%= "hidden" unless unfolded %>>
-    <%= turbo_frame_tag "unit_history", src: history_unit_path(@unit), loading: :lazy do %>
-      <p class="p-4 text-sm text-stone-400"><%= t("loading") %></p>
-    <% end %>
+    <%= render "history_frame", unit: @unit %>
   </div>
 </section>
 

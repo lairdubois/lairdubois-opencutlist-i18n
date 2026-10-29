@@ -98,6 +98,15 @@ Weblate was evaluated and rejected.
 - Key page sections Translations, Comments (counts kept in step by the thread's turbo-stream ; lazy frame when folded)
   and History (lazy frame, `units#history`) fold (`collapsible`) ; state in a `section_<name>` cookie read by
   `section_open?`, so the server renders it as left.
+  Admins correct every language there : each row laid out as the translator's (`md:grid-cols-[1fr_2fr]`, the language
+  on the left : code badge, name and status badge, the copy button in the cell's top right corner, in `units/_language_status` ; the translator's editor on the right,
+  `translations/_editor` with `unit_page: true` : no comments / history buttons, "Annuler" while dirty reloads it, the buttons bar hidden while it shows
+  nothing (`has-[[type=submit]:enabled…]`, dirty, issues, saved),
+  `UnitTranslationsController#edit`). `TranslationEditorData#preload_language` is shared with the translator's list,
+  one `Glossary` passed to all (each costs ~20 ms of patterns). "Enregistrer" = `TranslationOperations#correct` (the
+  text alone : status and `source_hash` kept, a `review` revision when approved ; new / blank text through `save`),
+  "Approuver" = `save(reviewed: true)` ; answered with streams (the editor, the language's status, status counts,
+  history count and frame). A copied key shows the stored texts read-only.
 - Help (`/help`, header link, everyone) : a guide (`help/_guide.fr` / `.en`, locale-specific partials) and a form to
   the admins. `HelpRequest` is stored first (`page` = the app path the link was clicked on, `HelpRequest.safe_page`,
   its `/translate/:lang` language), then mailed to the enabled admins (`HelpMailer`, `reply_to` the sender) when

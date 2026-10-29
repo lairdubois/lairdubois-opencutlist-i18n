@@ -1,5 +1,6 @@
 class UnitsController < ApplicationController
   include ListFilters
+  include TranslationEditorData
 
   PER_PAGE = 200
 
@@ -54,9 +55,12 @@ class UnitsController < ApplicationController
     end
 
     @translations = @unit.translations_by_language
-    @languages = Language.targets
-    @refs = Unit.refs([@unit])[@unit.id]
+    @languages = Language.targets.to_a
+    @refs = Unit.refs([@unit])
     @glossary = Glossary.new(@languages)
+    # Every language's editor (admins correct them here), en as their reference
+    @en = @languages.find { |l| l.code == "en" }
+    @editor_data = @languages.to_h { |language| [language.id, preload_language(language, [@unit], glossary: @glossary)] } unless @unit.copied
     @history_count = @unit.revisions.count
     @issues = @unit.issues.still_open.order(:id).group_by(&:language_id)
     @resolved_issues = @unit.issues.closed.group(:language_id).count

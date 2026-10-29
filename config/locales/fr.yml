@@ -505,6 +505,7 @@ fr:
       saved: "enregistré"
       save: "Enregistrer"
       save_and_review: "Approuver"
+      cancel: "Annuler"
       machine: "Proposition :"
       same_text: "Même texte ailleurs :"
       history: "Historique"

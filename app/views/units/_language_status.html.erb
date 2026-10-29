@@ -1,6 +1,13 @@
-<%# A language's "to review" badge beside its text (none otherwise) : replaced when an issue is closed from its panel %>
-<span id="unit_status_<%= unit.id %>_<%= language.code %>" class="contents">
-  <% if translation && !unit.copied && translation.to_review? %>
-    <span class="h-fit rounded bg-orange-100 px-1.5 text-xs text-orange-800"><%= to_review_label(translation) %></span>
+<%# A language's name and status (as on the translator's row ; none for a copied key : its header says so), its text's
+    copy button in the cell's top right corner (positioned by the cell, shown on the row's hover) : replaced when its text
+    is saved or an issue is closed from its panel %>
+<div id="unit_status_<%= unit.id %>_<%= language.code %>" class="flex flex-wrap items-center gap-x-2 gap-y-1 pr-6">
+  <%# The code's dark badge, as on the languages and users pages %>
+  <span class="flex items-center gap-2 text-sm text-stone-500"><span class="w-7 rounded bg-stone-900 text-center font-mono text-xs text-white"><%= language.code.upcase %></span><%= language.name %></span>
+  <% unless unit.copied %>
+    <span class="flex text-xs"><%= render "translations/status", unit: unit, language: language, translation: translation %></span>
   <% end %>
-</span>
+  <% if translation %>
+    <%= render "shared/copy_button", text: translation.text, class: "absolute top-2 right-2" %>
+  <% end %>
+</div>

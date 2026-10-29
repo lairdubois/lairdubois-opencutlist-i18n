@@ -505,6 +505,7 @@ en:
       saved: "saved"
       save: "Save"
       save_and_review: "Approve"
+      cancel: "Cancel"
       machine: "Suggestion:"
       same_text: "Same text elsewhere:"
       history: "History"

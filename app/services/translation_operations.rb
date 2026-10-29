@@ -34,6 +34,22 @@ class TranslationOperations
     translation
   end
 
+  # An admin's correction of the text alone (key page) : the status and the fr text it was checked against are kept
+  # (approved stays approved, outdated stays outdated). A new or blank text goes through save.
+  def correct(unit, language, text)
+    translation = unit.translations.find_by(language: language)
+    return save(unit, language, text) if translation.nil? || text.to_s.strip.empty?
+
+    old_text = translation.text
+    translation.text = text.to_s.gsub("\r\n", "\n")
+    return translation unless translation.changed?
+
+    translation.save!
+    # The history tints a revision by the status it produced : an approved one stays so
+    record(unit, language, translation.approved? ? "review" : "translate", old_text, translation.text)
+    translation
+  end
+
   # A text brought by a language's yml (TranslationFileImport), the user being its translator : translated (a
   # reviewed one too), taken as written against the current fr text
   def import(unit, language, text)

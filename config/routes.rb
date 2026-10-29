@@ -55,6 +55,9 @@ Rails.application.routes.draw do
   resources :units, only: [:index, :show] do
     get :duplicates, on: :collection
     resources :comments, only: [:index, :create]
+    # A language's translation corrected from the key's page (admins)
+    get "translations/:lang/edit", to: "unit_translations#edit", as: :edit_translation
+    patch "translations/:lang", to: "unit_translations#update", as: :translation
     member do
       get :history
       patch :rename
