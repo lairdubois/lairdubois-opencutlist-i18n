@@ -1,0 +1,15 @@
+<%# locals: (language:, stats:) %>
+<%# A language's header in the table : its code (its name on hover) and its entries with a term over the terms to
+    translate, dragged to reorder the columns (column_order_controller). Replaced by a stream after a save %>
+<% full = stats[:filled] == stats[:total] %>
+<% draggable = @columns.size > 1 %>
+<div id="glossary_column_<%= language.code %>" <%= draggable ? column_drag_attributes(language, "headers") : tag.attributes(title: language.name) %>
+     class="<%= "cursor-grab #{GlossaryHelper::DROP_MARK}" if draggable %> sticky top-0 z-20 flex flex-col justify-end gap-1 border-r border-b border-r-stone-100 border-b-stone-300 bg-white px-2.5 pt-1.5 pb-2">
+  <div class="flex items-baseline justify-between gap-1.5 text-xs">
+    <span class="font-bold" lang="<%= language.code %>"><%= language.code.upcase %></span>
+    <span class="text-stone-500 tabular-nums"><%= stats[:filled] %>/<%= stats[:total] %></span>
+  </div>
+  <div class="h-1 overflow-hidden rounded-full bg-stone-200">
+    <div class="h-full <%= full ? "bg-emerald-600" : "bg-stone-500" %>" style="width: <%= stats[:total].zero? ? 0 : stats[:filled] * 100 / stats[:total] %>%"></div>
+  </div>
+</div>

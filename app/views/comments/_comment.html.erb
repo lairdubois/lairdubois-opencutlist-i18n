@@ -1,0 +1,23 @@
+<%# One comment of the thread, in its box : author, age (and language), the text, then its footer (footer local, optional : the reply links). A question or an admin note shows its state and its badge in the top right corner (grey once resolved), tinted while open ; a reply shows neither, nor its language (its parent's), and takes its parent's tint (parent local). %>
+<% tint = local_assigns[:parent] || c %>
+<div class="rounded <%= tint.open_question? ? 'bg-sky-50' : tint.open_admin_note? ? 'bg-teal-50' : 'bg-stone-50' %> px-3 py-2">
+  <div class="mb-0.5 flex items-center gap-2 text-xs text-stone-500">
+    <span class="font-medium text-stone-700"><%= c.user.name %></span>
+    <span><%= l c.created_at, format: :short %></span>
+    <% unless c.reply? %><span><%= c.language ? c.language.code.upcase : t("comments.thread.all_languages") %></span><% end %>
+    <% if c.takes_replies? %>
+      <span class="ml-auto flex items-center gap-2">
+        <% if c.resolved? %>
+          <span class="text-emerald-700"><%= t("comments.thread.resolved") %></span>
+        <% elsif c.admin_only || current_user.admin? || c.user == current_user %>
+          <%= button_to t("comments.thread.resolve"), resolve_comment_path(c, lang: language&.code), method: :patch, class: "underline", form: { class: "inline" } %>
+        <% end %>
+        <span class="rounded px-1.5 py-0.5 font-medium <%= c.resolved? ? 'bg-stone-200 text-stone-600' : c.question ? 'bg-sky-200 text-sky-900' : 'bg-teal-200 text-teal-900' %>">
+          <%= t(c.question ? "comments.thread.question" : "comments.thread.admin_only") %>
+        </span>
+      </span>
+    <% end %>
+  </div>
+  <p class="whitespace-pre-wrap"><%= c.body %></p>
+  <%= local_assigns[:footer] %>
+</div>

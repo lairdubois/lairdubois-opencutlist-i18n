@@ -1,0 +1,14 @@
+<% content_for :title, [t(".title"), "OpenCutList Localize"].join(" · ") %>
+<%# glossary_table_controller (its arrow, Enter and Esc keys too) and column_order_controller (the search bar's column chips, the table's
+    headers) span the page %>
+<div class="contents" data-controller="glossary-table column-order" data-action="keydown@window->glossary-table#move keydown.enter@window->glossary-table#edit keydown.esc@window->glossary-table#back">
+<%# Toolbar (search) stays on screen above the table (.toolbar in application.css) ; the title is the header's link %>
+<div class="toolbar">
+  <h1 class="sr-only"><%= t(@archived ? ".archived_title" : ".title") %></h1>
+  <div class="mb-2 flex flex-wrap items-start gap-3">
+    <%= render "search_bar" %>
+  </div>
+</div>
+
+<%= render "table" %>
+</div>

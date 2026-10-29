@@ -1,0 +1,70 @@
+<%# locals: (term:, language:, entry:, form:, editable:) %>
+<%# The side panel (glossary_panel) : the fr term and its definition, then the language's entry or, for its
+    reviewers, its edit form (saved by GlossaryController#save_cell) ; the history in a lazy panel %>
+<section data-controller="disclosure" class="rounded border border-stone-200 bg-white text-sm">
+  <div class="flex items-center justify-between gap-2 border-b border-stone-200 py-1 pr-1 pl-3 text-xs text-stone-600">
+    <span><strong class="text-stone-900"><%= language.code.upcase %></strong> · <%= language.name %></span>
+    <button type="button" title="<%= t("glossary.cell_panel.close") %>" data-action="glossary-table#close"
+            class="flex h-6 w-6 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-100 hover:text-stone-900">×</button>
+  </div>
+
+  <div class="bg-stone-50 px-3 py-2">
+    <div class="flex items-start justify-between gap-2">
+      <p class="min-w-0 font-mono font-medium break-words" lang="<%= Language::SOURCE_CODE %>"><%= term.term %></p>
+      <% if term.archived? %>
+        <span class="mt-0.5 shrink-0 rounded bg-stone-200 px-1 text-xs text-stone-600"><%= t("glossary.cell_panel.archived") %></span>
+      <% end %>
+    </div>
+    <% if term.variants %><p class="font-mono text-xs break-words text-stone-500"><%= term.variants %></p><% end %>
+    <% if term.definition %><p class="mt-1.5 text-xs whitespace-pre-line text-stone-500" lang="en"><%= term.definition %></p><% end %>
+  </div>
+
+  <div class="border-t border-dashed border-stone-200 px-3 py-2">
+    <% if form %>
+      <%= form_with model: entry || GlossaryEntry.new, scope: :glossary_entry, url: glossary_term_cell_path(term, language.code, **column_params),
+                    method: :patch, class: "grid gap-3", data: { controller: "dirty-form" } do |f| %>
+        <%= render "entry_fields", f: f, entry: entry || GlossaryEntry.new, autofocus: true, language: language %>
+        <p class="text-xs text-stone-500"><%= t("glossary.form.entry_hint") %></p>
+        <div class="flex items-center justify-end gap-3">
+          <%= link_to t("cancel"), glossary_term_cell_path(term, language.code, **column_params), class: "text-stone-600 underline" %>
+          <%= f.submit t("save"), class: "rounded bg-stone-800 px-3 py-1 text-white" %>
+        </div>
+      <% end %>
+    <% elsif term.no_translate %>
+      <p class="text-stone-500 italic"><%= t("glossary.term.kept_as_is") %></p>
+    <% else %>
+      <% if entry&.term %>
+        <p class="font-mono font-medium break-words" lang="<%= language.code %>" dir="<%= language.rtl ? "rtl" : "ltr" %>"><%= entry.term %></p>
+        <% if entry.variants %><p class="font-mono text-xs break-words text-stone-500" lang="<%= language.code %>"><%= entry.variants %></p><% end %>
+      <% else %>
+        <p class="rounded bg-yellow-50 px-2 py-1.5 text-xs text-yellow-900"><%= t("glossary.cell_panel.missing", language: language.code.upcase) %></p>
+      <% end %>
+      <% if entry&.avoid || entry&.note %>
+        <div class="mt-1.5 flex flex-col gap-1 text-xs">
+          <% if entry.avoid %>
+            <p class="text-red-700"><%= t("glossary.term.avoid") %> <span class="font-mono" lang="<%= language.code %>"><%= entry.avoid %></span></p>
+          <% end %>
+          <% if entry.note %><p class="whitespace-pre-line text-stone-600"><%= entry.note %></p><% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2 border-t border-stone-200 px-3 py-1 text-xs">
+    <button type="button" data-disclosure-target="button" data-action="disclosure#toggle"
+            class="group/history flex items-center gap-1 rounded px-1 text-stone-400 hover:bg-stone-100 aria-expanded:bg-stone-100">
+      <%= chevron_icon("group-aria-expanded/history:rotate-90") %>
+      <%= t("glossary.term.history") %>
+    </button>
+    <span class="ml-auto"></span>
+    <% if editable && !form %>
+      <%= link_to t(entry&.term ? "glossary.term.edit" : "glossary.cell_panel.add"), glossary_term_cell_path(term, language.code, edit: 1, **column_params), data: { glossary_edit: true },
+                  class: "rounded border border-stone-300 px-1.5 text-stone-600 hover:border-stone-400 hover:text-stone-900" %>
+    <% end %>
+  </div>
+  <div data-disclosure-target="panel" hidden class="border-t border-stone-200 px-3 py-2 text-xs">
+    <%= turbo_frame_tag "glossary_history_#{term.id}", src: glossary_term_history_path(term, code: language.code), loading: :lazy do %>
+      <span class="text-stone-400"><%= t("loading") %></span>
+    <% end %>
+  </div>
+</section>

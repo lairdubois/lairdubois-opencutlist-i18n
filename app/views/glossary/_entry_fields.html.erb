@@ -1,0 +1,24 @@
+<%# locals: (f:, entry:, language:, autofocus: false) %>
+<%# The language's expected term's fields (its reviewers), in the side panel %>
+<% lang = { lang: language.code, dir: (language.rtl ? "rtl" : "ltr") } %>
+<% if entry.errors.any? %>
+  <p class="text-sm text-red-700"><%= entry.errors.full_messages.to_sentence %></p>
+<% end %>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= t("glossary.form.entry_term", language: language.name) %></span>
+  <%= f.text_field :term, autofocus: autofocus, **lang, class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryEntry.human_attribute_name(:variants) %></span>
+  <%= f.text_field :variants, **lang, placeholder: t("glossary.form.entry_variants_placeholder"), class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryEntry.human_attribute_name(:avoid) %></span>
+  <%= f.text_field :avoid, **lang, placeholder: t("glossary.form.avoid_placeholder"), class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryEntry.human_attribute_name(:note) %></span>
+  <%= f.text_area :note, rows: 2, placeholder: t("glossary.form.note_placeholder"),
+                  data: { controller: "autosize", action: "input->autosize#resize" },
+                  class: "resize-none rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>

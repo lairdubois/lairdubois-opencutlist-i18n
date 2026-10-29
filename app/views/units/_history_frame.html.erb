@@ -1,0 +1,5 @@
+<%# locals: (unit:) %>
+<%# Lazy : loads once its section is unfolded ; replaced by a fresh one when a translation is saved from the page %>
+<%= turbo_frame_tag "unit_history", src: history_unit_path(unit), loading: :lazy do %>
+  <p class="p-4 text-sm text-stone-400"><%= t("loading") %></p>
+<% end %>

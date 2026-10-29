@@ -1,0 +1,62 @@
+<%# The table : the fr terms down, the shown languages across (glossary/_column headers, glossary/_cell cells),
+    scrolling inside its box under its sticky header row and fr column. A cell opens
+    its term in the side panel (glossary_panel, glossary/_cell_panel), where its reviewers edit it ; a fr term its own
+    (glossary/_source_panel), where the admins edit it. A row : glossary/_row %>
+<%# glossary_table_controller : on the page's wrapper (index). The right column : the page's buttons (full width, new
+    term), then the side panel. On a narrow window the buttons go above the table and the panel over the window's
+    bottom, hidden while it holds the placeholder %>
+<div class="flex items-start gap-4 max-[63rem]:flex-col-reverse max-[63rem]:items-stretch">
+  <div class="flex min-w-0 flex-1 flex-col gap-2">
+    <%# Its max height fits the page to the window (glossary_table_controller#fit), the fallback until then ; isolated,
+        so its sticky cells stay under the sticky toolbar %>
+    <div role="region" aria-label="<%= t(".label") %>" tabindex="0" data-glossary-table-target="region"
+         class="isolate max-h-[calc(100dvh-12rem)] min-h-80 overflow-auto rounded border border-stone-200 bg-white">
+      <div id="glossary_grid" class="grid w-max min-w-full text-sm" style="grid-template-columns: 15rem<%= " repeat(#{@columns.size}, minmax(9.5rem, 1fr))" if @columns.any? %>">
+        <div class="sticky top-0 left-0 z-30 flex items-end border-r border-b border-r-stone-300 border-b-stone-300 bg-white px-3 pb-2 text-xs font-bold">
+          <%= Language::SOURCE_CODE.upcase %>
+        </div>
+        <% @columns.each do |language| %>
+          <%= render "column", language: language, stats: @column_stats[language.id] %>
+        <% end %>
+        <% @terms.each do |term| %>
+          <%= render "row", term: term, selected: nil %>
+        <% end %>
+      </div>
+      <% if @terms.empty? %>
+        <p id="glossary_empty" class="sticky left-0 px-3 py-2 text-sm text-stone-500"><%= t(GlossaryTerm.none? ? "glossary.index.empty" : "glossary.index.none_found") %></p>
+      <% end %>
+    </div>
+    <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-500">
+      <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm border border-yellow-200 bg-yellow-50"></span><%= t(".missing") %></span>
+      <span class="flex items-center gap-1"><%= glossary_avoid_icon %><%= t(".avoid") %></span>
+      <span class="flex items-center gap-1"><%= glossary_note_icon %><%= t(".note") %></span>
+    </p>
+  </div>
+
+  <aside class="flex w-80 shrink-0 flex-col gap-2 max-[63rem]:w-auto">
+    <div class="flex h-6.5 items-center justify-between gap-2">
+      <%# The table at the window's width, remembered per browser (html.wide-glossary, application.css) %>
+      <button type="button" data-controller="html-toggle" data-action="html-toggle#toggle"
+              data-html-toggle-class-value="wide-glossary" data-html-toggle-key-value="ocl-localize.wide-glossary"
+              title="<%= t("glossary.index.full_width") %>" aria-label="<%= t("glossary.index.full_width") %>"
+              class="flex h-5 w-5 items-center justify-center rounded text-stone-500 hover:bg-stone-200 aria-pressed:bg-stone-800 aria-pressed:text-white">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3.5 w-3.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5M3.75 12l3-3m-3 3 3 3m13.5-3-3-3m3 3-3 3" />
+        </svg>
+      </button>
+      <% if current_user.admin? && !@archived %>
+        <%# Its form in the panel below (GlossaryController#new_source) %>
+        <%= link_to t("glossary.index.new_term"), new_glossary_term_path(**list_params),
+                    data: { turbo_frame: "glossary_panel", action: "glossary-table#clear" },
+                    class: "rounded bg-stone-800 px-2.5 py-0.5 text-xs text-white hover:bg-stone-700" %>
+      <% end %>
+    </div>
+    <div class="max-[63rem]:fixed max-[63rem]:inset-x-0 max-[63rem]:bottom-0 max-[63rem]:z-40 max-[63rem]:max-h-[70dvh] max-[63rem]:overflow-y-auto max-[63rem]:p-2 max-[63rem]:has-[[data-glossary-placeholder]]:hidden max-[63rem]:[&_section]:shadow-xl">
+      <% placeholder = capture do %>
+        <p data-glossary-placeholder class="rounded border border-dashed border-stone-300 p-4 text-xs text-stone-500"><%= t(".pick") %></p>
+      <% end %>
+      <template data-glossary-table-target="placeholder"><%= placeholder %></template>
+      <%= turbo_frame_tag "glossary_panel", data: { glossary_table_target: "panel" } do %><%= placeholder %><% end %>
+    </div>
+  </aside>
+</div>

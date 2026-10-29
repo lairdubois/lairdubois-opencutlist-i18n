@@ -1,0 +1,29 @@
+<%# locals: (term:, entry:, language:, selected:) %>
+<%# A term in a language in the table : its expected term and forms (yellow without one), marks for the terms to
+    avoid and the note, everything in the tooltip. Opens the side panel ; replaced by a stream after a save (selected :
+    rendered shown, glossary_table_controller marks and scrolls to it). Its content doesn't size the column
+    (contain-inline-size) : long forms wrap over two lines at most %>
+<% lines = [entry&.term, entry&.variants, (t("glossary.tooltip.avoid", avoid: entry.avoid) if entry&.avoid), entry&.note].compact %>
+<%= link_to glossary_term_cell_path(term, language.code, **column_params),
+            id: dom_id(term, "cell_#{language.code}"), title: lines.join("\n").presence,
+            aria: { current: (true if selected), label: "#{language.code.upcase} · #{term.term}" },
+            data: { turbo_frame: "glossary_panel", glossary_cell: language.code, action: "glossary-table#select", glossary_table_target: ("current" if selected) },
+            class: ["block min-w-0 contain-inline-size border-b border-b-stone-200 px-2.5 py-2 outline-none hover:bg-stone-50 focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-inset",
+                    "aria-[current]:bg-sky-50 aria-[current]:ring-2 aria-[current]:ring-sky-600 aria-[current]:ring-inset",
+                    ("bg-yellow-50" unless entry&.term),
+                    "border-r border-r-stone-100"] do %>
+  <span class="flex items-start justify-between gap-1">
+    <% if entry&.term %>
+      <span class="truncate font-mono font-medium" lang="<%= language.code %>" dir="<%= language.rtl ? "rtl" : "ltr" %>"><%= entry.term %></span>
+    <% else %>
+      <span class="text-yellow-700">—</span>
+    <% end %>
+    <span class="flex shrink-0 gap-0.5 pt-1">
+      <%= glossary_avoid_icon if entry&.avoid %>
+      <%= glossary_note_icon if entry&.note %>
+    </span>
+  </span>
+  <% if entry&.term && entry.variants %>
+    <span class="line-clamp-2 font-mono text-xs break-words text-stone-500" lang="<%= language.code %>"><%= entry.variants %></span>
+  <% end %>
+<% end %>

@@ -1,0 +1,26 @@
+<%# locals: (f:, term:) %>
+<%# A fr term's fields (admins), in the side panel : the edit form's and the new term's %>
+<% if term.errors.any? %>
+  <p class="text-sm text-red-700"><%= term.errors.full_messages.to_sentence %></p>
+<% end %>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryTerm.human_attribute_name(:term) %></span>
+  <%= f.text_field :term, required: true, lang: Language::SOURCE_CODE, class: "rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryTerm.human_attribute_name(:variants) %></span>
+  <%= f.text_field :variants, placeholder: t("glossary.form.variants_placeholder"), lang: Language::SOURCE_CODE,
+                   class: "resize-none rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex flex-col gap-1">
+  <span class="text-xs text-stone-600"><%= GlossaryTerm.human_attribute_name(:definition) %></span>
+  <%# In English : read by every language's translators %>
+  <%= f.text_area :definition, rows: 2, lang: "en", placeholder: t("glossary.form.definition_placeholder"),
+                  data: { controller: "autosize", action: "input->autosize#resize" },
+                  class: "resize-none rounded border border-stone-300 bg-white px-2 py-1" %>
+</label>
+<label class="flex items-center gap-2">
+  <%= f.check_box :no_translate %>
+  <span><%= t("glossary.form.no_translate") %></span>
+</label>
+<p class="text-xs text-stone-500"><%= t("glossary.form.variants_hint") %></p>

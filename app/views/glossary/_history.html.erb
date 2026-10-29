@@ -1,0 +1,30 @@
+<%# locals: (term:, revisions:) %>
+<%# The term's changes, latest first : the fr term's (FR) and, but for the fr panel, its entry's in the language %>
+<%= turbo_frame_tag "glossary_history_#{term.id}" do %>
+  <ul class="flex flex-col gap-1.5">
+    <% revisions.each do |revision| %>
+      <li>
+        <span class="text-stone-500" title="<%= l revision.created_at, format: :long %>"><%= t("glossary.history.ago", time: time_ago_in_words(revision.created_at)) %></span>
+        · <span class="font-medium"><%= revision.user&.name || revision.origin || t("glossary.history.unknown") %></span>
+        · <span class="rounded bg-stone-100 px-1"><%= (revision.language&.code || Language::SOURCE_CODE).upcase %></span>
+        · <%= t("glossary.history.kinds.#{revision.kind}") %>
+        <% (revision.changes_made || {}).each do |field, (old_value, new_value)| %>
+          <span class="block pl-4 text-stone-600">
+            <%= (revision.language ? GlossaryEntry : GlossaryTerm).human_attribute_name(field) %> :
+            <% if field == "no_translate" %>
+              <%= t(new_value ? "glossary.history.yes" : "glossary.history.no") %>
+            <%# Set or cleared : the value alone, as word_diff_tag's insertions and deletions %>
+            <% elsif old_value.nil? %>
+              <ins class="rounded-sm bg-emerald-100 text-emerald-900 no-underline"><%= new_value %></ins>
+            <% elsif new_value.nil? %>
+              <del class="rounded-sm bg-red-100 text-red-800"><%= old_value %></del>
+            <% else %>
+              <%= word_diff_tag(WordDiff.call(old_value.to_s, new_value.to_s)) %>
+            <% end %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+    <% if revisions.empty? %><li class="text-stone-400"><%= t("glossary.history.empty") %></li><% end %>
+  </ul>
+<% end %>

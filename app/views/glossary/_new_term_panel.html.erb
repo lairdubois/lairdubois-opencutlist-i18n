@@ -1,0 +1,19 @@
+<%# locals: (term:) %>
+<%# The side panel (glossary_panel) : a new fr term's form (admins), created by
+    GlossaryController#create_source ; its languages are filled afterwards, in their cells (the first shown
+    column's form follows the creation) %>
+<section class="rounded border border-stone-200 bg-white text-sm">
+  <div class="flex items-center justify-between gap-2 border-b border-stone-200 py-1 pr-1 pl-3 text-xs text-stone-600">
+    <span><strong class="text-stone-900"><%= Language::SOURCE_CODE.upcase %></strong> · <%= t("glossary.index.new_term") %></span>
+    <button type="button" title="<%= t("glossary.cell_panel.close") %>" data-action="glossary-table#close"
+            class="flex h-6 w-6 items-center justify-center rounded leading-none text-stone-500 hover:bg-stone-100 hover:text-stone-900">×</button>
+  </div>
+  <%= form_with model: term, url: new_glossary_term_path(**list_params), method: :post, class: "grid gap-3 px-3 py-2", data: { controller: "dirty-form" } do |f| %>
+    <%= render "term_fields", f: f, term: term %>
+    <p class="text-xs text-stone-500"><%= t("glossary.new_term_panel.hint") %></p>
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" data-action="glossary-table#close" class="text-stone-600 underline"><%= t("cancel") %></button>
+      <%= f.submit t("glossary.cell_panel.add"), class: "rounded bg-stone-800 px-3 py-1 text-white" %>
+    </div>
+  <% end %>
+</section>

@@ -1,0 +1,46 @@
+<%# A dropdown instead of a select, to show each language's progress ; the code goes in a hidden field.
+    f, attribute : the form and its field ; label ; groups : [[title, [[code, name, stats or nil], …]], …] ;
+    picked, picked_name : the code shown as chosen (or nil) %>
+<div class="flex flex-col gap-1" data-controller="popover" data-popover-align-value="left">
+  <span id="language-picker-label" class="font-medium"><%= label %></span>
+  <%= f.hidden_field attribute, data: { language_picker_target: "field" } %>
+  <button type="button" popovertarget="language-picker" data-popover-target="anchor" aria-haspopup="listbox"
+          aria-labelledby="language-picker-label" data-action="keydown.down->language-picker#open keydown.up->language-picker#open"
+          class="flex items-center justify-between gap-2 rounded border border-stone-300 bg-white px-3 py-2 text-left">
+    <span data-language-picker-target="label" class="<%= "text-stone-400" unless picked_name %>">
+      <%= picked_name ? "#{picked_name} (#{picked.upcase})" : t("shared.language_picker.pick") %>
+    </span>
+    <span class="text-stone-500" aria-hidden="true">▾</span>
+  </button>
+  <div id="language-picker" popover data-popover-target="panel" data-language-picker-target="panel"
+       data-action="beforetoggle->popover#place beforetoggle->language-picker#size toggle->language-picker#opened keydown->language-picker#keydown"
+       class="m-0 max-h-[60vh] flex-col overflow-hidden rounded border border-stone-200 bg-white text-sm text-stone-700 shadow-lg open:flex">
+    <div class="border-b border-stone-200 p-1">
+      <input type="search" data-language-picker-target="search" data-action="input->language-picker#filter"
+             placeholder="<%= t("shared.language_picker.search_placeholder") %>" aria-label="<%= t("shared.language_picker.search_placeholder") %>" autocomplete="off"
+             class="w-full rounded border border-stone-300 px-2 py-1">
+    </div>
+    <div role="listbox" aria-labelledby="language-picker-label" class="overflow-y-auto p-1">
+      <% groups.each do |group, items| %>
+        <div role="group" aria-label="<%= group %>" data-language-picker-target="group">
+          <div class="px-3 pt-2 pb-1 text-xs font-medium text-stone-500"><%= group %></div>
+          <% items.each do |code, name, s| %>
+            <button type="button" role="option" aria-selected="<%= code == picked %>" data-code="<%= code %>" data-name="<%= name %>"
+                    data-action="language-picker#pick"
+                    class="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left outline-none hover:bg-stone-100 focus-visible:bg-stone-100">
+              <span class="w-3 shrink-0 text-xs text-stone-800"><%= "✓" if code == picked %></span>
+              <span class="flex-1"><%= name %></span>
+              <span class="text-xs text-stone-400"><%= code.upcase %></span>
+              <% if s %>
+                <%= render "shared/progress_bar", stats: s, css: "h-1.5 w-16 shrink-0" %>
+                <span class="w-9 text-right text-xs text-stone-500 tabular-nums"
+                      title="<%= t('languages.index.todo', count: s[:total] - s[:translated]) %>"><%= progress_percent(s[:translated], s[:total]) %></span>
+              <% end %>
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+      <p hidden data-language-picker-target="empty" class="px-3 py-2 text-stone-500"><%= t("shared.language_picker.no_match") %></p>
+    </div>
+  </div>
+</div>

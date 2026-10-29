@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Flags the form `data-dirty` while a field differs from what the server rendered. The DOM keeps it
 // (defaultValue, defaultChecked, defaultSelected), so a form re-rendered after a save starts clean.
 // Changes are announced on window for unsaved-guard. Fields with `data-dirty-ignore` don't count.
-// ⌘/Ctrl+Enter in a textarea submits the form (the i18n-text editor has its own binding).
+// ⌘/Ctrl+Enter in a textarea or an input submits the form (the i18n-text editor has its own binding).
 // `submit` targets are disabled while the form is clean, and the form then refuses a submission through
 // them or without a submitter (keyboard shortcuts go through requestSubmit(), which ignores disabled
 // buttons). Other buttons (e.g. save and approve) still submit a clean form.
@@ -38,7 +38,7 @@ export default class extends Controller {
   }
 
   keydown(event) {
-    if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey) || event.target.tagName !== "TEXTAREA") return
+    if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey) || !event.target.matches("textarea, input")) return
     event.preventDefault()
     this.element.requestSubmit()
   }
